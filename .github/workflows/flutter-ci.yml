@@ -1,0 +1,183 @@
+name: flutter-ci
+
+# Ships with flutter-kit. Every guard in .claude/ runs on your machine at write
+# time and stops when you close the session; this is the part that runs on the
+# path between your editor and main.
+#
+# The last three jobs are the reason this file exists in a kit rather than
+# being copied from a template: they enforce rules `flutter analyze` cannot
+# see, because they are architectural, not syntactic.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: format · analyze · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # Codegen output is not committed in most projects. If yours does commit
+      # it, delete this step; if it does not, the analyze step needs it.
+      - name: Run codegen (if configured)
+        run: |
+          if grep -q 'build_runner' pubspec.yaml; then
+            dart run build_runner build --delete-conflicting-outputs
+          else
+            echo "no build_runner — skipping"
+          fi
+
+      - name: Format
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test --coverage --reporter expanded
+
+      - name: Upload coverage
+        if: always() && hashFiles('coverage/lcov.info') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          retention-days: 7
+
+  guards:
+    name: architecture & security guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 01-flutter-architecture-guard + 06-flutter-error-guard §3.
+      # dio is allowed in exactly one place: the ApiClient implementation.
+      # Anywhere else means a repository or widget is welded to the HTTP
+      # package and DioException is escaping its seam.
+      - name: dio stays behind the ApiClient seam
+        run: |
+          hits=$(grep -rn "import 'package:dio" lib/ --include='*.dart' \
+                   | grep -v 'lib/core/network/' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::error file=${l%%:*}::dio imported outside lib/core/network/ (01-flutter-architecture-guard, 06-flutter-error-guard §3)"
+            done
+            exit 1
+          fi
+          echo "ok"
+
+      # Same seam, BaaS edition — 06-flutter-error-guard §7.
+      # Skips silently on projects that use neither SDK.
+      - name: BaaS SDKs stay behind the data-source seam
+        run: |
+          hits=$(grep -rn "import 'package:supabase_flutter\|import 'package:cloud_firestore" \
+                   lib/ --include='*.dart' \
+                   | grep -v 'lib/core/data/\|lib/core/network/' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::error file=${l%%:*}::BaaS SDK imported outside the data-source seam (06-flutter-error-guard §7)"
+            done
+            exit 1
+          fi
+          echo "ok"
+
+      # 01-flutter-architecture-guard: dependencies point inward. The domain
+      # layer is the innermost ring and imports nothing from the rings outside
+      # it. This is the boundary that erodes first and silently.
+      - name: domain layer does not import outward
+        run: |
+          hits=$(grep -rn "import.*/\(data\|presentation\)/" \
+                   lib/features/*/domain/ --include='*.dart' 2>/dev/null || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::error file=${l%%:*}::domain imports data or presentation (01-flutter-architecture-guard)"
+            done
+            exit 1
+          fi
+          echo "ok"
+
+      # 08-flutter-baas-security-guard: service_role bypasses RLS entirely.
+      # In client code it is not a leak, it is a total loss of authorisation.
+      - name: no service_role key in client code
+        run: |
+          hits=$(grep -rn "service_role\|serviceRole" lib/ --include='*.dart' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::error file=${l%%:*}::service_role key in client code — it bypasses RLS (08-flutter-baas-security-guard)"
+            done
+            exit 1
+          fi
+          echo "ok"
+
+      # 09-minimal-changes, diagnostic-instrumentation exception.
+      # Tagged debug lines are legitimate during /flutter-debug and must never
+      # survive to a commit. A DEBUG-TEMP on main means a session never closed.
+      - name: no debug instrumentation left in
+        run: |
+          hits=$(grep -rn "DEBUG-TEMP" lib/ test/ --include='*.dart' 2>/dev/null || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::error file=${l%%:*}::DEBUG-TEMP left in place (09-minimal-changes)"
+            done
+            exit 1
+          fi
+          echo "ok"
+
+      # 07-flutter-direction-guard. Advisory, not blocking: the escape hatch is
+      # a comment, and matching it reliably across multi-line widget calls is
+      # not a job for grep. Treat the annotations as a review prompt.
+      - name: physical layout APIs (advisory)
+        continue-on-error: true
+        run: |
+          hits=$(grep -rn "EdgeInsets\.only(\s*left:\|EdgeInsets\.only(\s*right:\|Alignment\.centerLeft\|Alignment\.centerRight\|TextAlign\.left\|TextAlign\.right" \
+                   lib/ --include='*.dart' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | while IFS= read -r l; do
+              echo "::warning file=${l%%:*}::physical layout API — use the directional form or tag it // direction-fixed: (07-flutter-direction-guard)"
+            done
+          fi
+          echo "advisory only"
+
+  screens-have-tests:
+    name: every screen has a test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # 04-flutter-test-guard states this; nothing enforced it. Advisory on its
+    # first run so an existing project is not blocked on day one — flip
+    # continue-on-error to false once the backlog is cleared.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for missing screen tests
+        run: |
+          missing=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            t="test/${f#lib/}"; t="${t%.dart}_test.dart"
+            if [ ! -f "$t" ]; then
+              echo "::warning file=$f::no test found at $t (04-flutter-test-guard)"
+              missing=$((missing + 1))
+            fi
+          done < <(find lib/features -name '*_screen.dart' 2>/dev/null)
+          echo "screens without tests: $missing"
