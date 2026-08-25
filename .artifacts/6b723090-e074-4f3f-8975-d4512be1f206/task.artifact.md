@@ -1,0 +1,4 @@
+- [ ] تحديث `compileSdk` إلى 37 في ملف `android/app/build.gradle.kts`
+- [ ] إجراء تنظيف عميق للمشروع (`flutter clean`)
+- [ ] إعادة تحميل الحزم (`flutter pub get`)
+- [ ] التحقق من صحة الإعدادات ومحاولة البناء
