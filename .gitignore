@@ -50,3 +50,18 @@ app.*.map.json
 .claude/.kit-version
 .claude.bak/
 CLAUDE.md.bak
+
+# --- flutter-kit: secrets and signing material (03-flutter-security-guard) ---
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+key.properties
+**/GoogleService-Info.plist
+**/google-services.json
+ios/Flutter/ephemeral/
+
+# Local MCP server config. Holds no secret (the Figma key is read from the
+# FIGMA_API_KEY environment variable at runtime), but kept local by choice.
+.mcp.json

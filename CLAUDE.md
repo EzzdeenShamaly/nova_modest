@@ -77,7 +77,7 @@ Fixed regardless of every answer: **`freezed`** models (one class per entity),
 | User asks how an existing screen works | `/feature-trace` — never answer from a guess about code you have not read |
 | About to change existing code | `/impact-analysis` **before** editing |
 | Work too big for one sitting | `/work-breakdown` — never hand-wave a multi-file change into one task |
-| New screen / state / repository / model / widget / route / test | The matching `flutter-*-gen` skill — **`pattern-scout` first** |
+| New screen / state / repository / model / widget / route / test | The matching `flutter-*-gen` skill — **`pattern-scout` first**, then plan and **wait for approval** (`13-plan-approval-gate`) |
 | Asked to audit or review | The matching `*-audit` skill |
 | Asked if something is ready to ship | `/production-readiness-review` — and do not soften a NO-GO |
 | Asked how a change reaches users | `/release-safety` — staged rollout, not a big-bang cutover |
@@ -108,6 +108,10 @@ authoritative** — read the full file before any non-trivial application.
 - **`05-planning-rigor`** — no plan or task board without an elicitation pass
   first. Present options with explicit tradeoffs; never one option presented
   as the only one.
+- **`13-plan-approval-gate`** — for **any** new screen or feature, present the
+  plan and **wait for an explicit go-ahead** before writing a single file.
+  Answers to clarifying questions, a design link, and "continue" are **not**
+  approval. No exemption for work that looks simple.
 - **`09-minimal-changes`** — change only what the task requires. No unrelated
   `dart format` sweeps, no drive-by refactors. Minimise the diff.
 - **`10-evidence-and-dependency-guard`** — confirm classes, cubits, providers,
@@ -128,18 +132,28 @@ authoritative** — read the full file before any non-trivial application.
 | any layout or widget code | `07-flutter-direction-guard.md` |
 | Firestore Rules, RLS policies, BaaS data sources | `08-flutter-baas-security-guard.md` *(BaaS projects)* |
 | `.arb` files, user-facing strings | `11-flutter-l10n-guard.md` *(multi-locale projects)* |
+| colours, spacing, radii, font sizes, theme code | `12-flutter-design-system-guard.md` |
 
 ### Rule numbering
 
 ```
 00–08   domain rules (Flutter/Dart craft)
 09–11   agent discipline, and conditional rules
+12+     overflow — domain and agent-discipline rules added once
+        00–08 and 09–11 were full (12 design system, 13 approval gate)
 ```
 
 A new rule takes **the first free number in its block**. Never skip to a higher
 number — 1.0.0 left 06/07/08 empty and the gap took a full audit to explain.
 If a block is full, that is a signal to merge two related rules rather than to
 break the sequence.
+
+**The one standing exception:** 08 looks free in a project with no BaaS source,
+but it is *reserved* — `/platform-init` reinstalls
+`08-flutter-baas-security-guard.md` there if Firebase or Supabase is ever added.
+A new domain rule must not claim it. That is why
+`12-flutter-design-system-guard.md` sits outside the domain block: it took the
+first genuinely unclaimed number instead.
 
 ### Non-negotiables
 

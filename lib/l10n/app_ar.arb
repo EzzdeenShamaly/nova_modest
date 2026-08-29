@@ -1,0 +1,926 @@
+{
+  "@@locale": "ar",
+  "appTitle": "\u0646\u0648\u0641\u0627 \u0645\u0648\u062f\u064a\u0633\u062a",
+  "@appTitle": {
+    "description": "The application name, shown in the task switcher and app bars."
+  },
+  "brandName": "NOVA MODEST",
+  "@brandName": {
+    "description": "The brand wordmark on the splash screen. DO NOT TRANSLATE and do not transliterate into Arabic letters - it is a fixed Latin brandmark in every locale. It lives in the ARB only so no user-facing literal sits in a widget."
+  },
+  "splashTagline": "\u0627\u062d\u062a\u0634\u0627\u0645 \u0639\u0635\u0631\u064a\u060c \u064a\u0646\u0627\u0633\u0628 \u0643\u0644 \u064a\u0648\u0645",
+  "@splashTagline": {
+    "description": "Tagline under the brand wordmark on the splash screen. Short - it must fit one line at 14sp on a 375pt-wide screen."
+  },
+  "onboardingTitle1": "\u062a\u0633\u0648\u0642\u064a \u0623\u0646\u0627\u0642\u062a\u0643 \u0628\u0643\u0644 \u0633\u0647\u0648\u0644\u0629",
+  "@onboardingTitle1": {
+    "description": "Onboarding slide 1 title - shopping ease. Short: one line at 24sp on a 375pt screen."
+  },
+  "onboardingBody1": "\u0627\u0643\u062a\u0634\u0641\u064a \u0623\u062d\u062f\u062b \u0635\u064a\u062d\u0627\u062a \u0627\u0644\u0645\u0648\u0636\u0629 \u0627\u0644\u0645\u062d\u062a\u0634\u0645\u0629 \u0627\u0644\u0645\u062e\u062a\u0627\u0631\u0629 \u0628\u0639\u0646\u0627\u064a\u0629 \u0644\u062a\u0646\u0627\u0633\u0628 \u0630\u0648\u0642\u0643 \u0627\u0644\u0631\u0641\u064a\u0639.",
+  "@onboardingBody1": {
+    "description": "Onboarding slide 1 body. Two to three lines at 16sp. No hard line breaks - it must wrap to the device width."
+  },
+  "onboardingTitle2": "\u062a\u0635\u0627\u0645\u064a\u0645 \u0645\u062d\u062a\u0634\u0645\u0629 \u0628\u0644\u0645\u0633\u0629 \u0639\u0635\u0631\u064a\u0629",
+  "@onboardingTitle2": {
+    "description": "Onboarding slide 2 title - modest, modern designs. Short: one line at 24sp on a 375pt screen."
+  },
+  "onboardingBody2": "\u0646\u062c\u0645\u0639 \u0628\u064a\u0646 \u0627\u0644\u0623\u0635\u0627\u0644\u0629 \u0648\u0627\u0644\u062d\u062f\u0627\u062b\u0629 \u0641\u064a \u0642\u0637\u0639 \u0641\u0631\u064a\u062f\u0629 \u062a\u0639\u0628\u0631 \u0639\u0646 \u0634\u062e\u0635\u064a\u062a\u0643 \u0628\u0623\u0646\u0627\u0642\u0629 \u062a\u0627\u0645\u0629.",
+  "@onboardingBody2": {
+    "description": "Onboarding slide 2 body. Two to three lines at 16sp. No hard line breaks - it must wrap to the device width."
+  },
+  "onboardingTitle3": "\u062a\u0648\u0635\u064a\u0644 \u0633\u0631\u064a\u0639 \u0648\u0645\u0648\u062b\u0648\u0642 \u0644\u0628\u0627\u0628 \u0628\u064a\u062a\u0643",
+  "@onboardingTitle3": {
+    "description": "Onboarding slide 3 title - fast delivery. Short: one line at 24sp on a 375pt screen."
+  },
+  "onboardingBody3": "\u0646\u0636\u0645\u0646 \u0644\u0643 \u062a\u062c\u0631\u0628\u0629 \u062a\u0633\u0648\u0642 \u0622\u0645\u0646\u0629 \u0648\u062a\u0648\u0635\u064a\u0644\u0627\u064b \u0633\u0631\u064a\u0639\u0627\u064b \u0644\u062c\u0645\u064a\u0639 \u0645\u0634\u062a\u0631\u064a\u0627\u062a\u0643 \u0628\u0643\u0644 \u0639\u0646\u0627\u064a\u0629.",
+  "@onboardingBody3": {
+    "description": "Onboarding slide 3 body. Two to three lines at 16sp. No hard line breaks - it must wrap to the device width."
+  },
+  "onboardingNext": "\u0627\u0644\u062a\u0627\u0644\u064a",
+  "@onboardingNext": {
+    "description": "Advances to the next onboarding slide. Shown on slides 1 and 2."
+  },
+  "onboardingStart": "\u0627\u0628\u062f\u0623",
+  "@onboardingStart": {
+    "description": "Finishes the onboarding and enters the app. Shown on the last slide only."
+  },
+  "onboardingSkip": "\u062a\u062e\u0637\u064a",
+  "@onboardingSkip": {
+    "description": "Dismisses the onboarding entirely. Same effect as finishing it."
+  },
+  "authMethodTitle": "\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0623\u0648 \u0625\u0646\u0634\u0627\u0621 \u062d\u0633\u0627\u0628",
+  "@authMethodTitle": {
+    "description": "Heading on the sign-in method screen. Covers both signing in and creating an account - the flow does not distinguish them."
+  },
+  "authMethodSubtitle": "\u062a\u0627\u0628\u0639\u064a \u0637\u0644\u0628\u0627\u062a\u0643 \u0648\u0627\u062d\u0641\u0638\u064a \u0639\u0646\u0627\u0648\u064a\u0646\u0643 \u0627\u0644\u0645\u0641\u0636\u0644\u0629",
+  "@authMethodSubtitle": {
+    "description": "Supporting line under the sign-in heading, explaining why signing in is worth it."
+  },
+  "authContinueWithGoogle": "\u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0639\u0628\u0631 Google",
+  "@authContinueWithGoogle": {
+    "description": "Label of the Google sign-in button. \"Google\" is a brand name and stays Latin in every locale."
+  },
+  "authOr": "\u0623\u0648",
+  "@authOr": {
+    "description": "Separator between the Google button and the email form. One word."
+  },
+  "authContinueWithEmail": "\u0645\u062a\u0627\u0628\u0639\u0629 \u0628\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
+  "@authContinueWithEmail": {
+    "description": "Submits the email address and requests a one-time code."
+  },
+  "authContinueAsGuest": "\u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0643\u0632\u0627\u0626\u0631",
+  "@authContinueAsGuest": {
+    "description": "Skips signing in. Browsing is public, so this simply returns to Home."
+  },
+  "verifyEmailTitle": "\u062a\u062d\u0642\u0642 \u0645\u0646 \u0628\u0631\u064a\u062f\u0643 \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
+  "@verifyEmailTitle": {
+    "description": "Heading on the code-verification screen."
+  },
+  "verifyEmailSubtitle": "\u0623\u0631\u0633\u0644\u0646\u0627 \u0631\u0645\u0632\u0627\u064b \u0645\u0643\u0648\u0646\u0627\u064b \u0645\u0646 6 \u0623\u0631\u0642\u0627\u0645 \u0625\u0644\u0649 {email}",
+  "@verifyEmailSubtitle": {
+    "description": "Tells the user where the six-digit code was sent.",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "sara@example.com"
+      }
+    }
+  },
+  "verifyEmailConfirm": "\u062a\u0623\u0643\u064a\u062f",
+  "@verifyEmailConfirm": {
+    "description": "Submits the entered code."
+  },
+  "verifyEmailResend": "\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u0625\u0631\u0633\u0627\u0644",
+  "@verifyEmailResend": {
+    "description": "Requests a new code. Disabled until the countdown reaches zero."
+  },
+  "verifyEmailNoCode": "\u0644\u0645 \u064a\u0635\u0644\u0643 \u0627\u0644\u0631\u0645\u0632\u061f",
+  "@verifyEmailNoCode": {
+    "description": "Precedes the resend action: \"did not get the code?\""
+  },
+  "verifyEmailCodeIncomplete": "\u0623\u062f\u062e\u0644\u064a \u0627\u0644\u0631\u0645\u0632 \u0627\u0644\u0645\u0643\u0648\u0646 \u0645\u0646 6 \u0623\u0631\u0642\u0627\u0645",
+  "@verifyEmailCodeIncomplete": {
+    "description": "Validation shown when fewer than six digits were entered."
+  },
+  "navHome": "\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629",
+  "@navHome": {
+    "description": "Bottom navigation label for the home tab."
+  },
+  "navCategories": "\u0627\u0644\u0641\u0626\u0627\u062a",
+  "@navCategories": {
+    "description": "Bottom navigation label for the categories tab."
+  },
+  "navCart": "\u0627\u0644\u0633\u0644\u0629",
+  "@navCart": {
+    "description": "Bottom navigation label for the cart tab."
+  },
+  "navProfile": "\u062d\u0633\u0627\u0628\u064a",
+  "@navProfile": {
+    "description": "Bottom navigation label for the account tab."
+  },
+  "homeHeroTagline": "\u0627\u062d\u062a\u0634\u0627\u0645 \u0639\u0635\u0631\u064a\u060c \u064a\u0646\u0627\u0633\u0628 \u0643\u0644 \u064a\u0648\u0645",
+  "@homeHeroTagline": {
+    "description": "Tagline over the hero banner on Home. Same wording as the splash tagline, by design."
+  },
+  "homeHeroCta": "\u062a\u0633\u0648\u0642\u064a \u0627\u0644\u0622\u0646",
+  "@homeHeroCta": {
+    "description": "Button on the hero banner that opens the catalogue."
+  },
+  "homeCategoryAll": "\u0627\u0644\u0643\u0644",
+  "@homeCategoryAll": {
+    "description": "First filter chip, clearing any category filter. A UI affordance, not a category the backend returns."
+  },
+  "homeFeaturedTitle": "\u0645\u0646\u062a\u062c\u0627\u062a \u0645\u0645\u064a\u0632\u0629",
+  "@homeFeaturedTitle": {
+    "description": "Heading of the featured products grid."
+  },
+  "homeSeeAll": "\u0639\u0631\u0636 \u0627\u0644\u0643\u0644",
+  "@homeSeeAll": {
+    "description": "Link beside the featured heading that opens the full catalogue."
+  },
+  "homeEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0628\u0639\u062f",
+  "@homeEmpty": {
+    "description": "Shown when the catalogue itself is empty."
+  },
+  "homeFilterEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0641\u064a \u0647\u0630\u0647 \u0627\u0644\u0641\u0626\u0629",
+  "@homeFilterEmpty": {
+    "description": "Shown inside the grid when the chosen category has nothing in it. The chips stay visible so another can be picked."
+  },
+  "homeFavourite": "\u0625\u0636\u0627\u0641\u0629 \u0644\u0644\u0645\u0641\u0636\u0644\u0629",
+  "@homeFavourite": {
+    "description": "Screen-reader label for the heart button on a product card."
+  },
+  "homeSearch": "\u0628\u062d\u062b",
+  "@homeSearch": {
+    "description": "Screen-reader label for the search action in the Home app bar."
+  },
+  "currencySymbol": "\u0631.\u0633",
+  "@currencySymbol": {
+    "description": "Currency symbol shown after a price. Saudi riyal."
+  },
+  "productSoldOut": "\u0646\u0641\u062f \u0645\u0646 \u0627\u0644\u0645\u062e\u0632\u0646",
+  "@productSoldOut": {
+    "description": "Badge on a product card whose stock has run out."
+  },
+  "productListFilter": "\u062a\u0635\u0641\u064a\u0629",
+  "@productListFilter": {
+    "description": "Screen-reader label for the filter control in the product listing app bar."
+  },
+  "productListEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0641\u064a \u0647\u0630\u0647 \u0627\u0644\u0641\u0626\u0629",
+  "@productListEmpty": {
+    "description": "Shown when the category itself holds no products."
+  },
+  "productListFilterEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0645\u0646\u062a\u062c\u0627\u062a \u0628\u0647\u0630\u0627 \u0627\u0644\u0641\u0644\u062a\u0631",
+  "@productListFilterEmpty": {
+    "description": "Shown inside the grid when the chosen tag matches nothing. The chips stay visible so another can be picked."
+  },
+  "productColour": "\u0627\u0644\u0644\u0648\u0646",
+  "@productColour": {
+    "description": "Heading of the colour selector on a product page."
+  },
+  "productSize": "\u0627\u0644\u0645\u0642\u0627\u0633",
+  "@productSize": {
+    "description": "Heading of the size selector on a product page."
+  },
+  "productSizeGuide": "\u062f\u0644\u064a\u0644 \u0627\u0644\u0645\u0642\u0627\u0633\u0627\u062a",
+  "@productSizeGuide": {
+    "description": "Link to the sizing chart. The chart screen is not built yet."
+  },
+  "productDetails": "\u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644",
+  "@productDetails": {
+    "description": "Heading of the description section on a product page."
+  },
+  "productAddToCart": "\u0623\u0636\u0641 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629",
+  "@productAddToCart": {
+    "description": "Primary action on a product page."
+  },
+  "productAddedToCart": "\u062a\u0645\u062a \u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629",
+  "@productAddedToCart": {
+    "description": "Confirmation shown after adding a product. The cart screen itself is not built yet."
+  },
+  "productShare": "\u0645\u0634\u0627\u0631\u0643\u0629",
+  "@productShare": {
+    "description": "Screen-reader label for the share action on a product page."
+  },
+  "productDecreaseQuantity": "\u0625\u0646\u0642\u0627\u0635 \u0627\u0644\u0643\u0645\u064a\u0629",
+  "@productDecreaseQuantity": {
+    "description": "Screen-reader label for the minus button on the quantity stepper."
+  },
+  "productIncreaseQuantity": "\u0632\u064a\u0627\u062f\u0629 \u0627\u0644\u0643\u0645\u064a\u0629",
+  "@productIncreaseQuantity": {
+    "description": "Screen-reader label for the plus button on the quantity stepper."
+  },
+  "productImageCount": "{current} \u0645\u0646 {total}",
+  "@productImageCount": {
+    "description": "Screen-reader position within the product image carousel.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "1"
+      },
+      "total": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "loginTitle": "\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644",
+  "@loginTitle": {
+    "description": "Title of the login screen."
+  },
+  "emailLabel": "\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
+  "@emailLabel": {
+    "description": "Label for the email text field on the login form."
+  },
+  "logoutButton": "\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062e\u0631\u0648\u062c",
+  "@logoutButton": {
+    "description": "Label of the sign-out action."
+  },
+  "emailRequired": "\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a \u0645\u0637\u0644\u0648\u0628",
+  "@emailRequired": {
+    "description": "Validation message shown when the email field is empty."
+  },
+  "emailInvalid": "\u0623\u062f\u062e\u0644 \u0628\u0631\u064a\u062f\u064b\u0627 \u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u064b\u0627 \u0635\u062d\u064a\u062d\u064b\u0627",
+  "@emailInvalid": {
+    "description": "Validation message shown when the email field is not a valid address."
+  },
+  "retry": "\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629",
+  "@retry": {
+    "description": "Label of the retry action on an error state."
+  },
+  "homeTitle": "\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629",
+  "@homeTitle": {
+    "description": "Title of the home screen shown after a successful sign-in."
+  },
+  "welcomeUser": "\u0645\u0631\u062d\u0628\u064b\u0627\u060c {name}",
+  "@welcomeUser": {
+    "description": "Greeting shown on the home screen after sign-in.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "\u0633\u0627\u0631\u0629"
+      }
+    }
+  },
+  "failureNetwork": "\u0644\u0627 \u064a\u0648\u062c\u062f \u0627\u062a\u0635\u0627\u0644 \u0628\u0627\u0644\u0625\u0646\u062a\u0631\u0646\u062a.",
+  "@failureNetwork": {
+    "description": "Shown for NetworkFailure \u2014 no connectivity or a timeout."
+  },
+  "failureServer": "\u062d\u062f\u062b \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062e\u0627\u062f\u0645. \u064a\u0631\u062c\u0649 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0644\u0627\u062d\u0642\u064b\u0627.",
+  "@failureServer": {
+    "description": "Shown for ServerFailure \u2014 a 5xx response."
+  },
+  "failureNotFound": "\u0644\u0645 \u064a\u062a\u0645 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0627\u0644\u0639\u0646\u0635\u0631 \u0627\u0644\u0645\u0637\u0644\u0648\u0628.",
+  "@failureNotFound": {
+    "description": "Shown for NotFoundFailure \u2014 a 404 response."
+  },
+  "failureUnauthorized": "\u0627\u0646\u062a\u0647\u062a \u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u062c\u0644\u0633\u0629. \u064a\u0631\u062c\u0649 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0645\u0646 \u062c\u062f\u064a\u062f.",
+  "@failureUnauthorized": {
+    "description": "Shown for UnauthorizedFailure \u2014 a 401 or 403 response."
+  },
+  "failureValidation": "\u064a\u0631\u062c\u0649 \u0627\u0644\u062a\u062d\u0642\u0642 \u0645\u0646 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u062f\u062e\u0644\u0629.",
+  "@failureValidation": {
+    "description": "Shown for ValidationFailure \u2014 a 422 response."
+  },
+  "failureCache": "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0645\u062d\u0644\u064a\u0629 \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631\u0629.",
+  "@failureCache": {
+    "description": "Shown for CacheFailure \u2014 local data could not be read."
+  },
+  "failureUnknown": "\u062d\u062f\u062b \u062e\u0637\u0623 \u0645\u0627.",
+  "@failureUnknown": {
+    "description": "Shown for UnknownFailure \u2014 an unclassified error."
+  },
+  "cartTitle": "\u0633\u0644\u0629 \u0627\u0644\u062a\u0633\u0648\u0642",
+  "@cartTitle": {
+    "description": "Heading of the cart screen. Also the bottom-navigation destination it belongs to."
+  },
+  "cartVariant": "\u0627\u0644\u0644\u0648\u0646: {colour} | \u0627\u0644\u0645\u0642\u0627\u0633: {size}",
+  "@cartVariant": {
+    "description": "The choices made on one cart line, shown under the product name. Composed as one string rather than joining translated fragments in code, so a translator controls the separator and the word order.",
+    "placeholders": {
+      "colour": {
+        "type": "String",
+        "example": "\u0631\u0645\u0644\u064a"
+      },
+      "size": {
+        "type": "String",
+        "example": "M"
+      }
+    }
+  },
+  "cartVariantColour": "\u0627\u0644\u0644\u0648\u0646: {colour}",
+  "@cartVariantColour": {
+    "description": "Same line as cartVariant for a product that offers no sizes.",
+    "placeholders": {
+      "colour": {
+        "type": "String",
+        "example": "\u0631\u0645\u0644\u064a"
+      }
+    }
+  },
+  "cartVariantSize": "\u0627\u0644\u0645\u0642\u0627\u0633: {size}",
+  "@cartVariantSize": {
+    "description": "Same line as cartVariant for a product that offers no colours.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "M"
+      }
+    }
+  },
+  "cartRemoveItem": "\u0625\u0632\u0627\u0644\u0629 \u0645\u0646 \u0627\u0644\u0633\u0644\u0629",
+  "@cartRemoveItem": {
+    "description": "Screen-reader label and tooltip for the \u00d7 on a cart line."
+  },
+  "cartSubtotal": "\u0627\u0644\u0645\u062c\u0645\u0648\u0639 \u0627\u0644\u0641\u0631\u0639\u064a",
+  "@cartSubtotal": {
+    "description": "Summary row: the sum of the line totals, before shipping."
+  },
+  "cartShipping": "\u0627\u0644\u0634\u062d\u0646",
+  "@cartShipping": {
+    "description": "Summary row: the delivery fee."
+  },
+  "cartTotal": "\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a",
+  "@cartTotal": {
+    "description": "Summary row: subtotal plus shipping. The emphasised row."
+  },
+  "cartCheckout": "\u0645\u062a\u0627\u0628\u0639\u0629 \u0627\u0644\u062f\u0641\u0639",
+  "@cartCheckout": {
+    "description": "Primary action in the cart's sticky bar. Disabled until the checkout screen exists."
+  },
+  "cartEmpty": "\u0633\u0644\u062a\u0643 \u0641\u0627\u0631\u063a\u0629",
+  "@cartEmpty": {
+    "description": "Heading shown when the cart holds nothing."
+  },
+  "cartEmptyBody": "\u0623\u0636\u064a\u0641\u064a \u0645\u0627 \u064a\u0639\u062c\u0628\u0643 \u0645\u0646 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0648\u0633\u062a\u062c\u062f\u064a\u0646\u0647 \u0647\u0646\u0627",
+  "@cartEmptyBody": {
+    "description": "Supporting line under the empty-cart heading. Two lines at most at 14sp on a 375pt screen."
+  },
+  "cartEmptyCta": "\u062a\u0633\u0648\u0651\u0642\u064a \u0627\u0644\u0622\u0646",
+  "@cartEmptyCta": {
+    "description": "Button on the empty cart that returns to the catalogue."
+  },
+  "cartViewCart": "\u0639\u0631\u0636 \u0627\u0644\u0633\u0644\u0629",
+  "@cartViewCart": {
+    "description": "Action on the confirmation shown after adding a product, opening the cart tab."
+  },
+  "filterTitle": "\u0627\u0644\u0641\u0644\u0627\u062a\u0631",
+  "@filterTitle": {
+    "description": "Heading of the shared filter sheet, used by the product listing and by search results."
+  },
+  "filterClose": "\u0625\u063a\u0644\u0627\u0642",
+  "@filterClose": {
+    "description": "Screen-reader label for the sheet's close control."
+  },
+  "filterClearAll": "\u0645\u0633\u062d \u0627\u0644\u0643\u0644",
+  "@filterClearAll": {
+    "description": "Clears every facet at once, from the sheet header."
+  },
+  "filterCategory": "\u0627\u0644\u062a\u0635\u0646\u064a\u0641",
+  "@filterCategory": {
+    "description": "Facet heading: which catalogue category a product belongs to."
+  },
+  "filterStyle": "\u0627\u0644\u0646\u0645\u0637",
+  "@filterStyle": {
+    "description": "Facet heading for the product tags (everyday, occasion, colourful). Distinct from cartVariant's category: a tag describes the style, not the section of the catalogue."
+  },
+  "filterPriceRange": "\u0646\u0637\u0627\u0642 \u0627\u0644\u0633\u0639\u0631",
+  "@filterPriceRange": {
+    "description": "Facet heading for the price slider."
+  },
+  "filterPriceRangeValue": "{min} - {max}",
+  "@filterPriceRangeValue": {
+    "description": "The currently selected price bounds, shown beside the price heading. Both values arrive already formatted with the currency symbol, so this entry controls only the separator and the order.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "450 \u0631.\u0633"
+      },
+      "max": {
+        "type": "String",
+        "example": "950 \u0631.\u0633"
+      }
+    }
+  },
+  "filterReset": "\u0625\u0639\u0627\u062f\u0629 \u062a\u0639\u064a\u064a\u0646",
+  "@filterReset": {
+    "description": "Secondary action in the sheet footer: clears the facets without closing."
+  },
+  "filterApply": "\u0639\u0631\u0636 \u0627\u0644\u0646\u062a\u0627\u0626\u062c ({count})",
+  "@filterApply": {
+    "description": "Primary action in the sheet footer. The number is how many products the pending filter matches, so the shopper sees the effect before applying it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "\u0627\u0628\u062d\u062b\u064a \u0639\u0645\u0627 \u062a\u0641\u0636\u0644\u064a\u0646\u0647",
+  "@searchHint": {
+    "description": "Placeholder inside the search field. Fits one line at 16sp on a 375pt screen."
+  },
+  "searchClear": "\u0645\u0633\u062d \u0627\u0644\u0628\u062d\u062b",
+  "@searchClear": {
+    "description": "Screen-reader label for the clear control inside the search field."
+  },
+  "searchRecent": "\u0639\u0645\u0644\u064a\u0627\u062a \u0628\u062d\u062b \u0633\u0627\u0628\u0642\u0629",
+  "@searchRecent": {
+    "description": "Heading of the recent-searches section on the search screen."
+  },
+  "searchRemoveTerm": "\u0625\u0632\u0627\u0644\u0629 \u0645\u0646 \u0639\u0645\u0644\u064a\u0627\u062a \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+  "@searchRemoveTerm": {
+    "description": "Screen-reader label for the small close control on one recent-search chip."
+  },
+  "searchTrending": "\u0627\u0644\u0623\u0643\u062b\u0631 \u0628\u062d\u062b\u0627\u064b",
+  "@searchTrending": {
+    "description": "Heading of the suggested search terms the catalogue offers."
+  },
+  "searchExploreCategories": "\u0627\u0633\u062a\u0643\u0634\u0641\u064a \u0627\u0644\u0641\u0626\u0627\u062a",
+  "@searchExploreCategories": {
+    "description": "Heading of the category cards offered instead of searching."
+  },
+  "searchResultCount": "{count, plural, =0{\u0644\u0627 \u0646\u062a\u0627\u0626\u062c \u0644\u0640 \u00ab{query}\u00bb} =1{\u0646\u062a\u064a\u062c\u0629 \u0648\u0627\u062d\u062f\u0629 \u0644\u0640 \u00ab{query}\u00bb} =2{\u0646\u062a\u064a\u062c\u062a\u0627\u0646 \u0644\u0640 \u00ab{query}\u00bb} few{{count} \u0646\u062a\u0627\u0626\u062c \u0644\u0640 \u00ab{query}\u00bb} many{{count} \u0646\u062a\u064a\u062c\u0629 \u0644\u0640 \u00ab{query}\u00bb} other{{count} \u0646\u062a\u064a\u062c\u0629 \u0644\u0640 \u00ab{query}\u00bb}}",
+  "@searchResultCount": {
+    "description": "Heading above the results grid, stating how many products matched. ICU plural: Arabic has six forms and a ternary would be wrong in most of them.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchSort": "\u062a\u0631\u062a\u064a\u0628",
+  "@searchSort": {
+    "description": "Opens the ordering options above the results grid."
+  },
+  "searchSortRelevance": "\u0627\u0644\u0623\u0643\u062b\u0631 \u0635\u0644\u0629",
+  "@searchSortRelevance": {
+    "description": "Ordering option: the catalogue's own order for the query."
+  },
+  "searchSortPriceAscending": "\u0627\u0644\u0633\u0639\u0631: \u0645\u0646 \u0627\u0644\u0623\u0642\u0644",
+  "@searchSortPriceAscending": {
+    "description": "Ordering option: cheapest first."
+  },
+  "searchSortPriceDescending": "\u0627\u0644\u0633\u0639\u0631: \u0645\u0646 \u0627\u0644\u0623\u0639\u0644\u0649",
+  "@searchSortPriceDescending": {
+    "description": "Ordering option: most expensive first."
+  },
+  "searchEmptyTitle": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c",
+  "@searchEmptyTitle": {
+    "description": "Heading shown when a query matched nothing in the catalogue."
+  },
+  "searchEmptyBody": "\u0644\u0645 \u0646\u062c\u062f \u0634\u064a\u0626\u0627\u064b \u064a\u0637\u0627\u0628\u0642 \u00ab{query}\u00bb. \u062c\u0631\u0651\u0628\u064a \u0643\u0644\u0645\u0629 \u0623\u062e\u0631\u0649.",
+  "@searchEmptyBody": {
+    "description": "Supporting line under the no-results heading, repeating what was searched for.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchFilterEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0646\u062a\u0627\u0626\u062c \u0628\u0647\u0630\u0647 \u0627\u0644\u0641\u0644\u0627\u062a\u0631",
+  "@searchFilterEmpty": {
+    "description": "Shown inside the grid when the chosen filters cover nothing, while the query itself matched something. The filter controls stay visible so they can be widened."
+  },
+  "profileMyOrders": "\u0637\u0644\u0628\u0627\u062a\u064a",
+  "@profileMyOrders": {
+    "description": "Account menu row leading to the shopper's past orders."
+  },
+  "profilePersonalInfo": "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0634\u062e\u0635\u064a\u0629",
+  "@profilePersonalInfo": {
+    "description": "Account menu row leading to the name/email/phone editor."
+  },
+  "profileAddresses": "\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646",
+  "@profileAddresses": {
+    "description": "Account menu row leading to the saved delivery addresses."
+  },
+  "profileLanguage": "\u0627\u0644\u0644\u063a\u0629",
+  "@profileLanguage": {
+    "description": "Account menu row leading to the language chooser. Shows the current language as its value."
+  },
+  "profileNotifications": "\u0627\u0644\u0625\u0634\u0639\u0627\u0631\u0627\u062a",
+  "@profileNotifications": {
+    "description": "Account menu row leading to the notification preferences."
+  },
+  "profileHelp": "\u0627\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0648\u0627\u0644\u062f\u0639\u0645",
+  "@profileHelp": {
+    "description": "Account menu row leading to help and customer support."
+  },
+  "profileTerms": "\u0627\u0644\u0634\u0631\u0648\u0637 \u0648\u0627\u0644\u0623\u062d\u0643\u0627\u0645",
+  "@profileTerms": {
+    "description": "Account menu row leading to the terms and conditions."
+  },
+  "profileLogoutConfirm": "\u0647\u0644 \u062a\u0631\u064a\u062f\u064a\u0646 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062e\u0631\u0648\u062c \u0645\u0646 \u062d\u0633\u0627\u0628\u0643\u061f",
+  "@profileLogoutConfirm": {
+    "description": "Body of the confirmation asked before signing out. Ending the session with one stray tap inside a scrolling list is the easiest mistake on this screen."
+  },
+  "commonCancel": "\u0625\u0644\u063a\u0627\u0621",
+  "@commonCancel": {
+    "description": "Dismisses a confirmation without acting. Generic, reused by any dialog."
+  },
+  "languageName": "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+  "@languageName": {
+    "description": "The name of THIS locale, written in it. Each locale names itself, so the account screen can show the current language without a lookup table. DO NOT translate - render the language's own endonym."
+  },
+  "personalInfoSubtitle": "\u0642\u0645 \u0628\u062a\u062d\u062f\u064a\u062b \u0645\u0639\u0644\u0648\u0645\u0627\u062a\u0643 \u0627\u0644\u0634\u062e\u0635\u064a\u0629 \u0644\u0644\u062d\u0641\u0627\u0638 \u0639\u0644\u0649 \u062d\u0633\u0627\u0628\u0643 \u0645\u062d\u062f\u062b\u0627\u064b.",
+  "@personalInfoSubtitle": {
+    "description": "Supporting line under the personal-information heading. Two lines at most at 16sp on a 375pt screen."
+  },
+  "personalInfoFullName": "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644",
+  "@personalInfoFullName": {
+    "description": "Label of the editable name field."
+  },
+  "personalInfoEmailLocked": "\u0644\u0627 \u064a\u0645\u0643\u0646 \u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a.",
+  "@personalInfoEmailLocked": {
+    "description": "Note under the disabled email field. The address is fixed for the account, not merely disabled in this screen."
+  },
+  "personalInfoPhone": "\u0631\u0642\u0645 \u0627\u0644\u062c\u0648\u0627\u0644",
+  "@personalInfoPhone": {
+    "description": "Label of the editable phone field. Optional - an account created with Google may have no number."
+  },
+  "personalInfoSave": "\u062d\u0641\u0638 \u0627\u0644\u062a\u063a\u064a\u064a\u0631\u0627\u062a",
+  "@personalInfoSave": {
+    "description": "Primary action in the sticky bar."
+  },
+  "personalInfoSaved": "\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u062a\u063a\u064a\u064a\u0631\u0627\u062a",
+  "@personalInfoSaved": {
+    "description": "Confirmation shown after the profile is saved."
+  },
+  "personalInfoNameRequired": "\u0627\u0644\u0627\u0633\u0645 \u0645\u0637\u0644\u0648\u0628",
+  "@personalInfoNameRequired": {
+    "description": "Validation shown when the name field is left empty."
+  },
+  "personalInfoPhoneInvalid": "\u0623\u062f\u062e\u0644\u064a \u0631\u0642\u0645 \u062c\u0648\u0627\u0644 \u0635\u062d\u064a\u062d",
+  "@personalInfoPhoneInvalid": {
+    "description": "Validation shown when the phone field holds something that is not a number. Deliberately loose - no country format is specified."
+  },
+  "personalInfoDiscardTitle": "\u062a\u0639\u062f\u064a\u0644\u0627\u062a \u063a\u064a\u0631 \u0645\u062d\u0641\u0648\u0638\u0629",
+  "@personalInfoDiscardTitle": {
+    "description": "Heading of the confirmation asked when leaving with unsaved edits."
+  },
+  "personalInfoDiscardBody": "\u0644\u062f\u064a\u0643 \u062a\u0639\u062f\u064a\u0644\u0627\u062a \u0644\u0645 \u062a\u064f\u062d\u0641\u0638. \u0647\u0644 \u062a\u0631\u064a\u062f\u064a\u0646 \u0627\u0644\u062e\u0631\u0648\u062c \u062f\u0648\u0646 \u062d\u0641\u0638\u0647\u0627\u061f",
+  "@personalInfoDiscardBody": {
+    "description": "Body of the unsaved-changes confirmation."
+  },
+  "personalInfoDiscard": "\u062e\u0631\u0648\u062c \u062f\u0648\u0646 \u062d\u0641\u0638",
+  "@personalInfoDiscard": {
+    "description": "Confirming action of the unsaved-changes dialog: leave and lose the edits."
+  },
+  "addressListTitle": "\u0639\u0646\u0627\u0648\u064a\u0646\u064a",
+  "@addressListTitle": {
+    "description": "Heading of the saved-addresses screen."
+  },
+  "addressDefaultBadge": "\u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a",
+  "@addressDefaultBadge": {
+    "description": "Badge on the address that orders default to."
+  },
+  "addressSetDefault": "\u062a\u0639\u064a\u064a\u0646 \u0643\u0627\u0641\u062a\u0631\u0627\u0636\u064a",
+  "@addressSetDefault": {
+    "description": "Action making one address the default. Only offered on the ones that are not."
+  },
+  "addressEdit": "\u062a\u0639\u062f\u064a\u0644 \u0627\u0644\u0639\u0646\u0648\u0627\u0646",
+  "@addressEdit": {
+    "description": "Screen-reader label and tooltip for the edit control on an address card. Also the heading when editing."
+  },
+  "addressDelete": "\u062d\u0630\u0641 \u0627\u0644\u0639\u0646\u0648\u0627\u0646",
+  "@addressDelete": {
+    "description": "Screen-reader label for the delete control, and the heading of its confirmation."
+  },
+  "addressDeleteConfirm": "\u0633\u064a\u064f\u062d\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0646\u0647\u0627\u0626\u064a\u064b\u0627. \u0647\u0644 \u062a\u0631\u064a\u062f\u064a\u0646 \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f",
+  "@addressDeleteConfirm": {
+    "description": "Body of the delete confirmation."
+  },
+  "addressAdd": "\u0625\u0636\u0627\u0641\u0629 \u0639\u0646\u0648\u0627\u0646 \u062c\u062f\u064a\u062f",
+  "@addressAdd": {
+    "description": "Primary action on the addresses screen, and the heading when adding."
+  },
+  "addressEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0639\u0646\u0627\u0648\u064a\u0646 \u0645\u062d\u0641\u0648\u0638\u0629",
+  "@addressEmpty": {
+    "description": "Heading shown when nothing has been saved yet."
+  },
+  "addressEmptyBody": "\u0623\u0636\u064a\u0641\u064a \u0639\u0646\u0648\u0627\u0646\u064b\u0627 \u0644\u064a\u0635\u0644\u0643 \u0637\u0644\u0628\u0643 \u0623\u0633\u0631\u0639",
+  "@addressEmptyBody": {
+    "description": "Supporting line under the empty-addresses heading."
+  },
+  "addressLabelField": "\u0627\u0633\u0645 \u0627\u0644\u0639\u0646\u0648\u0627\u0646",
+  "@addressLabelField": {
+    "description": "Label of the free-text field naming an address - the shopper may call it anything."
+  },
+  "addressKind": "\u0627\u0644\u0646\u0648\u0639",
+  "@addressKind": {
+    "description": "Label of the home/work/other selector, which picks the card's icon."
+  },
+  "addressKindHome": "\u0627\u0644\u0645\u0646\u0632\u0644",
+  "@addressKindHome": {
+    "description": "Address type: a home. Also the default name suggested for one."
+  },
+  "addressKindWork": "\u0627\u0644\u0639\u0645\u0644",
+  "@addressKindWork": {
+    "description": "Address type: a workplace."
+  },
+  "addressKindOther": "\u0623\u062e\u0631\u0649",
+  "@addressKindOther": {
+    "description": "Address type: anything else."
+  },
+  "addressRecipient": "\u0627\u0633\u0645 \u0627\u0644\u0645\u0633\u062a\u0644\u0645",
+  "@addressRecipient": {
+    "description": "Label of the recipient field - who receives the parcel, not necessarily the account holder."
+  },
+  "addressCountry": "\u0627\u0644\u062f\u0648\u0644\u0629",
+  "@addressCountry": {
+    "description": "Label of the country selector."
+  },
+  "addressRegion": "\u0627\u0644\u0645\u0646\u0637\u0642\u0629",
+  "@addressRegion": {
+    "description": "Label of the district field. The design's example is a neighbourhood, not a province."
+  },
+  "addressCity": "\u0627\u0644\u0645\u062f\u064a\u0646\u0629",
+  "@addressCity": {
+    "description": "Label of the city field."
+  },
+  "addressPostalCode": "\u0627\u0644\u0631\u0645\u0632 \u0627\u0644\u0628\u0631\u064a\u062f\u064a",
+  "@addressPostalCode": {
+    "description": "Label of the optional postal code field."
+  },
+  "addressStreet": "\u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0628\u0627\u0644\u062a\u0641\u0635\u064a\u0644",
+  "@addressStreet": {
+    "description": "Label of the multi-line street field."
+  },
+  "addressStreetHint": "\u0627\u0633\u0645 \u0627\u0644\u0634\u0627\u0631\u0639\u060c \u0631\u0642\u0645 \u0627\u0644\u0645\u0628\u0646\u0649...",
+  "@addressStreetHint": {
+    "description": "Placeholder inside the street field."
+  },
+  "addressNotes": "\u0645\u0644\u0627\u062d\u0638\u0627\u062a \u0625\u0636\u0627\u0641\u064a\u0629",
+  "@addressNotes": {
+    "description": "Label of the optional notes field - read by whoever delivers, shown on no card."
+  },
+  "addressNotesHint": "\u0639\u0644\u0627\u0645\u0629 \u0645\u0645\u064a\u0632\u0629\u060c \u0648\u0642\u062a \u0627\u0644\u062a\u0648\u0635\u064a\u0644 \u0627\u0644\u0645\u0641\u0636\u0644...",
+  "@addressNotesHint": {
+    "description": "Placeholder inside the notes field."
+  },
+  "addressMakeDefault": "\u0627\u062c\u0639\u0644\u0647 \u0627\u0644\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a",
+  "@addressMakeDefault": {
+    "description": "Switch in the form making the saved address the default one."
+  },
+  "addressSave": "\u062d\u0641\u0638 \u0627\u0644\u0639\u0646\u0648\u0627\u0646",
+  "@addressSave": {
+    "description": "Primary action of the address form."
+  },
+  "addressSaved": "\u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0639\u0646\u0648\u0627\u0646",
+  "@addressSaved": {
+    "description": "Confirmation shown after an address is saved."
+  },
+  "addressFieldRequired": "\u0647\u0630\u0627 \u0627\u0644\u062d\u0642\u0644 \u0645\u0637\u0644\u0648\u0628",
+  "@addressFieldRequired": {
+    "description": "Validation shown when a required address field is left empty."
+  },
+  "languageExplanation": "\u0633\u064a\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0644\u063a\u0629 \u0648\u0627\u062c\u0647\u0629 \u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u0641\u0648\u0631\u0627\u064b \u0628\u0646\u0627\u0621\u064b \u0639\u0644\u0649 \u0627\u062e\u062a\u064a\u0627\u0631\u0643.",
+  "@languageExplanation": {
+    "description": "Line under the language options. It promises an immediate switch with no restart, which is the behaviour the screen actually implements."
+  },
+  "languageNotSaved": "\u062a\u0645 \u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0644\u063a\u0629\u060c \u0644\u0643\u0646 \u062a\u0639\u0630\u0651\u0631 \u062d\u0641\u0638 \u0627\u062e\u062a\u064a\u0627\u0631\u0643.",
+  "@languageNotSaved": {
+    "description": "Shown when the language was applied but could not be written to storage - so the shopper knows it will not survive a restart."
+  },
+  "helpFaqTitle": "\u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0634\u0627\u0626\u0639\u0629",
+  "@helpFaqTitle": {
+    "description": "Heading of the FAQ section on the help screen."
+  },
+  "helpContactTitle": "\u062a\u0648\u0627\u0635\u0644\u064a \u0645\u0639\u0646\u0627",
+  "@helpContactTitle": {
+    "description": "Heading of the contact section on the help screen."
+  },
+  "helpFaqSignInQuestion": "\u0643\u064a\u0641 \u0623\u0633\u062c\u0651\u0644 \u0627\u0644\u062f\u062e\u0648\u0644\u061f",
+  "@helpFaqSignInQuestion": {
+    "description": "FAQ question about signing in."
+  },
+  "helpFaqSignInAnswer": "\u0628\u062d\u0633\u0627\u0628\u0643 \u0641\u064a Google\u060c \u0623\u0648 \u0628\u0631\u0645\u0632 \u0645\u0643\u0648\u0651\u0646 \u0645\u0646 \u0666 \u0623\u0631\u0642\u0627\u0645 \u064a\u0635\u0644\u0643 \u0639\u0644\u0649 \u0628\u0631\u064a\u062f\u0643 \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a. \u0644\u0627 \u062a\u0648\u062c\u062f \u0643\u0644\u0645\u0629 \u0645\u0631\u0648\u0631 \u0641\u064a \u0627\u0644\u062a\u0637\u0628\u064a\u0642.",
+  "@helpFaqSignInAnswer": {
+    "description": "FAQ answer describing the passwordless sign-in the app actually implements."
+  },
+  "helpFaqEmailQuestion": "\u0647\u0644 \u0623\u0633\u062a\u0637\u064a\u0639 \u062a\u063a\u064a\u064a\u0631 \u0628\u0631\u064a\u062f\u064a \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a\u061f",
+  "@helpFaqEmailQuestion": {
+    "description": "FAQ question about changing the account email."
+  },
+  "helpFaqEmailAnswer": "\u0627\u0644\u0628\u0631\u064a\u062f \u0645\u0631\u062a\u0628\u0637 \u0628\u062d\u0633\u0627\u0628\u0643 \u0648\u0644\u0627 \u064a\u0645\u0643\u0646 \u062a\u063a\u064a\u064a\u0631\u0647 \u0645\u0646 \u0627\u0644\u062a\u0637\u0628\u064a\u0642. \u0623\u0645\u0627 \u0627\u0644\u0627\u0633\u0645 \u0648\u0631\u0642\u0645 \u0627\u0644\u062c\u0648\u0627\u0644 \u0641\u062a\u0639\u062f\u0651\u0644\u064a\u0646\u0647\u0645\u0627 \u0645\u0646 \u00ab\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0634\u062e\u0635\u064a\u0629\u00bb.",
+  "@helpFaqEmailAnswer": {
+    "description": "FAQ answer. The email really is unchangeable - the update contract has no field for it."
+  },
+  "helpFaqLanguageQuestion": "\u0643\u064a\u0641 \u0623\u063a\u064a\u0651\u0631 \u0644\u063a\u0629 \u0627\u0644\u062a\u0637\u0628\u064a\u0642\u061f",
+  "@helpFaqLanguageQuestion": {
+    "description": "FAQ question about switching language."
+  },
+  "helpFaqLanguageAnswer": "\u0645\u0646 \u00ab\u062d\u0633\u0627\u0628\u064a\u00bb \u062b\u0645 \u00ab\u0627\u0644\u0644\u063a\u0629\u00bb. \u062a\u062a\u063a\u064a\u0651\u0631 \u0627\u0644\u0648\u0627\u062c\u0647\u0629 \u0641\u0648\u0631\u0627\u064b \u062f\u0648\u0646 \u0625\u0639\u0627\u062f\u0629 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642.",
+  "@helpFaqLanguageAnswer": {
+    "description": "FAQ answer describing the language screen's actual behaviour."
+  },
+  "helpFaqAddressQuestion": "\u0643\u064a\u0641 \u0623\u062f\u064a\u0631 \u0639\u0646\u0627\u0648\u064a\u0646\u064a\u061f",
+  "@helpFaqAddressQuestion": {
+    "description": "FAQ question about managing addresses."
+  },
+  "helpFaqAddressAnswer": "\u0645\u0646 \u00ab\u062d\u0633\u0627\u0628\u064a\u00bb \u062b\u0645 \u00ab\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646\u00bb. \u064a\u0645\u0643\u0646\u0643 \u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u0648\u0627\u0644\u062a\u0639\u062f\u064a\u0644 \u0648\u0627\u0644\u062d\u0630\u0641\u060c \u0648\u062a\u062d\u062f\u064a\u062f \u0639\u0646\u0648\u0627\u0646 \u0648\u0627\u062d\u062f \u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0627\u064b \u064a\u0635\u0644 \u0625\u0644\u064a\u0647 \u0637\u0644\u0628\u0643.",
+  "@helpFaqAddressAnswer": {
+    "description": "FAQ answer describing the addresses screen, including the one-default rule."
+  },
+  "helpContactEmail": "\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
+  "@helpContactEmail": {
+    "description": "Label of the support email row."
+  },
+  "helpContactPhone": "\u0647\u0627\u062a\u0641 \u0627\u0644\u062f\u0639\u0645",
+  "@helpContactPhone": {
+    "description": "Label of the support phone row."
+  },
+  "helpCopy": "\u0646\u0633\u062e",
+  "@helpCopy": {
+    "description": "Screen-reader label and tooltip for the copy control on a contact row."
+  },
+  "helpCopied": "\u062a\u0645 \u0627\u0644\u0646\u0633\u062e",
+  "@helpCopied": {
+    "description": "Confirmation shown after a contact detail is copied to the clipboard."
+  },
+  "termsPlaceholder": "\u0633\u064a\u062a\u0645 \u0625\u0636\u0627\u0641\u0629 \u0627\u0644\u0634\u0631\u0648\u0637 \u0648\u0627\u0644\u0623\u062d\u0643\u0627\u0645 \u0627\u0644\u0643\u0627\u0645\u0644\u0629 \u0647\u0646\u0627.",
+  "@termsPlaceholder": {
+    "description": "The stand-in shown until the real terms text is supplied. Deliberately not draft legal wording - policy is a business decision, not a technical one."
+  },
+  "termsPlaceholderNote": "\u0627\u0644\u0646\u0633\u062e\u0629 \u0627\u0644\u0646\u0647\u0627\u0626\u064a\u0629 \u0642\u064a\u062f \u0627\u0644\u0625\u0639\u062f\u0627\u062f. \u0644\u0644\u0627\u0633\u062a\u0641\u0633\u0627\u0631\u060c \u062a\u0648\u0627\u0635\u0644\u064a \u0645\u0639\u0646\u0627 \u0645\u0646 \u00ab\u0627\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0648\u0627\u0644\u062f\u0639\u0645\u00bb.",
+  "@termsPlaceholderNote": {
+    "description": "Second line under the terms placeholder, telling the reader the absence is known rather than broken."
+  },
+  "notificationsOrders": "\u0625\u0634\u0639\u0627\u0631\u0627\u062a \u0627\u0644\u0637\u0644\u0628\u0627\u062a",
+  "@notificationsOrders": {
+    "description": "Title of the transactional notifications preference."
+  },
+  "notificationsOrdersDescription": "\u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0637\u0644\u0628 \u0648\u062a\u062d\u062f\u064a\u062b\u0627\u062a \u0627\u0644\u0634\u062d\u0646 \u0648\u0627\u0644\u062a\u0648\u0635\u064a\u0644.",
+  "@notificationsOrdersDescription": {
+    "description": "What the orders preference actually covers. Transactional, which is why it is on by default."
+  },
+  "notificationsPromotions": "\u0627\u0644\u0639\u0631\u0648\u0636 \u0648\u0627\u0644\u062a\u062e\u0641\u064a\u0636\u0627\u062a",
+  "@notificationsPromotions": {
+    "description": "Title of the promotional notifications preference."
+  },
+  "notificationsPromotionsDescription": "\u0627\u0644\u062d\u0645\u0644\u0627\u062a \u0648\u0627\u0644\u062a\u062e\u0641\u064a\u0636\u0627\u062a \u0648\u0648\u0635\u0648\u0644 \u0627\u0644\u0642\u0637\u0639 \u0627\u0644\u062c\u062f\u064a\u062f\u0629.",
+  "@notificationsPromotionsDescription": {
+    "description": "What the promotions preference covers. Marketing, which is why it is off by default."
+  },
+  "notificationsDeviceNote": "\u062a\u062d\u0643\u0651\u0645 \u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0647\u0627\u062a\u0641\u0643 \u0641\u064a \u0648\u0635\u0648\u0644 \u0627\u0644\u0625\u0634\u0639\u0627\u0631\u0627\u062a \u0623\u0635\u0644\u0627\u064b. \u0625\u0646 \u0643\u0627\u0646\u062a \u0645\u0648\u0642\u0648\u0641\u0629 \u0647\u0646\u0627\u0643\u060c \u0641\u0644\u0646 \u064a\u0635\u0644\u0643 \u0634\u064a\u0621 \u0645\u0647\u0645\u0627 \u0627\u062e\u062a\u0631\u062a \u0647\u0646\u0627.",
+  "@notificationsDeviceNote": {
+    "description": "Note under the switches. The app cannot read the OS permission - no permission package is a dependency - so it says so plainly rather than letting the switches imply a guarantee they cannot make."
+  },
+  "checkoutContactTitle": "\u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0627\u0644\u062a\u0648\u0627\u0635\u0644",
+  "@checkoutContactTitle": {
+    "description": "App-bar title for checkout step 1."
+  },
+  "checkoutAddressTitle": "\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u062a\u0648\u0635\u064a\u0644",
+  "@checkoutAddressTitle": {
+    "description": "App-bar title for checkout step 2."
+  },
+  "checkoutPaymentTitle": "\u0627\u0644\u0634\u062d\u0646 \u0648\u0627\u0644\u062f\u0641\u0639",
+  "@checkoutPaymentTitle": {
+    "description": "App-bar title for checkout step 3."
+  },
+  "checkoutReviewTitle": "\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0637\u0644\u0628",
+  "@checkoutReviewTitle": {
+    "description": "App-bar title for the confirmation screen after the three steps."
+  },
+  "checkoutSuccessTitle": "\u062a\u0645 \u0628\u0646\u062c\u0627\u062d",
+  "@checkoutSuccessTitle": {
+    "description": "App-bar title for the order-placed screen."
+  },
+  "checkoutFullName": "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644",
+  "@checkoutFullName": {
+    "description": "Label of the name field in checkout step 1. Separate from personalInfoFullName because this one names the order's recipient, not the account holder - a shopper may buy for someone else."
+  },
+  "checkoutFullNameHint": "\u0623\u062f\u062e\u0644 \u0627\u0633\u0645\u0643 \u0627\u0644\u0643\u0627\u0645\u0644",
+  "@checkoutFullNameHint": {
+    "description": "Placeholder inside the checkout name field."
+  },
+  "checkoutPhoneHint": "59 123 4567",
+  "@checkoutPhoneHint": {
+    "description": "Placeholder inside the checkout phone field, shown after the dialling code. Digits only - the code is its own control."
+  },
+  "checkoutStepOf": "\u0627\u0644\u062e\u0637\u0648\u0629 {current} \u0645\u0646 {total}",
+  "@checkoutStepOf": {
+    "description": "Screen-reader label for the step indicator, which is dots only and says nothing to a screen reader on its own.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "checkoutSavedAddresses": "\u0627\u0644\u0639\u0646\u0627\u0648\u064a\u0646 \u0627\u0644\u0645\u062d\u0641\u0648\u0638\u0629",
+  "@checkoutSavedAddresses": {
+    "description": "Heading over the saved-address cards in checkout step 2."
+  },
+  "checkoutNewAddress": "\u0639\u0646\u0648\u0627\u0646 \u062c\u062f\u064a\u062f",
+  "@checkoutNewAddress": {
+    "description": "Heading of the inline address form in checkout step 2. Distinct from addressAdd, which is the button that opens it."
+  },
+  "checkoutSaveAndContinue": "\u062d\u0641\u0638 \u0648\u0645\u062a\u0627\u0628\u0639\u0629",
+  "@checkoutSaveAndContinue": {
+    "description": "Primary action of checkout step 2 - it saves the address as well as advancing, which the generic Next does not say."
+  },
+  "checkoutShippingMethod": "\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u0634\u062d\u0646",
+  "@checkoutShippingMethod": {
+    "description": "Heading over the shipping options in checkout step 3."
+  },
+  "checkoutPaymentMethod": "\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062f\u0641\u0639",
+  "@checkoutPaymentMethod": {
+    "description": "Heading over the payment options in checkout step 3."
+  },
+  "checkoutShippingStandard": "\u0627\u0644\u062a\u0648\u0635\u064a\u0644 \u0627\u0644\u0642\u064a\u0627\u0633\u064a",
+  "@checkoutShippingStandard": {
+    "description": "Name of the one shipping method the shop offers."
+  },
+  "checkoutShippingStandardEta": "\u0663-\u0665 \u0623\u064a\u0627\u0645 \u0639\u0645\u0644",
+  "@checkoutShippingStandardEta": {
+    "description": "Delivery window under the standard shipping method."
+  },
+  "checkoutPaymentCod": "\u0627\u0644\u062f\u0641\u0639 \u0639\u0646\u062f \u0627\u0644\u0627\u0633\u062a\u0644\u0627\u0645",
+  "@checkoutPaymentCod": {
+    "description": "Name of the cash-on-delivery payment method."
+  },
+  "checkoutPaymentCodFee": "\u0631\u0633\u0648\u0645 \u0625\u0636\u0627\u0641\u064a\u0629 {fee}",
+  "@checkoutPaymentCodFee": {
+    "description": "Surcharge line under cash on delivery. The amount is formatted as currency by the caller.",
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutPaymentCard": "\u0627\u0644\u0628\u0637\u0627\u0642\u0629 \u0627\u0644\u0627\u0626\u062a\u0645\u0627\u0646\u064a\u0629",
+  "@checkoutPaymentCard": {
+    "description": "Name of the card payment method, which is drawn but not selectable."
+  },
+  "checkoutComingSoon": "\u0642\u0631\u064a\u0628\u0627\u064b",
+  "@checkoutComingSoon": {
+    "description": "Shown under an option the design draws but the app cannot offer yet."
+  },
+  "checkoutPaymentFee": "\u0631\u0633\u0648\u0645 \u0627\u0644\u062f\u0641\u0639",
+  "@checkoutPaymentFee": {
+    "description": "Order-summary row for the payment method's surcharge."
+  },
+  "checkoutOrderTotal": "\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a",
+  "@checkoutOrderTotal": {
+    "description": "Order-summary row for the sum of every line above it."
+  },
+  "checkoutToReview": "\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0637\u0644\u0628",
+  "@checkoutToReview": {
+    "description": "Forward action of checkout step 3, from its own frame."
+  },
+  "reviewContactSection": "\u0645\u0639\u0644\u0648\u0645\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644",
+  "@reviewContactSection": {
+    "description": "Heading of the contact card on the review screen."
+  },
+  "reviewAddressSection": "\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u062a\u0648\u0635\u064a\u0644",
+  "@reviewAddressSection": {
+    "description": "Heading of the delivery-address card on the review screen."
+  },
+  "reviewShippingSection": "\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u0634\u062d\u0646",
+  "@reviewShippingSection": {
+    "description": "Heading of the shipping card on the review screen."
+  },
+  "reviewPaymentSection": "\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062f\u0641\u0639",
+  "@reviewPaymentSection": {
+    "description": "Heading of the payment card on the review screen. The frame draws no such card - it was added so the reviewed total matches what will actually be charged."
+  },
+  "reviewEdit": "\u062a\u0639\u062f\u064a\u0644",
+  "@reviewEdit": {
+    "description": "Link on a review card, returning to the step that collected it."
+  },
+  "reviewItems": "\u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a",
+  "@reviewItems": {
+    "description": "Heading over the ordered lines on the review screen."
+  },
+  "reviewQuantity": "\u0627\u0644\u0643\u0645\u064a\u0629: {count}",
+  "@reviewQuantity": {
+    "description": "Quantity of one line on the review screen, where it is read-only text rather than a stepper.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewPostalCode": "\u0627\u0644\u0631\u0645\u0632 \u0627\u0644\u0628\u0631\u064a\u062f\u064a:",
+  "@reviewPostalCode": {
+    "description": "Label before the postal code on the review screen's address card. Ends with a colon; the code follows it."
+  },
+  "reviewConfirm": "\u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0637\u0644\u0628",
+  "@reviewConfirm": {
+    "description": "The action that places the order. The last thing the shopper taps."
+  },
+  "reviewShippingEta": "\u062e\u0644\u0627\u0644 {days}",
+  "@reviewShippingEta": {
+    "description": "Delivery window on the review screen's shipping card, wrapping the method's own window.",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  }
+}

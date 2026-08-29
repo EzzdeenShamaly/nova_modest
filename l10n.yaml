@@ -1,0 +1,8 @@
+# Authored ARB is the source of truth. AppLocalizations is generated and never
+# hand-edited (11-flutter-l10n-guard §2).
+arb-dir: lib/l10n
+template-arb-file: app_ar.arb
+output-dir: lib/l10n
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

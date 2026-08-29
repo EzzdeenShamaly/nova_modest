@@ -77,6 +77,10 @@ out.push(`
   full file if any of it looks contradictory or stale.
 - **05-planning-rigor** - no plan/task board without an elicitation pass;
   always give options with tradeoffs.
+- **13-plan-approval-gate** - for ANY new screen or feature, present the plan and
+  WAIT for an explicit \"موافق\"/\"go ahead\" before writing a single file. Answers to
+  clarifying questions, a design link, and \"continue\" are NOT approval. No
+  exceptions for tasks that look simple.
 - **09-minimal-changes** - change only what the task requires; minimise the diff.
   Temporary \`// DEBUG-TEMP:\` instrumentation is allowed during
   \`/flutter-debug\` and must never reach a commit.
