@@ -8,5 +8,10 @@ import 'injection.config.dart';
 final GetIt sl = GetIt.instance;
 
 /// Called once from `main()` before `runApp`.
+///
+/// [environment] selects which repository implementations are bound:
+/// `Environment.dev` is Supabase; `Environment.test` keeps the fakes.
 @InjectableInit()
-Future<void> configureDependencies() async => sl.init();
+Future<void> configureDependencies({
+  String environment = Environment.dev,
+}) async => sl.init(environment: environment);

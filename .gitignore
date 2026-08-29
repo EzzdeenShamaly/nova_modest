@@ -55,6 +55,8 @@ CLAUDE.md.bak
 .env
 .env.*
 !.env.example
+config/dev.json
+config/prod.json
 *.jks
 *.keystore
 key.properties

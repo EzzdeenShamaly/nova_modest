@@ -31,8 +31,12 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
 
-  # Networking — REST only
+  # Networking — REST only (Dio remains for any leftover HTTP seams)
   dio: ^5.11.0
+
+  # Backend — isolated to lib/core/supabase and data-layer repositories
+  supabase_flutter: ^2.10.3
+  google_sign_in: ^6.3.0
 
   # Secure storage for auth tokens
   flutter_secure_storage: ^11.0.0

@@ -23,6 +23,8 @@ import 'package:nova_modest/core/storage/storage_module.dart' as _i297;
 import 'package:nova_modest/core/storage/token_storage.dart' as _i780;
 import 'package:nova_modest/features/address/data/repositories/fake_address_repository.dart'
     as _i577;
+import 'package:nova_modest/features/address/data/repositories/supabase_address_repository.dart'
+    as _i1101;
 import 'package:nova_modest/features/address/domain/repositories/address_repository.dart'
     as _i1039;
 import 'package:nova_modest/features/address/presentation/bloc/address_form_bloc.dart'
@@ -33,6 +35,8 @@ import 'package:nova_modest/features/auth/data/datasources/auth_remote_datasourc
     as _i125;
 import 'package:nova_modest/features/auth/data/repositories/fake_auth_repository.dart'
     as _i192;
+import 'package:nova_modest/features/auth/data/repositories/supabase_auth_repository.dart'
+    as _i1102;
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart'
     as _i643;
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart'
@@ -49,6 +53,8 @@ import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart'
     as _i776;
 import 'package:nova_modest/features/catalog/data/repositories/fake_catalog_repository.dart'
     as _i623;
+import 'package:nova_modest/features/catalog/data/repositories/supabase_catalog_repository.dart'
+    as _i1103;
 import 'package:nova_modest/features/catalog/data/repositories/search_history_repository_impl.dart'
     as _i448;
 import 'package:nova_modest/features/catalog/domain/repositories/catalog_repository.dart'
@@ -65,6 +71,8 @@ import 'package:nova_modest/features/catalog/presentation/bloc/search_bloc.dart'
     as _i1072;
 import 'package:nova_modest/features/checkout/data/repositories/fake_order_repository.dart'
     as _i753;
+import 'package:nova_modest/features/checkout/data/repositories/supabase_order_repository.dart'
+    as _i1104;
 import 'package:nova_modest/features/checkout/domain/repositories/order_repository.dart'
     as _i146;
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart'
@@ -108,12 +116,22 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1039.AddressRepository>(
       () => _i577.FakeAddressRepository(),
+      registerFor: {'test'},
+    );
+    gh.lazySingleton<_i1039.AddressRepository>(
+      () => const _i1101.SupabaseAddressRepository(),
+      registerFor: {'dev'},
     );
     gh.lazySingleton<_i780.TokenStorage>(
       () => _i780.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i643.AuthRepository>(
       () => _i192.FakeAuthRepository(gh<_i780.TokenStorage>()),
+      registerFor: {'test'},
+    );
+    gh.lazySingleton<_i643.AuthRepository>(
+      () => _i1102.SupabaseAuthRepository(),
+      registerFor: {'dev'},
     );
     gh.factory<_i35.AddressFormBloc>(
       () => _i35.AddressFormBloc(gh<_i1039.AddressRepository>()),
@@ -121,7 +139,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i512.AddressListBloc>(
       () => _i512.AddressListBloc(gh<_i1039.AddressRepository>()),
     );
-    gh.lazySingleton<_i146.OrderRepository>(() => _i753.FakeOrderRepository());
+    gh.lazySingleton<_i146.OrderRepository>(
+      () => _i753.FakeOrderRepository(),
+      registerFor: {'test'},
+    );
+    gh.lazySingleton<_i146.OrderRepository>(
+      () => const _i1104.SupabaseOrderRepository(),
+      registerFor: {'dev'},
+    );
     gh.lazySingleton<_i666.SearchHistoryRepository>(
       () => _i448.SearchHistoryRepositoryImpl(gh<_i460.SharedPreferences>()),
     );
@@ -138,6 +163,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i479.CatalogRepository>(
       () => const _i623.FakeCatalogRepository(),
+      registerFor: {'test'},
+    );
+    gh.lazySingleton<_i479.CatalogRepository>(
+      () => const _i1103.SupabaseCatalogRepository(),
+      registerFor: {'dev'},
     );
     gh.lazySingleton<_i866.CartRepository>(
       () => _i290.CartRepositoryImpl(

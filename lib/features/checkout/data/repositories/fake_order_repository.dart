@@ -10,15 +10,14 @@ import 'package:nova_modest/features/checkout/domain/repositories/order_reposito
 
 /// Stands in for the orders backend.
 ///
-/// **This is the registered [OrderRepository]**, exactly as
-/// `FakeAddressRepository` and `FakeCatalogRepository` are for theirs. Swapping
-/// in the real one is a single registration line in `core/di/`.
+/// Registered in the `test` environment. The running app uses
+/// `SupabaseOrderRepository`.
 ///
 /// Holds nothing: a placed order is handed back and forgotten. There is no
 /// orders screen to read it from yet, and persisting a shopper's order history
 /// to plaintext preferences is the PII call `03-flutter-security-guard` already
 /// settled for addresses and profile edits.
-@LazySingleton(as: OrderRepository)
+@LazySingleton(as: OrderRepository, env: [Environment.test])
 class FakeOrderRepository implements OrderRepository {
   FakeOrderRepository();
 
