@@ -1,7 +1,9 @@
 # Tech Context
 
-**Last Updated:** 2026-08-18
-Locked by: `/platform-init`
+**Last Updated:** 2026-08-30
+Locked by: `/platform-init` — data source **re-locked 2026-08-30** (user
+approval) when Supabase arrived. Everything else is the original 2026-08-18
+lock, unchanged.
 
 > This file is **Tier 1**. `/platform-init` wrote the locked stack once;
 > `/context-sync` refreshes the observed reality around it on every sync and
@@ -16,9 +18,15 @@ Locked by: `/platform-init`
   with `fold` in the Bloc handler** — one sealed hierarchy in
   `lib/core/error/failure.dart`
 - DI: **`get_it` + `injectable`**
-- Data sources: **REST only** — no Firebase, no Supabase
-  - REST → `dio` behind `lib/core/network/api_client.dart`
-- Failure mapping: `06-flutter-error-guard` §3 (Dio). §7 (BaaS) does not apply.
+- Data sources: **Supabase + REST** — not exclusive, as `CLAUDE.md` states for
+  this axis
+  - Supabase → `supabase_flutter` behind `lib/core/supabase/` and the
+    `supabase_*_repository.dart` files. **The live backend.**
+  - REST → `dio` behind `lib/core/network/api_client.dart`. Retained and still
+    registered; nothing routes through it today.
+- Failure mapping: `06-flutter-error-guard` **§7 (Supabase)** via
+  `core/supabase/supabase_error_mapper.dart`. §3 (Dio) still applies to the
+  `dio` seam.
 - Models: `freezed` + `json_serializable`, one class per entity
 - Routing: `go_router`
 - Testing: **`bloc_test` + `mocktail`**
@@ -32,12 +40,13 @@ Locked by: `/platform-init`
 | `02-flutter-state-guard.md` | installed — **bloc** variant |
 | `07-flutter-direction-guard.md` | installed — always on, every project |
 | `11-flutter-l10n-guard.md` | installed — multi-locale |
-| `08-flutter-baas-security-guard.md` | **not installed** — no BaaS data source |
+| `08-flutter-baas-security-guard.md` | **installed 2026-08-30** — Supabase |
 
-The gap at 08 is intentional, not a numbering error: it is the conditional
-BaaS rule, and this project has no BaaS source. Adding Firebase or Supabase
-later is normal evolution — re-run `/platform-init` to record it and install
-`08`.
+08 was reserved and empty from 2026-08-18 to 2026-08-29, exactly as the
+numbering convention says such a slot should be: held for the conditional BaaS
+rule rather than claimed by an unrelated one. Adding Supabase is the evolution
+that file was waiting for, and `12-flutter-design-system-guard.md` sitting
+outside the domain block is what kept the slot free for it.
 
 ## Observed reality (refreshed by `/context-sync`)
 
@@ -57,6 +66,16 @@ are now implemented in code.
 - Secure storage: `flutter_secure_storage` behind `core/storage/token_storage.dart`,
   auth tokens only
 - HTTP client: `dio`, confined to `lib/core/network/`; leaks above it: **0**
+- Backend: **Supabase**, local stack under `supabase/` — 13 tables, RLS enabled
+  on every one, `place_order` as a `security definer` RPC. `supabase_flutter`
+  imports are confined to `lib/core/supabase/` and the four
+  `supabase_*_repository.dart` files; leaks above them: **0**
+- Repository bindings are **environment-scoped**: `Environment.dev` binds the
+  Supabase implementations, `Environment.test` binds the fakes. The whole suite
+  runs on `test` and never touches a network.
+- Live today: `AuthRepository`, `CatalogRepository`, `AddressRepository`,
+  `OrderRepository`. Still local: the cart, onboarding, locale, search history
+  and notification preferences — all `SharedPreferences`.
 - Localization: `lib/l10n/`, template `app_ar.arb` + `app_en.arb`, generated
   `AppLocalizations` committed alongside
 - Generated code (`*.g.dart`, `*.freezed.dart`, `*.config.dart`) is **committed**

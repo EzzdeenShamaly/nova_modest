@@ -1483,6 +1483,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'عنوان التوصيل'**
   String get orderDeliveryAddress;
+
+  /// Order status: called off. Not drawn in either frame — it exists because public.order_status has it, and a status with no counterpart would fail to parse.
+  ///
+  /// In ar, this message translates to:
+  /// **'ملغي'**
+  String get orderStatusCancelled;
 }
 
 class _AppLocalizationsDelegate

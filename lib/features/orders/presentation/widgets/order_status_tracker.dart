@@ -66,9 +66,13 @@ class OrderStatusTracker extends StatelessWidget {
               child: ExcludeSemantics(
                 child: Column(
                   children: [
-                    for (final stage in OrderStatus.values) ...[
+                    // `journey`, not `values`: the enum gained `cancelled`
+                    // when the Supabase schema arrived, and that is an outcome
+                    // rather than a sixth stage — a rail ending in it would
+                    // suggest every order does.
+                    for (final stage in OrderStatus.journey) ...[
                       _Stage(stage: stage, current: status),
-                      if (stage != OrderStatus.values.last)
+                      if (stage != OrderStatus.journey.last)
                         SizedBox(height: AppSpacing.xl),
                     ],
                   ],
@@ -91,6 +95,7 @@ class OrderStatusTracker extends StatelessWidget {
         OrderStatus.processing => l10n.orderStatusProcessing,
         OrderStatus.shipped => l10n.orderStatusShipped,
         OrderStatus.delivered => l10n.orderStatusDeliveredLong,
+        OrderStatus.cancelled => l10n.orderStatusCancelled,
       };
 }
 

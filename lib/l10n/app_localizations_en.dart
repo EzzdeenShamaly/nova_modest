@@ -773,4 +773,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderDeliveryAddress => 'Delivery address';
+
+  @override
+  String get orderStatusCancelled => 'Cancelled';
 }

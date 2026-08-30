@@ -7,16 +7,15 @@ import 'package:nova_modest/features/auth/domain/repositories/auth_repository.da
 
 /// Stands in for the backend until it exists.
 ///
-/// **This is the registered [AuthRepository].** `AuthRepositoryImpl` is written
-/// against the same interface but deliberately left unregistered; switching to it
-/// is one line in `core/di/` and changes nothing above this seam.
+/// Registered in the `test` environment. The running app uses
+/// `SupabaseAuthRepository`.
 ///
 /// It succeeds every time, after a short delay so the UI's loading states are
 /// actually exercised rather than skipped. It writes through the real
 /// [TokenStorage] instead of holding a boolean in memory, so a signed-in session
 /// survives a restart and sign-out genuinely clears something — the same code
 /// path the real implementation will use.
-@LazySingleton(as: AuthRepository)
+@LazySingleton(as: AuthRepository, env: [Environment.test])
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository(this._tokenStorage);
 

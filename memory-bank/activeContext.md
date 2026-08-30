@@ -1,6 +1,6 @@
 # Active Context
 
-**Last Updated:** 2026-08-30 (SettingsCard, and the language chooser settled)
+**Last Updated:** 2026-08-30 (Supabase merged; the project has a real backend)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
@@ -1482,6 +1482,86 @@ added for it — and the accepted guest-email gap moved there too, since it said
 reader goes to find outstanding work.
 
 Verified: `flutter analyze` clean, **701 tests passing**.
+
+## Supabase merged (2026-08-30)
+
+A teammate (omar.ismail) pushed `8ffd2ef` **straight to `master`** — no branch,
+which is why a first look for one found nothing. It integrates Supabase as the
+live backend: `lib/core/supabase/`, four `supabase_*_repository.dart` files, and
+a `supabase/` stack of 13 tables with RLS on every one.
+
+**His integration is compatible with the repository pattern as written.** It
+touches no bloc and no screen. Rather than swapping registrations it scopes
+them, which is cleaner than the swap this project had assumed:
+
+```dart
+@LazySingleton(as: OrderRepository, env: [Environment.test])   // the fake
+@LazySingleton(as: OrderRepository, env: [Environment.dev])    // Supabase
+```
+
+Live now: auth, catalogue, addresses, orders. Still local `SharedPreferences`:
+the cart, onboarding, locale, search history, notification preferences.
+
+### The one real conflict, and why it was cheap
+`SupabaseOrderRepository` was written against the `Order` that lived in
+`checkout/` — three fields, one method — while this session had grown it to
+eight fields with `OrderStatus` and moved the whole feature to
+`features/orders/`. His file was ported: **every line of Supabase logic kept
+verbatim** (the `place_order` RPC name, the payload shape, the method encodings,
+`mapSupabaseError`, the pre-flight guards), with the mapping rewritten and
+`orders()` / `orderByNumber()` added as plain PostgREST selects.
+
+**His schema was ahead of his Dart**, which is what made this cheap: `orders`
+already stores the status, the contact and the flattened address, and
+`order_items` stores `product_name` and `unit_price`. Only the RPC's return
+shape was behind. So reading an order back needed no new SQL, and `place`
+needed one key.
+
+### The status enums each lacked what the other had
+| SQL | Dart |
+|---|---|
+| pending · confirmed · shipped · delivered · **cancelled** | pending · confirmed · **processing** · shipped · delivered |
+
+`processing` is drawn in two frames; `cancelled` exists server-side and would
+have failed to parse. Both sides gained the missing value. `cancelled` is **not**
+on `OrderStatus.journey` — it is an outcome, not a stage, and a rail ending in it
+would suggest every order does. The tracker walks `journey`, not `values`.
+
+### Two migrations, not an edit
+A migration that has run is history. `20260830090000` adds `processing` to the
+enum; `20260830090100` replaces `place_order` to return the status it wrote.
+They are separate files because `alter type … add value` cannot be used in the
+same transaction that uses the new value. The second is his function with
+exactly three lines changed — verified by diffing it against his original.
+
+### `8ffd2ef` did not compile
+Two pre-existing name collisions, in his files, unchanged by the merge:
+- `supabase_auth_repository.dart` — gotrue exports `User` through
+  `supabase_flutter`, shadowing this app's entity.
+- `injection_test.dart` — injectable exports a `test` constant, shadowing
+  `flutter_test`'s `test()`.
+
+Both fixed with this codebase's own remedy, the one already used for
+`hide Order` and `hide TextDirection`.
+
+### The lock was re-opened (user approval)
+`techContext.md` said **REST only**, and `08-flutter-baas-security-guard.md` was
+not installed. The data source is now **Supabase + REST** — not exclusive, as
+`CLAUDE.md` says for that axis — and **08 is installed**, written against this
+project's actual policies rather than generically. The slot had been held empty
+since 2026-08-18 for exactly this.
+
+### What the merge did not resolve
+- `supabase_bootstrap.dart` uses `anonKey`, deprecated in favour of
+  `publishableKey`. One `info` from the analyzer, in his file, left alone: it is
+  a working API and the rename is his call.
+- `google_sign_in` is used, by `SupabaseAuthRepository.signInWithGoogle()`. An
+  earlier note here said it was unused; that was written before reading that
+  file.
+- Nothing has been run against a live Supabase. The suite proves the mapping and
+  the wiring, not the queries.
+
+Verified: `flutter analyze` — 1 info, 0 errors. **710 tests passing.**
 
 ## Current focus
 

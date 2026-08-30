@@ -293,5 +293,6 @@
       }
     }
   },
-  "orderDeliveryAddress": "Delivery address"
+  "orderDeliveryAddress": "Delivery address",
+  "orderStatusCancelled": "Cancelled"
 }

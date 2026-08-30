@@ -10,9 +10,8 @@ import 'package:nova_modest/features/catalog/domain/repositories/catalog_reposit
 
 /// Stands in for the catalogue backend.
 ///
-/// **This is the registered [CatalogRepository]**, exactly as
-/// `FakeAuthRepository` is the registered `AuthRepository`. Swapping in the
-/// real one is a single registration line in `core/di/`.
+/// Registered in the `test` environment. The running app uses
+/// `SupabaseCatalogRepository`.
 ///
 /// The rows below carry the design's own copy and prices, so every screen is
 /// built against the content it was designed for rather than lorem ipsum.
@@ -22,7 +21,7 @@ import 'package:nova_modest/features/catalog/domain/repositories/catalog_reposit
 ///
 /// `imageUrl` is null throughout - there is no artwork yet, and the card draws a
 /// palette placeholder instead. Supplying URLs later changes nothing else.
-@LazySingleton(as: CatalogRepository)
+@LazySingleton(as: CatalogRepository, env: [Environment.test])
 class FakeCatalogRepository implements CatalogRepository {
   const FakeCatalogRepository();
 

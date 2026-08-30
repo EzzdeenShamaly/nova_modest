@@ -31,6 +31,9 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Gradle writes reports under the android module's own build dir, which the
+# root-anchored rule above does not cover.
+android/build/
 /coverage/
 
 # Symbolication related
@@ -55,6 +58,8 @@ CLAUDE.md.bak
 .env
 .env.*
 !.env.example
+config/dev.json
+config/prod.json
 *.jks
 *.keystore
 key.properties

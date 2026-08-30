@@ -245,6 +245,11 @@ class _StatusBadge extends StatelessWidget {
         (AppColors.secondary, AppColors.secondary, AppColors.mutedStrong),
       OrderStatus.shipped => (null, AppColors.accent, AppColors.accent),
       OrderStatus.delivered => (null, AppColors.subtle, AppColors.muted),
+      // The one status the frame never drew, because the frame predates the
+      // schema that has it. `error` is the terracotta already carried over from
+      // the admin's own cancelled state, so this continues that decision rather
+      // than inventing a colour.
+      OrderStatus.cancelled => (null, AppColors.error, AppColors.error),
     };
 
     return Container(
@@ -277,6 +282,7 @@ String statusLabel(OrderStatus status, AppLocalizations l10n) =>
       OrderStatus.processing => l10n.orderStatusProcessing,
       OrderStatus.shipped => l10n.orderStatusShipped,
       OrderStatus.delivered => l10n.orderStatusDelivered,
+      OrderStatus.cancelled => l10n.orderStatusCancelled,
     };
 
 /// No orders yet.

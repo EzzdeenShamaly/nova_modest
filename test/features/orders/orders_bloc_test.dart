@@ -98,14 +98,25 @@ void main() {
     });
 
     test('the five stages are declared in the order they happen', () {
-      // `1:1480` draws them top to bottom in exactly this order.
-      expect(OrderStatus.values, [
+      // `1:1480` draws them top to bottom in exactly this order. Asserted on
+      // `journey` rather than `values`, which gained `cancelled` when the
+      // Supabase schema arrived — an outcome, not a sixth stage.
+      expect(OrderStatus.journey, [
         OrderStatus.pending,
         OrderStatus.confirmed,
         OrderStatus.processing,
         OrderStatus.shipped,
         OrderStatus.delivered,
       ]);
+    });
+
+    test('cancelled is a status but not a stage', () {
+      // It exists because `public.order_status` has it and an unmapped value
+      // would fail to parse on a screen the shopper is looking at. It is not
+      // on the rail, because an order that was called off left the path rather
+      // than reaching its end.
+      expect(OrderStatus.values, contains(OrderStatus.cancelled));
+      expect(OrderStatus.journey, isNot(contains(OrderStatus.cancelled)));
     });
   });
 }

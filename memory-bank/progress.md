@@ -217,6 +217,15 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   passed without a single edit**, which is the proof the refactor changed no
   behaviour. **701 tests passing.**
 
+- **Supabase merged** (omar.ismail's `8ffd2ef`, ported 2026-08-30) — the live
+  backend for auth, catalogue, addresses and orders. Bindings are
+  environment-scoped, so the suite still runs entirely on the fakes.
+  `SupabaseOrderRepository` ported to `features/orders/` against the grown
+  `Order`, with every line of his Supabase logic kept. Two migrations add
+  `processing` to `order_status` and make `place_order` report the status it
+  wrote. **`/platform-init` re-locked: Supabase + REST, and
+  `08-flutter-baas-security-guard.md` installed.** **710 tests passing.**
+
 ## In Progress
 
 - _(none)_
@@ -229,7 +238,8 @@ Tracks what's Done, In Progress, and Blocked, per feature.
 - **Size guide** — the link on a product page is inert; the chart screen is
   unbuilt.
 - **Search relevance ordering** — `ProductSort.relevance` is whatever the
-  catalogue returned. A real backend would rank; the fake matches in list order.
+  catalogue returned. Now that Supabase is the catalogue, ranking is a query
+  change rather than a missing backend.
 - **Share** — the product page's share action is disabled: a platform share
   sheet needs a package that is not in `pubspec.yaml`.
 - **Push notifications** — the preferences screen records choices that **nothing
@@ -263,6 +273,19 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   account section, which is enough — and asking before the shopper has seen
   anything is friction in front of the app rather than a service to them. This
   is settled, not deferred: do not re-raise it as outstanding work.
+
+## Open after the Supabase merge
+
+- **Nothing has run against a live Supabase.** The suite covers the mapping and
+  the wiring; the queries themselves are unproven. `integration_test/` still
+  does not exist, which is where a test with a real local stack would go.
+- **The cart is still device-local** while everything around it is server-backed
+  — the recorded "server-side cart" gap, now more visible.
+- **`supabase_bootstrap.dart` uses the deprecated `anonKey`.** One analyzer
+  info; the rename to `publishableKey` is omar's call, not a merge fix.
+- **`config/dev.json` is required to run the app at all.** `initializeSupabase()`
+  throws without it, deliberately — but it means a fresh clone cannot launch
+  until someone copies the example.
 
 ## Blocked
 

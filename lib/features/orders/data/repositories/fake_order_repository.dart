@@ -16,9 +16,10 @@ import 'package:nova_modest/features/orders/domain/repositories/order_repository
 
 /// Stands in for the orders backend.
 ///
-/// **This is the registered [OrderRepository]**, exactly as
-/// `FakeAddressRepository` and `FakeCatalogRepository` are for theirs. Swapping
-/// in the real one is a single registration line in `core/di/`.
+/// Registered in the `test` environment. The running app uses
+/// `SupabaseOrderRepository`, bound to `dev` — the two coexist rather than one
+/// replacing the other, which is what keeps the whole suite running against
+/// predictable data with no server.
 ///
 /// **It remembers now, and it did not.** The first version handed an order back
 /// and forgot it, on the stated grounds that no screen read orders. That screen
@@ -29,7 +30,7 @@ import 'package:nova_modest/features/orders/domain/repositories/order_repository
 /// `03-flutter-security-guard` reserves the keystore for, and the same call
 /// already made for addresses and profile edits. History survives navigation,
 /// not a restart.
-@LazySingleton(as: OrderRepository)
+@LazySingleton(as: OrderRepository, env: [Environment.test])
 class FakeOrderRepository implements OrderRepository {
   FakeOrderRepository();
 

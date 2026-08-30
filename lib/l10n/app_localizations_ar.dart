@@ -776,4 +776,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orderDeliveryAddress => 'عنوان التوصيل';
+
+  @override
+  String get orderStatusCancelled => 'ملغي';
 }

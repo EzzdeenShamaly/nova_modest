@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+// show Environment: injectable also exports a `test` constant, which shadows
+// flutter_test's `test()` function in every file that needs both.
+import 'package:injectable/injectable.dart' show Environment;
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/network/api_client.dart';
 import 'package:nova_modest/core/network/interceptors/auth_interceptor.dart';
@@ -58,7 +61,7 @@ void main() {
     // handler is stubbed so a future eager read cannot turn this into a flake.
     FlutterSecureStorage.setMockInitialValues({});
 
-    await configureDependencies();
+    await configureDependencies(environment: Environment.test);
   });
 
   // The container is a process-wide singleton, so a leaked registration would

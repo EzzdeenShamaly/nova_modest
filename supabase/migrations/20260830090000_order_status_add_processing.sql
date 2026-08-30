@@ -1,0 +1,14 @@
+-- `processing` — the stage between "confirmed" and "shipped".
+--
+-- The app draws it in two places: the «قيد التحضير» badge on the order list
+-- (Figma 1:1356) and the middle stage of the tracker on the details screen
+-- (1:1480). `public.order_status` was created without it, so an order could
+-- never be in the stage both frames draw.
+--
+-- Added *after* 'confirmed' so the enum's own ordering still matches the order
+-- the stages happen in: the app derives progress from that ordering
+-- (OrderStatus.index), not from a separate position column.
+--
+-- Alone in its own migration because `alter type ... add value` cannot be used
+-- in the same transaction that uses the new value, and the next migration does.
+alter type public.order_status add value if not exists 'processing' after 'confirmed';

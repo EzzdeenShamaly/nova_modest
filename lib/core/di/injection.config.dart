@@ -23,6 +23,8 @@ import 'package:nova_modest/core/storage/storage_module.dart' as _i297;
 import 'package:nova_modest/core/storage/token_storage.dart' as _i780;
 import 'package:nova_modest/features/address/data/repositories/fake_address_repository.dart'
     as _i577;
+import 'package:nova_modest/features/address/data/repositories/supabase_address_repository.dart'
+    as _i1008;
 import 'package:nova_modest/features/address/domain/repositories/address_repository.dart'
     as _i1039;
 import 'package:nova_modest/features/address/presentation/bloc/address_form_bloc.dart'
@@ -33,6 +35,8 @@ import 'package:nova_modest/features/auth/data/datasources/auth_remote_datasourc
     as _i125;
 import 'package:nova_modest/features/auth/data/repositories/fake_auth_repository.dart'
     as _i192;
+import 'package:nova_modest/features/auth/data/repositories/supabase_auth_repository.dart'
+    as _i346;
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart'
     as _i643;
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart'
@@ -51,6 +55,8 @@ import 'package:nova_modest/features/catalog/data/repositories/fake_catalog_repo
     as _i623;
 import 'package:nova_modest/features/catalog/data/repositories/search_history_repository_impl.dart'
     as _i448;
+import 'package:nova_modest/features/catalog/data/repositories/supabase_catalog_repository.dart'
+    as _i396;
 import 'package:nova_modest/features/catalog/domain/repositories/catalog_repository.dart'
     as _i479;
 import 'package:nova_modest/features/catalog/domain/repositories/search_history_repository.dart'
@@ -73,6 +79,8 @@ import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_blo
     as _i267;
 import 'package:nova_modest/features/orders/data/repositories/fake_order_repository.dart'
     as _i335;
+import 'package:nova_modest/features/orders/data/repositories/supabase_order_repository.dart'
+    as _i632;
 import 'package:nova_modest/features/orders/domain/repositories/order_repository.dart'
     as _i827;
 import 'package:nova_modest/features/orders/presentation/bloc/order_detail_bloc.dart'
@@ -93,6 +101,9 @@ import 'package:nova_modest/features/settings/presentation/bloc/notification_pre
     as _i913;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
+const String _test = 'test';
+const String _dev = 'dev';
+
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
   Future<_i174.GetIt> init({
@@ -110,20 +121,24 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => storageModule.secureStorage,
     );
-    gh.lazySingleton<_i1039.AddressRepository>(
-      () => _i577.FakeAddressRepository(),
+    gh.lazySingleton<_i479.CatalogRepository>(
+      () => const _i623.FakeCatalogRepository(),
+      registerFor: {_test},
+    );
+    gh.lazySingleton<_i643.AuthRepository>(
+      () => _i346.SupabaseAuthRepository(),
+      registerFor: {_dev},
+    );
+    gh.lazySingleton<_i827.OrderRepository>(
+      () => const _i632.SupabaseOrderRepository(),
+      registerFor: {_dev},
     );
     gh.lazySingleton<_i780.TokenStorage>(
       () => _i780.SecureTokenStorage(gh<_i558.FlutterSecureStorage>()),
     );
-    gh.lazySingleton<_i643.AuthRepository>(
-      () => _i192.FakeAuthRepository(gh<_i780.TokenStorage>()),
-    );
-    gh.factory<_i35.AddressFormBloc>(
-      () => _i35.AddressFormBloc(gh<_i1039.AddressRepository>()),
-    );
-    gh.factory<_i512.AddressListBloc>(
-      () => _i512.AddressListBloc(gh<_i1039.AddressRepository>()),
+    gh.lazySingleton<_i827.OrderRepository>(
+      () => _i335.FakeOrderRepository(),
+      registerFor: {_test},
     );
     gh.lazySingleton<_i666.SearchHistoryRepository>(
       () => _i448.SearchHistoryRepositoryImpl(gh<_i460.SharedPreferences>()),
@@ -136,12 +151,24 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
-    gh.lazySingleton<_i827.OrderRepository>(() => _i335.FakeOrderRepository());
+    gh.lazySingleton<_i643.AuthRepository>(
+      () => _i192.FakeAuthRepository(gh<_i780.TokenStorage>()),
+      registerFor: {_test},
+    );
+    gh.lazySingleton<_i1039.AddressRepository>(
+      () => _i577.FakeAddressRepository(),
+      registerFor: {_test},
+    );
     gh.lazySingleton<_i1022.LocaleRepository>(
       () => _i146.LocaleRepositoryImpl(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i1039.AddressRepository>(
+      () => const _i1008.SupabaseAddressRepository(),
+      registerFor: {_dev},
+    );
     gh.lazySingleton<_i479.CatalogRepository>(
-      () => const _i623.FakeCatalogRepository(),
+      () => const _i396.SupabaseCatalogRepository(),
+      registerFor: {_dev},
     );
     gh.factory<_i83.OrderDetailBloc>(
       () => _i83.OrderDetailBloc(gh<_i827.OrderRepository>()),
@@ -198,6 +225,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i267.OnboardingBloc>(
       () => _i267.OnboardingBloc(gh<_i835.OnboardingRepository>()),
+    );
+    gh.factory<_i35.AddressFormBloc>(
+      () => _i35.AddressFormBloc(gh<_i1039.AddressRepository>()),
+    );
+    gh.factory<_i512.AddressListBloc>(
+      () => _i512.AddressListBloc(gh<_i1039.AddressRepository>()),
     );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(gh<_i453.AuthInterceptor>()),

@@ -6,9 +6,8 @@ import 'package:nova_modest/features/address/domain/repositories/address_reposit
 
 /// Stands in for the addresses backend.
 ///
-/// **This is the registered [AddressRepository]**, exactly as
-/// `FakeCatalogRepository` and `FakeAuthRepository` are for theirs. Swapping in
-/// the real one is a single registration line in `core/di/`.
+/// Registered in the `test` environment. The running app uses
+/// `SupabaseAddressRepository`.
 ///
 /// Held **in memory**, not in `SharedPreferences`: an address carries a
 /// recipient's name, their phone number and where they live, which is the PII
@@ -20,7 +19,7 @@ import 'package:nova_modest/features/address/domain/repositories/address_reposit
 ///
 /// The two seeded rows are the design's own (Figma `1:1767`), so the screens are
 /// built against the content they were designed for.
-@LazySingleton(as: AddressRepository)
+@LazySingleton(as: AddressRepository, env: [Environment.test])
 class FakeAddressRepository implements AddressRepository {
   FakeAddressRepository();
 

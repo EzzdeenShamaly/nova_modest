@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:injectable/injectable.dart';
 import 'package:nova_modest/app.dart';
 import 'package:nova_modest/core/di/injection.dart';
+import 'package:nova_modest/core/supabase/supabase_bootstrap.dart';
 
 void main() {
   // runZonedGuarded catches async errors that escape the framework's own
@@ -18,7 +20,8 @@ void main() {
         FlutterError.presentError(details);
       };
 
-      await configureDependencies();
+      await initializeSupabase();
+      await configureDependencies(environment: Environment.dev);
 
       // ScreenUtilInit must sit above everything that reads AppSpacing /
       // AppRadius / AppFontSize: those scales resolve `.h` / `.r` / `.sp` at
