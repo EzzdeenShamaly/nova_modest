@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-08-29
+**Last Updated:** 2026-08-30
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -186,28 +186,46 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   — without them it would promise a total 15 short of the charge.
   **630 tests passing.**
 
+- **The confirmation screen** (`1:2137`) — `SuccessStep`, terminal: the host
+  drops its app bar, indicator and sticky bar for this step, and back leaves for
+  the shop front. **`CartRepository.clear()` added** — there was none, so the
+  cart survived a purchase intact — dispatched as `CartCleared` to `CartBloc` on
+  the transition into success. "تتبع الطلب" is hidden from a guest, who would
+  otherwise be sent to sign-in moments after paying. **Checkout is complete end
+  to end**, and a router test walks all five steps through the real bloc and
+  repository. **642 tests passing.**
+
+- **Order history — the list** (`1:1356`) — `features/orders/` is its own
+  feature now, and `Order`, `OrderTotals` and the repository moved into it so
+  the feature that reads orders does not depend on the one that writes them.
+  `OrderStatus` reconciles the two frames' three badges and five tracker stages.
+  **`FakeOrderRepository` remembers now** — in memory, like addresses — and
+  seeds the three orders the frame draws. `OrdersBloc` + `OrdersScreen` replace
+  **the last `PlaceholderTab` in the app**. **671 tests passing.**
+
+- **Order details** (`1:1480`) — `OrderDetailBloc` fetching by number,
+  `/orders/:number` as a nested `GoRoute`, and the list card tappable at last.
+  `OrderStatusTracker` derives its five stages from `OrderStatus.index`.
+  `OrderItemLine` and `OrderPriceBreakdown` moved out of `review_step.dart` now
+  that two screens draw them. **The orders feature is complete.**
+  **694 tests passing.**
+
+- **`SettingsCard`** — `core/widgets/`, replacing four hand-rolled copies:
+  `_MenuCard` (account), `_Card` (help), `_Card` (notifications) — byte-for-byte
+  identical — and `_OptionCard` (language), which differed only in its fill.
+  Two variants, `outlined` and `filled`. **The four screens' 87 existing tests
+  passed without a single edit**, which is the proof the refactor changed no
+  behaviour. **701 tests passing.**
+
 ## In Progress
 
-- **The confirmation screen** (`1:2137`) — reached now: confirming lands on
-  `CheckoutStep.success`, which still renders a named `PlaceholderTab`. It shows
-  «رقم الطلب: ORD-260818-0001» and two actions, and `CheckoutDraft.order`
-  already holds the number it needs.
+- _(none)_
 
 ## Not Started
 
 - **Artwork** — onboarding, hero banner and product cards all draw a palette
   stand-in. Blocked on real photography; the Figma sources are 286x512, below 1x
   for their slots.
-- **Orders** — the last account destination still a `PlaceholderTab`, and the
-  only remaining user of that widget. Two Figma frames exist: `1:1356` (طلباتي)
-  and `1:1480` (تفاصيل الطلب).
-  Building one replaces a single entry in `_accountPlaceholders` with a
-  `GoRoute`, as personal information, addresses and language have.
-- **First-launch language chooser** (`1:2304`) — a full-screen "اختر لغتك" with
-  the brandmark and large option cards, belonging to the onboarding flow rather
-  than the account. Unbuilt; it would sit on the same `LocaleBloc` with no new
-  state. Whether the app should ask before the onboarding at all is its own
-  decision.
 - **Size guide** — the link on a product page is inert; the chart screen is
   unbuilt.
 - **Search relevance ordering** — `ProductSort.relevance` is whatever the
@@ -227,20 +245,24 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   demonstrably does. Shipping windows, returns, payment methods and order
   tracking need copy from the client before they can be added, and the demo
   contact details need replacing with a real inbox and line.
-- **A shared settings card** — `_MenuCard` (account), `_OptionCard` (language),
-  `_Card` (help) and `_Card` (notifications) are **four** near-identical cards of
-  rows. Promoting one costs edits to four screens and belongs in its own task.
+- **Token refresh** — `/flutter-network-gen`; see gap 1 in `activeContext.md`.
+- **Crash reporting** — release blocker per `/production-readiness-review`.
+
+## Decisions taken, not tasks
+
 - **A guest order has no email — accepted, not outstanding** (user,
   2026-08-24). Checkout step 1 collects a name and a phone only, as the frame
   draws it, and a guest has no account to borrow one from. **The phone is
   enough to track an order by**, and adding an email field or SMS confirmation
   is a real client decision to make when there is a real client to make it. Do
   not "fix" this by adding a third field.
-- **Placing an order** — no `OrderRepository` and no order number. The success
-  frame (`1:2137`) shows `ORD-260818-0001`; nothing generates it yet.
-- **Token refresh** — `/flutter-network-gen`; see gap 1 in `activeContext.md`.
-- **Crash reporting** — release blocker per `/production-readiness-review`.
-- **`.claude/cache/repo-map.json`** — run `/repo-discovery`.
+
+- **No first-launch language chooser** (user, 2026-08-30). `1:2304` draws a
+  full-screen "اختر لغتك" with the brandmark and large option cards. **It will
+  not be built.** Arabic is the default and the language is switchable from the
+  account section, which is enough — and asking before the shopper has seen
+  anything is friction in front of the app rather than a service to them. This
+  is settled, not deferred: do not re-raise it as outstanding work.
 
 ## Blocked
 

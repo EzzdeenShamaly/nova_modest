@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/settings_card.dart';
 import 'package:nova_modest/core/widgets/failure_view.dart';
 import 'package:nova_modest/features/settings/domain/entities/notification_preferences.dart';
 import 'package:nova_modest/features/settings/presentation/bloc/notification_preferences_bloc.dart';
@@ -75,7 +76,7 @@ class _Body extends StatelessWidget {
     return ListView(
       padding: EdgeInsetsDirectional.all(AppSpacing.l),
       children: [
-        _Card(
+        SettingsCard(
           children: [
             _PreferenceRow(
               title: l10n.notificationsOrders,
@@ -110,32 +111,6 @@ class _Body extends StatelessWidget {
 /// chooser's and help's. Still local, still recorded in `progress.md` as its own
 /// task: promoting a shared card now means editing three working screens in the
 /// middle of an unrelated change (`09-minimal-changes.md`).
-class _Card extends StatelessWidget {
-  const _Card({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.background,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: AppColors.subtle),
-        borderRadius: BorderRadius.circular(AppRadius.m),
-      ),
-      child: Column(
-        children: [
-          for (final child in children) ...[
-            child,
-            if (child != children.last)
-              Divider(height: 0, color: AppColors.subtle),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 /// One preference: a title, a line saying what it actually covers, and a switch.
 class _PreferenceRow extends StatelessWidget {

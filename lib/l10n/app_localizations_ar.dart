@@ -682,4 +682,98 @@ class AppLocalizationsAr extends AppLocalizations {
   String reviewShippingEta(String days) {
     return 'خلال $days';
   }
+
+  @override
+  String get successTitle => 'تم تأكيد طلبك بنجاح!';
+
+  @override
+  String get successOrderNumber => 'رقم الطلب:';
+
+  @override
+  String get successBody => 'سنتواصل معك قريبًا لتأكيد التوصيل.';
+
+  @override
+  String get successTrackOrder => 'تتبع الطلب';
+
+  @override
+  String get successKeepShopping => 'متابعة التسوق';
+
+  @override
+  String get ordersTitle => 'طلباتي';
+
+  @override
+  String ordersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count طلب',
+      many: '$count طلبًا',
+      few: '$count طلبات',
+      two: 'طلبان',
+      one: 'طلب واحد',
+      zero: 'لا طلبات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ordersEmpty => 'لا توجد طلبات بعد';
+
+  @override
+  String get ordersEmptyBody => 'كل طلب تنهينه سيظهر هنا لتتابعيه';
+
+  @override
+  String get ordersEmptyAction => 'ابدئي التسوق';
+
+  @override
+  String ordersMoreItems(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get orderStatusPending => 'قيد الانتظار';
+
+  @override
+  String get orderStatusConfirmed => 'مؤكد';
+
+  @override
+  String get orderStatusProcessing => 'قيد التحضير';
+
+  @override
+  String get orderStatusShipped => 'تم الشحن';
+
+  @override
+  String get orderStatusDelivered => 'مكتمل';
+
+  @override
+  String get orderStatusDeliveredLong => 'تم التوصيل';
+
+  @override
+  String get orderDetailTitle => 'تفاصيل الطلب';
+
+  @override
+  String orderPlacedOn(String date) {
+    return 'تم الطلب في $date';
+  }
+
+  @override
+  String orderNumberHeading(String number) {
+    return 'الطلب #$number';
+  }
+
+  @override
+  String get orderStatusHeading => 'حالة الطلب';
+
+  @override
+  String orderStatusCurrent(String status) {
+    return 'حالة الطلب: $status';
+  }
+
+  @override
+  String orderItemsHeading(int count) {
+    return 'المنتجات ($count)';
+  }
+
+  @override
+  String get orderDeliveryAddress => 'عنوان التوصيل';
 }

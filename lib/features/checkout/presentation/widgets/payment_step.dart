@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
-import 'package:nova_modest/features/checkout/domain/entities/order_totals.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_totals.dart';
 import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';

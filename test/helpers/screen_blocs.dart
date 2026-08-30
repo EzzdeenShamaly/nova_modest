@@ -7,6 +7,7 @@ import 'package:nova_modest/features/address/presentation/bloc/address_list_bloc
 import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/home_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/product_list_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:nova_modest/features/settings/presentation/bloc/notification_preferences_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/search_bloc.dart';
 
@@ -30,6 +31,9 @@ class MockAddressFormBloc extends MockBloc<AddressFormEvent, AddressFormState>
 
 class _MockSearchBloc extends MockBloc<SearchEvent, SearchState>
     implements SearchBloc {}
+
+class _MockOrdersBloc extends MockBloc<OrdersEvent, OrdersState>
+    implements OrdersBloc {}
 
 class _MockNotificationPreferencesBloc
     extends MockBloc<NotificationPreferencesEvent, NotificationPreferencesState>
@@ -145,6 +149,22 @@ void registerScreenBlocs() {
     return bloc;
   });
 
+  // The orders row is a real screen now — the last PlaceholderTab in the app
+  // is gone — so every navigation suite that opens it reaches this.
+  put<OrdersBloc>(() {
+    final bloc = _MockOrdersBloc();
+    // Empty, not Loading: a spinner animates forever and a navigation test
+    // ending in pumpAndSettle would time out instead of asserting.
+    whenListen(
+      bloc,
+      Stream<OrdersState>.value(const OrdersEmpty()),
+      initialState: const OrdersEmpty(),
+    );
+    // Provided with `create:`, so the provider closes it on dispose.
+    when(bloc.close).thenAnswer((_) async {});
+    return bloc;
+  });
+
   // The account menu's notifications row is a real screen now, so every
   // navigation suite that opens it reaches this.
   put<NotificationPreferencesBloc>(() {
@@ -186,4 +206,5 @@ void unregisterScreenBlocs() {
   if (sl.isRegistered<AddressListBloc>()) sl.unregister<AddressListBloc>();
   if (sl.isRegistered<AddressFormBloc>()) sl.unregister<AddressFormBloc>();
   if (sl.isRegistered<SearchBloc>()) sl.unregister<SearchBloc>();
+  if (sl.isRegistered<OrdersBloc>()) sl.unregister<OrdersBloc>();
 }

@@ -1,7 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
-import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
-import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 
 part 'order_totals.freezed.dart';
 
@@ -14,6 +11,12 @@ part 'order_totals.freezed.dart';
 ///
 /// A domain value: the arithmetic lives here, not in a `build()`
 /// (`01-flutter-architecture-guard`).
+///
+/// **Plain.** It used to carry an `of(CartTotals, {shipping, payment})` factory,
+/// which made an order-shaped value depend on checkout's two method enums — and
+/// once orders became their own feature, that dependency pointed the wrong way.
+/// Building one from a cart and a pair of choices is checkout's business, and
+/// `CheckoutDraft.totals` does it.
 @freezed
 abstract class OrderTotals with _$OrderTotals {
   const OrderTotals._();
@@ -23,22 +26,6 @@ abstract class OrderTotals with _$OrderTotals {
     required num shipping,
     required num paymentFee,
   }) = _OrderTotals;
-
-  /// Prices [cart]'s contents under the chosen [shipping] and [payment].
-  ///
-  /// Takes only the **subtotal** from [cart]. Its own `shipping` is the quote
-  /// made before a method was picked; once one is, the method decides. They
-  /// agree today because both are 35, and this is written so they still agree
-  /// when a second method makes them differ.
-  static OrderTotals of(
-    CartTotals cart, {
-    required ShippingMethod shipping,
-    required PaymentMethod payment,
-  }) => OrderTotals(
-    subtotal: cart.subtotal,
-    shipping: shipping.cost,
-    paymentFee: payment.fee,
-  );
 
   num get total => subtotal + shipping + paymentFee;
 }

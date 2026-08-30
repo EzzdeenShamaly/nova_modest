@@ -30,6 +30,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemAdded>(_onItemAdded, transformer: sequential());
     on<CartQuantityChanged>(_onQuantityChanged, transformer: sequential());
     on<CartItemRemoved>(_onItemRemoved, transformer: sequential());
+    // sequential like the rest: it is a read-modify-write against the same
+    // stored list, and it must not interleave with a quantity change already
+    // in flight.
+    on<CartCleared>(_onCleared, transformer: sequential());
   }
 
   final CartRepository _repository;
@@ -79,6 +83,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     Emitter<CartState> emit,
   ) async {
     _emitCart(await _repository.remove(event.lineId), emit);
+  }
+
+  Future<void> _onCleared(CartCleared event, Emitter<CartState> emit) async {
+    _emitCart(await _repository.clear(), emit);
   }
 
   /// The one place a repository result becomes a state.

@@ -216,6 +216,24 @@ void main() {
       expect(itemsOf(result).map((item) => item.product.id), ['p3']);
       expect(storedLines().map((line) => line['product_id']), ['p3']);
     });
+
+    test('clear empties the cart and the storage behind it', () async {
+      await repository.add(product: dress, size: 'M');
+      await repository.add(product: scarf);
+
+      final result = await repository.clear();
+
+      expect(itemsOf(result), isEmpty);
+      // Persisted, not only emitted: a cart that comes back on the next launch
+      // is a cart of things already bought.
+      expect(storedLines(), isEmpty);
+    });
+
+    test('clearing an already-empty cart is not an error', () async {
+      final result = await repository.clear();
+
+      expect(itemsOf(result), isEmpty);
+    });
   });
 
   group('rehydration', () {

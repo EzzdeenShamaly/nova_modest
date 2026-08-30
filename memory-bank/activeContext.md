@@ -1,6 +1,6 @@
 # Active Context
 
-**Last Updated:** 2026-08-29 (checkout review — and the first write seam)
+**Last Updated:** 2026-08-30 (SettingsCard, and the language chooser settled)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
@@ -1260,6 +1260,228 @@ its radius from the theme, and one screen overriding that is how a button style
 stops being shared.
 
 Verified: `flutter analyze` clean, **630 tests passing**.
+
+## The confirmation screen (2026-08-29, `1:2137`) — checkout is complete
+
+The shortest frame in the flow (528pt) and the one with the most that the frame
+does not say.
+
+### It is terminal, so the host drops its own chrome
+`1:2137` draws no app bar, no indicator and no sticky bar; its two actions sit
+in the content. `CheckoutScreen` suppresses all three for `CheckoutStep.success`
+rather than this widget hiding underneath them — still one route, still "the
+step is bloc state", so nobody can land on a confirmation with no order.
+
+`canPop` is false throughout now, and the confirmation's back **leaves for the
+shop front**. Popping would land on whatever opened checkout, which is the cart
+the order has just emptied.
+
+### Three things the frame does not show, all fixed
+
+**The cart stayed full after a purchase.** There was no `clear` in
+`CartRepository` at all — a shopper bought, tapped "متابعة التسوق", and found
+the same items waiting to be bought again. `CartRepository.clear()` exists now,
+wipes the stored ids as well as the state, and `CartCleared` is `sequential`
+like every other mutation.
+
+**Who clears it:** the screen dispatches `CartCleared` to the app-wide
+`CartBloc` on the *transition into* success — not `CheckoutBloc` writing to
+`CartRepository` itself. Two writers to one store would leave the navigation
+badge disagreeing with storage until something re-read it. `CartBloc` stays the
+single owner of cart state.
+
+The listener is guarded on `previous.step != success`, not on
+`current.step == success`: the second fires for any later state on that step. A
+test emits a redundant success state and asserts nothing is cleared twice —
+removing the guard fails it.
+
+**A guest was thrown out right after paying.** `/orders` is behind the sign-in
+gate by prefix, so "تتبع الطلب" would send someone who had just paid to a login
+screen. The button is **not shown to a guest at all** — they have no account to
+track an order through — and opens `/orders` for a signed-in shopper, where a
+`PlaceholderTab` still waits.
+
+### Notes
+- The two ambient discs are drawn **without blur** (approved): `ImageFiltered`
+  would match the frame at the cost of a raster layer on a screen whose whole
+  job is to sit still and be read.
+- The order number is `direction-fixed` LTR, like the dialling code.
+- `#747878` appears a third time as the outlined button's border; the theme
+  assigns that role to `secondary`, as it did for step 3's radio.
+- The copy says "نتواصل معك", not "نرسل بريدًا" — which is the only honest
+  wording while a guest order carries a phone number and nothing else.
+
+Verified: `flutter analyze` clean, **642 tests passing**. The router test now
+walks the entire flow — contact, address, payment, review, confirm — through the
+real router, the real `CheckoutBloc` and the real `FakeOrderRepository`, and
+asserts the cart was emptied at the end of it.
+
+## Order history — the list (2026-08-29, `1:1356`)
+
+Batch 1 of two. The last `PlaceholderTab` in the app is gone.
+
+### `features/orders/` is now its own feature, and the order domain moved into it
+`Order`, `OrderTotals`, `OrderRepository` and `FakeOrderRepository` lived under
+`features/checkout/`. Leaving them there would have made the feature that
+**reads** orders depend on the one that **writes** them — the exact inversion
+`Address`'s own comment warns about, which is why `Address` sits in
+`features/address/` and not in the profile screen that manages it.
+
+Dependencies now point one way: `orders → {cart, address}`, `checkout → orders`.
+
+`OrderTotals` lost its `of(CartTotals, {shipping, payment})` factory in the
+move — it made an order-shaped value depend on checkout's two method enums.
+Pricing a cart under a chosen pair is checkout's business, and
+`CheckoutDraft.totals` does it now.
+
+**This was a structural call made inside the approved work, not something the
+plan spelled out.** Flagging it here because it moved four files.
+
+### The repository remembers, reversing a decision recorded three batches ago
+`FakeOrderRepository` was written to hand an order back and forget it, on the
+stated grounds that no screen read orders. That screen is this one, so the
+decision expired. It keeps them **in memory**, like `FakeAddressRepository` and
+for the same reason: an order carries a recipient, a phone and an address, which
+is the PII `03-flutter-security-guard` keeps out of plaintext preferences.
+History survives navigation, not a restart.
+
+It also **seeds the three orders `1:1356` draws** — one per badge appearance —
+so the screen can be reviewed as designed. Their products are literals rather
+than catalogue lookups, and that is the right shape rather than a shortcut: an
+order records what was bought at the price it was bought for, and a line that
+re-read today's catalogue would rewrite history every time the shop re-priced.
+
+### The two frames disagreed about how many statuses there are
+`1:1356` shows three badges and calls the last one «مكتمل»; `1:1480` draws a
+five-stage tracker and calls it «تم التوصيل». One `OrderStatus` with five values
+serves both, and `delivered` carries **two strings** — the short one for a badge,
+the long one for the tracker. Declared in order, so `index` *is* the progress and
+the tracker (next batch) needs no positions of its own.
+
+**Status never advances.** A new order is `processing` and stays there; a backend
+moves an order along, and a timer that "shipped" it after a minute would be
+inventing server behaviour.
+
+### Notes
+- `Order` grew from three fields to eight. Its old comment said it "does not
+  repeat what the draft holds" — true while nothing outlived the draft, and
+  wrong the moment something did: the cart is emptied moments later and the
+  draft dies with the flow.
+- The card is **not tappable** yet. The details route arrives in batch 2, and
+  tapping into a route that does not exist is worse than a card that does not
+  respond. A test pins it.
+- `ordersCount` is an ICU plural with `=1`, `=2`, `few` and `many` — Arabic has a
+  dual and two plural bands, and «طلبان» is not something a ternary can produce.
+- `ProductThumbnail`, extracted last batch, has its third caller.
+- The DI drift guard fired on cue for `OrdersBloc`, as it did for `CheckoutBloc`
+  and `OrderRepository` before it.
+- **`PlaceholderTab` is now unused in `lib/`.** Left in place — deleting it is
+  its own decision, and it is a useful scaffold for the next unbuilt screen.
+
+Verified: `flutter analyze` clean, **671 tests passing**. A router test buys and
+then opens the history through the real router and one shared repository, and
+finds the order it just placed at the top.
+
+## Order details (2026-08-29, `1:1480`)
+
+Batch 2 of two, and the end of the orders feature. Read-only throughout: `Order`
+already carried `status`, `items`, `address` and the recipient from batch 1, so
+nothing new about the data itself.
+
+### The tracker derives itself from the enum
+`OrderStatus` is declared in the order the stages happen, so `index` **is** the
+progress and `OrderStatusTracker` carries no positions of its own — behind,
+current, ahead, in one comparison. The same three-appearance reading as
+`CheckoutStepIndicator`, deliberately **not** the same widget: that one is
+horizontal, three stations wide, unlabelled and lives inside a flow the shopper
+is walking. Generalising it would have coupled two things that only resemble
+each other.
+
+Its polarity is drawn from `1:1480` directly — done stages are `primaryText`,
+the current one accent and larger, the rest `subtle`. A test compares all five
+against the frame, and swapping the passed colour fails it.
+
+### Fetching, not reading the list
+`OrderDetailBloc` asks `orderByNumber`. The address form reads
+`AddressListBloc` because it is always pushed as a child of the list; **an order
+number can arrive from a link or a notification with no list loaded above it**,
+which is why this one fetches and why `/orders/:number` is a plain nested
+`GoRoute` rather than a `ShellRoute`. A router test opens it cold and asserts the
+list is not in the tree.
+
+**Three states, not four.** There is no empty: one order exists or it does not,
+and "it does not" is a `NotFoundFailure` with a reason that an `Empty` state
+would throw away.
+
+### Two widgets left the review step
+`OrderItemLine` and `OrderPriceBreakdown` were private to `review_step.dart`.
+The second caller arrived, so they moved to
+`features/orders/presentation/widgets/` — the same call `ProductThumbnail` got,
+and the same reason: two copies of "how this app draws an ordered line" drift the
+first time anything changes. Each caller passes its own thumbnail size (80x96
+review, 96x144 details), and `tinted` picks between the review's filled card and
+this frame's ruled block.
+
+### Three deliberate departures from the frame
+- **Shipping comes from the order**, not the frame's ٥٠ ر.س — the fourth
+  different shipping figure in the file, and exactly what unifying `shippingFee`
+  was for.
+- **The payment-fee row is drawn.** `1:1480` omits it, as `1:1840` did, and both
+  predate cash on delivery carrying a fee.
+- **The address card uses `background`, not the frame's `#FFFFFF`.** Pure white
+  is not in this warm palette and cannot be derived from it; on a bordered card
+  the difference is invisible, and the palette stays closed.
+
+### The recipient shown is the one typed at checkout
+`Order` carries both `address.recipientName` and its own `recipientName`. The
+card shows the order's, because the contact step is editable **precisely** so a
+shopper can buy for someone else — showing the address book's would quietly undo
+that. A test seeds the two differently and asserts which one appears.
+
+### A URL assertion that was testing go_router, not this app
+The tap test first asserted `currentConfiguration.uri.path`. `push` inside a
+`StatefulShellRoute` leaves that on the branch's own path (`/orders`) while the
+pushed page renders correctly — so the assertion was about the library. It
+asserts what renders instead, including that the *other two* seeded orders are
+absent, which is what "opens that order, not another" actually means.
+
+Verified: `flutter analyze` clean, **694 tests passing**.
+
+## SettingsCard (2026-08-30)
+
+The recorded card debt, paid. **Four hand-rolled copies became one widget in
+`core/widgets/`** — and three of them were byte-for-byte identical, down to the
+comment: `_MenuCard` in the account screen, `_Card` in help, `_Card` in
+notification preferences. The fourth, `_OptionCard` in the language screen,
+differed only in its fill and the colour of its rules, so it is the `filled`
+variant rather than a fifth thing.
+
+Each was defensible alone; together they were a card that had stopped being one.
+The same failure `12-flutter-design-system-guard` exists to prevent, in layout
+instead of colour.
+
+**The proof it changed no behaviour: the four screens' 87 existing tests passed
+without a single edit.** That was the point of taking the whole scope rather
+than the three identical copies — if a test had needed changing, that would have
+been the signal that a refactor had quietly become a rewrite.
+
+A note on what the old tests did *not* cover: collapsing the `filled` variant
+into `outlined` breaks only the new `settings_card_test.dart`, not the language
+screen's own test, which never asserted the card's fill. The card's appearance
+is that widget's business now, and it is tested there.
+
+## The first-launch language chooser will not be built (user, 2026-08-30)
+
+`1:2304` exists in the file and stays unbuilt. Arabic is the default and the
+language is switchable from the account section; asking before the shopper has
+seen anything is friction in front of the app rather than a service.
+
+Recorded in `progress.md` under **"Decisions taken, not tasks"**, a section
+added for it — and the accepted guest-email gap moved there too, since it said
+"accepted, not outstanding" while sitting under Not Started, which is where a
+reader goes to find outstanding work.
+
+Verified: `flutter analyze` clean, **701 tests passing**.
 
 ## Current focus
 

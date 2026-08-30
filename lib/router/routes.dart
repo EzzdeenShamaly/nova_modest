@@ -111,6 +111,11 @@ abstract final class Routes {
   static const String ordersPath = '/orders';
   static const String ordersName = 'orders';
 
+  /// One order, by the number the shopper was quoted. A child of `/orders`, so
+  /// the sign-in gate covers it by prefix without a second rule.
+  static const String orderDetailPath = ':number';
+  static const String orderDetailName = 'orderDetail';
+
   /// Children of [profilePath], so the sign-in gate covers them by prefix.
   static const String personalInfoPath = 'personal';
   static const String personalInfoName = 'personal-info';
@@ -144,6 +149,8 @@ abstract final class Routes {
   static const String addressNew = '$addresses/$addressNewPath';
 
   static String addressEdit(String addressId) => '$addresses/$addressId';
+
+  static String orderDetail(String number) => '$ordersPath/$number';
   static const String language = '$profilePath/$languagePath';
   static const String notifications = '$profilePath/$notificationsPath';
   static const String help = '$profilePath/$helpPath';

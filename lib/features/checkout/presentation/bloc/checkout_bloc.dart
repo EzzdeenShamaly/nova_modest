@@ -15,7 +15,7 @@ import 'package:nova_modest/features/checkout/domain/entities/checkout_step.dart
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
 import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
-import 'package:nova_modest/features/checkout/domain/repositories/order_repository.dart';
+import 'package:nova_modest/features/orders/domain/repositories/order_repository.dart';
 
 part 'checkout_event.dart';
 part 'checkout_state.dart';

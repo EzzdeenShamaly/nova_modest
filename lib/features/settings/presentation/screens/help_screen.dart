@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/settings_card.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
 
 /// Help and support.
@@ -31,13 +32,13 @@ class HelpScreen extends StatelessWidget {
         children: [
           Text(l10n.helpFaqTitle, style: textTheme.headlineMedium),
           SizedBox(height: AppSpacing.m),
-          _Card(
+          SettingsCard(
             children: [for (final entry in _faq(l10n)) _Question(entry: entry)],
           ),
           SizedBox(height: AppSpacing.xl),
           Text(l10n.helpContactTitle, style: textTheme.headlineMedium),
           SizedBox(height: AppSpacing.m),
-          _Card(
+          SettingsCard(
             children: [
               _ContactRow(
                 icon: Icons.mail_outline,
@@ -92,32 +93,6 @@ class HelpScreen extends StatelessWidget {
 /// chooser's. Kept local on purpose: promoting a shared card means editing two
 /// screens that work, in the middle of a change that has nothing to do with
 /// them (`09-minimal-changes.md`). Recorded in progress.md as its own task.
-class _Card extends StatelessWidget {
-  const _Card({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.background,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: AppColors.subtle),
-        borderRadius: BorderRadius.circular(AppRadius.m),
-      ),
-      child: Column(
-        children: [
-          for (final child in children) ...[
-            child,
-            if (child != children.last)
-              Divider(height: 0, color: AppColors.subtle),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _Question extends StatelessWidget {
   const _Question({required this.entry});

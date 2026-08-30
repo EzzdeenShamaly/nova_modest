@@ -922,5 +922,131 @@
         "type": "String"
       }
     }
+  },
+  "successTitle": "\u062a\u0645 \u062a\u0623\u0643\u064a\u062f \u0637\u0644\u0628\u0643 \u0628\u0646\u062c\u0627\u062d!",
+  "@successTitle": {
+    "description": "Heading of the confirmation screen, the last thing checkout shows."
+  },
+  "successOrderNumber": "\u0631\u0642\u0645 \u0627\u0644\u0637\u0644\u0628:",
+  "@successOrderNumber": {
+    "description": "Label before the order number on the confirmation screen. Ends with a colon; the number follows it."
+  },
+  "successBody": "\u0633\u0646\u062a\u0648\u0627\u0635\u0644 \u0645\u0639\u0643 \u0642\u0631\u064a\u0628\u064b\u0627 \u0644\u062a\u0623\u0643\u064a\u062f \u0627\u0644\u062a\u0648\u0635\u064a\u0644.",
+  "@successBody": {
+    "description": "Supporting line under the order number. Deliberately says 'contact', not 'email': a guest order carries only a phone number."
+  },
+  "successTrackOrder": "\u062a\u062a\u0628\u0639 \u0627\u0644\u0637\u0644\u0628",
+  "@successTrackOrder": {
+    "description": "Action opening the shopper's orders. Not shown to a guest, who has no account to track through."
+  },
+  "successKeepShopping": "\u0645\u062a\u0627\u0628\u0639\u0629 \u0627\u0644\u062a\u0633\u0648\u0642",
+  "@successKeepShopping": {
+    "description": "Action returning to the shop front."
+  },
+  "ordersTitle": "\u0637\u0644\u0628\u0627\u062a\u064a",
+  "@ordersTitle": {
+    "description": "Heading of the order-history screen."
+  },
+  "ordersCount": "{count, plural, =0{\u0644\u0627 \u0637\u0644\u0628\u0627\u062a} =1{\u0637\u0644\u0628 \u0648\u0627\u062d\u062f} =2{\u0637\u0644\u0628\u0627\u0646} few{{count} \u0637\u0644\u0628\u0627\u062a} many{{count} \u0637\u0644\u0628\u064b\u0627} other{{count} \u0637\u0644\u0628}}",
+  "@ordersCount": {
+    "description": "Count beside the orders heading. Arabic has a dual and two plural bands, which a ternary cannot express.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersEmpty": "\u0644\u0627 \u062a\u0648\u062c\u062f \u0637\u0644\u0628\u0627\u062a \u0628\u0639\u062f",
+  "@ordersEmpty": {
+    "description": "Heading of the empty order history."
+  },
+  "ordersEmptyBody": "\u0643\u0644 \u0637\u0644\u0628 \u062a\u0646\u0647\u064a\u0646\u0647 \u0633\u064a\u0638\u0647\u0631 \u0647\u0646\u0627 \u0644\u062a\u062a\u0627\u0628\u0639\u064a\u0647",
+  "@ordersEmptyBody": {
+    "description": "Supporting line under the empty-orders heading."
+  },
+  "ordersEmptyAction": "\u0627\u0628\u062f\u0626\u064a \u0627\u0644\u062a\u0633\u0648\u0642",
+  "@ordersEmptyAction": {
+    "description": "Action on the empty order history, leading to the shop front."
+  },
+  "ordersMoreItems": "+{count}",
+  "@ordersMoreItems": {
+    "description": "Badge on an order card counting the lines its single thumbnail does not show.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderStatusPending": "\u0642\u064a\u062f \u0627\u0644\u0627\u0646\u062a\u0638\u0627\u0631",
+  "@orderStatusPending": {
+    "description": "Order status: placed, nothing done yet."
+  },
+  "orderStatusConfirmed": "\u0645\u0624\u0643\u062f",
+  "@orderStatusConfirmed": {
+    "description": "Order status: accepted by the shop."
+  },
+  "orderStatusProcessing": "\u0642\u064a\u062f \u0627\u0644\u062a\u062d\u0636\u064a\u0631",
+  "@orderStatusProcessing": {
+    "description": "Order status: being picked and packed."
+  },
+  "orderStatusShipped": "\u062a\u0645 \u0627\u0644\u0634\u062d\u0646",
+  "@orderStatusShipped": {
+    "description": "Order status: handed to the courier."
+  },
+  "orderStatusDelivered": "\u0645\u0643\u062a\u0645\u0644",
+  "@orderStatusDelivered": {
+    "description": "Order status on a list badge, where the frame writes the short form."
+  },
+  "orderStatusDeliveredLong": "\u062a\u0645 \u0627\u0644\u062a\u0648\u0635\u064a\u0644",
+  "@orderStatusDeliveredLong": {
+    "description": "The same status on the details tracker, where the frame writes it in full. Two strings for one value, because the two frames word it differently."
+  },
+  "orderDetailTitle": "\u062a\u0641\u0627\u0635\u064a\u0644 \u0627\u0644\u0637\u0644\u0628",
+  "@orderDetailTitle": {
+    "description": "App-bar title of the order-details screen."
+  },
+  "orderPlacedOn": "\u062a\u0645 \u0627\u0644\u0637\u0644\u0628 \u0641\u064a {date}",
+  "@orderPlacedOn": {
+    "description": "Line above the order number. The date is formatted by intl for the locale.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNumberHeading": "\u0627\u0644\u0637\u0644\u0628 #{number}",
+  "@orderNumberHeading": {
+    "description": "The order number as the details screen heads it, with the hash the frame draws.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStatusHeading": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0637\u0644\u0628",
+  "@orderStatusHeading": {
+    "description": "Heading over the five-stage tracker."
+  },
+  "orderStatusCurrent": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0637\u0644\u0628: {status}",
+  "@orderStatusCurrent": {
+    "description": "Screen-reader label for the tracker, which is dots and words a reader would otherwise announce five times.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "orderItemsHeading": "\u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a ({count})",
+  "@orderItemsHeading": {
+    "description": "Heading over the ordered lines, counting quantities rather than lines.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDeliveryAddress": "\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u062a\u0648\u0635\u064a\u0644",
+  "@orderDeliveryAddress": {
+    "description": "Heading of the delivery-address card on the details screen."
   }
 }

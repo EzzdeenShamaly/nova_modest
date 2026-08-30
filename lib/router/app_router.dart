@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
@@ -20,7 +19,6 @@ import 'package:nova_modest/features/catalog/presentation/screens/product_list_s
 import 'package:nova_modest/features/catalog/presentation/screens/search_screen.dart';
 import 'package:nova_modest/features/catalog/presentation/screens/home_screen.dart';
 import 'package:nova_modest/core/di/injection.dart';
-import 'package:nova_modest/core/widgets/placeholder_tab.dart';
 import 'package:nova_modest/features/profile/presentation/screens/personal_info_screen.dart';
 import 'package:nova_modest/features/settings/presentation/screens/help_screen.dart';
 import 'package:nova_modest/features/settings/presentation/screens/terms_screen.dart';
@@ -28,9 +26,12 @@ import 'package:nova_modest/features/settings/presentation/screens/notifications
 import 'package:nova_modest/features/settings/presentation/screens/language_screen.dart';
 import 'package:nova_modest/features/profile/presentation/screens/profile_screen.dart';
 import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/order_detail_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/screens/order_detail_screen.dart';
+import 'package:nova_modest/features/orders/presentation/screens/orders_screen.dart';
 import 'package:nova_modest/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:nova_modest/features/splash/presentation/screens/splash_screen.dart';
-import 'package:nova_modest/l10n/app_localizations.dart';
 import 'package:nova_modest/router/app_shell.dart';
 import 'package:nova_modest/router/routes.dart';
 
@@ -306,10 +307,27 @@ GoRouter createRouter(
             GoRoute(
               path: Routes.ordersPath,
               name: Routes.ordersName,
-              builder: (context, state) => PlaceholderTab(
-                title: AppLocalizations.of(context).profileMyOrders,
-                icon: Icons.receipt_long_outlined,
+              builder: (context, state) => BlocProvider<OrdersBloc>(
+                create: (_) => sl<OrdersBloc>()..add(const OrdersRequested()),
+                child: const OrdersScreen(),
               ),
+              routes: [
+                // A plain nested GoRoute, not a ShellRoute: the details screen
+                // fetches its own order by number, so it needs nothing from the
+                // list's bloc — which is the whole reason a link can open it.
+                GoRoute(
+                  path: Routes.orderDetailPath,
+                  name: Routes.orderDetailName,
+                  builder: (context, state) {
+                    final number = state.pathParameters['number'] ?? '';
+                    return BlocProvider<OrderDetailBloc>(
+                      create: (_) =>
+                          sl<OrderDetailBloc>()..add(OrderRequested(number)),
+                      child: OrderDetailScreen(number: number),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),

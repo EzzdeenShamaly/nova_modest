@@ -23,13 +23,15 @@ import 'package:nova_modest/features/catalog/presentation/bloc/home_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/product_detail_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/product_list_bloc.dart';
 import 'package:nova_modest/features/catalog/presentation/bloc/search_bloc.dart';
-import 'package:nova_modest/features/checkout/domain/repositories/order_repository.dart';
+import 'package:nova_modest/features/orders/domain/repositories/order_repository.dart';
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:nova_modest/features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:nova_modest/features/settings/domain/repositories/locale_repository.dart';
 import 'package:nova_modest/features/settings/domain/repositories/notification_preferences_repository.dart';
 import 'package:nova_modest/features/settings/presentation/bloc/locale_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/order_detail_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:nova_modest/features/settings/presentation/bloc/notification_preferences_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -120,6 +122,8 @@ void main() {
       resolves<SignInBloc>();
       resolves<ProfileEditBloc>();
       resolves<NotificationPreferencesBloc>();
+      resolves<OrdersBloc>();
+      resolves<OrderDetailBloc>();
       resolves<CheckoutBloc>();
     });
   });

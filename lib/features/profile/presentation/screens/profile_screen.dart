@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/settings_card.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:nova_modest/features/profile/presentation/widgets/profile_menu_tile.dart';
@@ -72,7 +73,7 @@ class _Body extends StatelessWidget {
       children: [
         _HeaderCard(user: user),
         SizedBox(height: AppSpacing.l),
-        _MenuCard(
+        SettingsCard(
           children: [
             ProfileMenuTile(
               icon: Icons.receipt_long_outlined,
@@ -250,35 +251,3 @@ class _Detail extends StatelessWidget {
 
 /// The bordered card the menu rows sit in, with the design's hairlines between
 /// them.
-class _MenuCard extends StatelessWidget {
-  const _MenuCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.background,
-      // shape, not borderRadius: Material asserts if given both, and the border
-      // has to come from the shape. AppColors.subtle is a derived alpha, so it
-      // is `final` rather than `const` and neither this nor the Divider below
-      // can be a const expression.
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: AppColors.subtle),
-        borderRadius: BorderRadius.circular(AppRadius.m),
-      ),
-      child: Column(
-        children: [
-          for (final child in children) ...[
-            child,
-            // height 0: the rule itself, with none of the Divider theme's
-            // surrounding space, because the rows already carry their own.
-            if (child != children.last)
-              Divider(height: 0, color: AppColors.subtle),
-          ],
-        ],
-      ),
-    );
-  }
-}

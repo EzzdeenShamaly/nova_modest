@@ -54,3 +54,12 @@ final class CartItemRemoved extends CartEvent {
   @override
   List<Object?> get props => [lineId];
 }
+
+/// The cart was emptied because an order was placed.
+///
+/// Not a control the shopper taps — there is no "empty cart" button in any
+/// frame. The confirmation screen raises it once, so a shopper does not return
+/// to a cart holding what they have already bought.
+final class CartCleared extends CartEvent {
+  const CartCleared();
+}

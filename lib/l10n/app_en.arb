@@ -227,5 +227,71 @@
         "type": "String"
       }
     }
-  }
+  },
+  "successTitle": "Your order is confirmed!",
+  "successOrderNumber": "Order number:",
+  "successBody": "We will contact you shortly to confirm delivery.",
+  "successTrackOrder": "Track order",
+  "successKeepShopping": "Keep shopping",
+  "ordersTitle": "My orders",
+  "ordersCount": "{count, plural, =0{No orders} =1{1 order} other{{count} orders}}",
+  "@ordersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersEmpty": "No orders yet",
+  "ordersEmptyBody": "Every order you place will show up here",
+  "ordersEmptyAction": "Start shopping",
+  "ordersMoreItems": "+{count}",
+  "@ordersMoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderStatusPending": "Pending",
+  "orderStatusConfirmed": "Confirmed",
+  "orderStatusProcessing": "Processing",
+  "orderStatusShipped": "Shipped",
+  "orderStatusDelivered": "Completed",
+  "orderStatusDeliveredLong": "Delivered",
+  "orderDetailTitle": "Order details",
+  "orderPlacedOn": "Placed on {date}",
+  "@orderPlacedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderNumberHeading": "Order #{number}",
+  "@orderNumberHeading": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStatusHeading": "Order status",
+  "orderStatusCurrent": "Order status: {status}",
+  "@orderStatusCurrent": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "orderItemsHeading": "Items ({count})",
+  "@orderItemsHeading": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderDeliveryAddress": "Delivery address"
 }

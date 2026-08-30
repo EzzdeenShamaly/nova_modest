@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/theme/app_theme.dart';
 import 'package:nova_modest/features/address/domain/entities/address.dart';
@@ -14,13 +15,16 @@ import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
 import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:nova_modest/features/catalog/domain/entities/product.dart';
-import 'package:nova_modest/features/checkout/data/repositories/fake_order_repository.dart';
+import 'package:nova_modest/features/orders/data/repositories/fake_order_repository.dart';
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart';
 import 'package:nova_modest/features/checkout/presentation/screens/checkout_screen.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/address_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/contact_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/payment_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/review_step.dart';
+import 'package:nova_modest/features/checkout/presentation/widgets/success_step.dart';
+import 'package:nova_modest/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:nova_modest/features/orders/presentation/screens/orders_screen.dart';
 import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
 import 'package:nova_modest/router/app_router.dart';
@@ -51,6 +55,20 @@ class _MockOnboardingBloc extends MockBloc<OnboardingEvent, OnboardingState>
 void main() {
   late _MockAuthBloc authBloc;
   late _MockOnboardingBloc onboardingBloc;
+  late MockCartBloc cartBloc;
+  late FakeOrderRepository orders;
+
+  const dress = Product(
+    id: 'p1',
+    name: 'فستان سهرة حريري',
+    price: 450,
+    categoryId: 'dresses',
+  );
+
+  const loadedCart = CartLoaded(
+    items: [CartItem(product: dress)],
+    totals: CartTotals(subtotal: 450, shipping: 35),
+  );
 
   const user = User(
     id: 'u1',
@@ -77,13 +95,20 @@ void main() {
   setUp(() {
     authBloc = _MockAuthBloc();
     onboardingBloc = _MockOnboardingBloc();
+    cartBloc = stubCartBloc(loadedCart);
 
     registerScreenBlocs();
     // The real one: this file is about what the route provides, so the bloc
     // that decides the step has to be the bloc that actually decides it. It
     // takes no dependencies.
     if (sl.isRegistered<CheckoutBloc>()) sl.unregister<CheckoutBloc>();
-    sl.registerFactory<CheckoutBloc>(() => CheckoutBloc(FakeOrderRepository()));
+    // One repository shared by the flow that writes orders and the screen that
+    // reads them — the app registers it as a lazy singleton for exactly this
+    // reason, and two instances would let a placed order vanish.
+    orders = FakeOrderRepository();
+    sl.registerFactory<CheckoutBloc>(() => CheckoutBloc(orders));
+    if (sl.isRegistered<OrdersBloc>()) sl.unregister<OrdersBloc>();
+    sl.registerFactory<OrdersBloc>(() => OrdersBloc(orders));
 
     // A saved address, so the address step has a default to preselect and
     // advances on one tap. `registerScreenBlocs` leaves the list empty, which
@@ -101,17 +126,6 @@ void main() {
 
   /// A stocked cart, so the totals the route hands into the flow are visible
   /// rather than null.
-  const dress = Product(
-    id: 'p1',
-    name: 'فستان سهرة حريري',
-    price: 450,
-    categoryId: 'dresses',
-  );
-
-  const loadedCart = CartLoaded(
-    items: [CartItem(product: dress)],
-    totals: CartTotals(subtotal: 450, shipping: 35),
-  );
 
   Future<GoRouter> boot(WidgetTester tester, {required AuthState auth}) async {
     tester.view.physicalSize = const Size(375, 812);
@@ -134,7 +148,7 @@ void main() {
           providers: [
             BlocProvider<AuthBloc>.value(value: authBloc),
             BlocProvider<OnboardingBloc>.value(value: onboardingBloc),
-            BlocProvider<CartBloc>.value(value: stubCartBloc(loadedCart)),
+            BlocProvider<CartBloc>.value(value: cartBloc),
           ],
           child: MaterialApp.router(
             routerConfig: router,
@@ -238,9 +252,95 @@ void main() {
     await tester.tap(find.text('تأكيد الطلب'));
     await tester.pumpAndSettle();
 
-    // The confirmation screen is the next batch; reaching its step is what
-    // proves the order was placed.
-    expect(find.byType(ReviewStep), findsNothing);
+    // The real FakeOrderRepository minted this, through the real bloc.
+    expect(find.byType(SuccessStep), findsOneWidget);
+    expect(find.textContaining('ORD-'), findsOneWidget);
+    // Chrome gone: nothing to title, and nothing to walk back into.
+    expect(find.byType(AppBar), findsNothing);
+
+    // The order holds what the cart held, so the cart must not.
+    verify(() => cartBloc.add(const CartCleared())).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keep shopping leaves checkout for the shop front', (
+    tester,
+  ) async {
+    final router = await boot(tester, auth: const AuthAuthenticated(user));
+
+    router.go(Routes.checkoutPath);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('التالي'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('حفظ ومتابعة'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('مراجعة الطلب'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('تأكيد الطلب'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('متابعة التسوق'));
+    await tester.pumpAndSettle();
+
+    // Home, not a pop back to the cart the order has just emptied.
+    expect(
+      router.routerDelegate.currentConfiguration.uri.path,
+      Routes.homePath,
+    );
+    expect(find.byType(SuccessStep), findsNothing);
+  });
+
+  testWidgets('a guest is not offered order tracking after paying', (
+    tester,
+  ) async {
+    // `/orders` is behind the sign-in gate, so the button would send someone
+    // who has just paid to a login screen.
+    final router = await boot(tester, auth: const AuthUnauthenticated());
+
+    router.go(Routes.checkoutPath);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'ليلى');
+    await tester.enterText(find.byType(TextFormField).at(1), '550001111');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('التالي'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('حفظ ومتابعة'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('مراجعة الطلب'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('تأكيد الطلب'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SuccessStep), findsOneWidget);
+    expect(find.text('تتبع الطلب'), findsNothing);
+    expect(find.text('متابعة التسوق'), findsOneWidget);
+  });
+
+  testWidgets('a placed order shows up in the order history', (tester) async {
+    // The seam end to end: checkout writes through the real repository and the
+    // orders screen reads the same one back, through the real router.
+    final router = await boot(tester, auth: const AuthAuthenticated(user));
+
+    router.go(Routes.checkoutPath);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('التالي'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('حفظ ومتابعة'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('مراجعة الطلب'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('تأكيد الطلب'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('تتبع الطلب'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OrdersScreen), findsOneWidget);
+    // Newest first, so the order just placed leads — above the three the
+    // repository seeds from the frame.
+    expect(find.textContaining('ORD-'), findsWidgets);
+    expect(find.text('قيد التحضير'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

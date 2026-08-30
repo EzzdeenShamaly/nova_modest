@@ -8,7 +8,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/widgets/failure_view.dart';
-import 'package:nova_modest/core/widgets/placeholder_tab.dart';
 import 'package:nova_modest/features/address/domain/entities/address.dart';
 import 'package:nova_modest/features/address/presentation/bloc/address_form_bloc.dart';
 import 'package:nova_modest/features/address/presentation/bloc/address_list_bloc.dart';
@@ -17,6 +16,12 @@ import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
 import 'package:nova_modest/features/catalog/domain/entities/product.dart';
 import 'package:nova_modest/features/catalog/domain/entities/product_colour.dart';
+import 'package:nova_modest/features/auth/domain/entities/user.dart';
+import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:nova_modest/features/orders/domain/entities/order.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_status.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_totals.dart';
 import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/checkout_draft.dart';
@@ -29,6 +34,7 @@ import 'package:nova_modest/features/checkout/presentation/widgets/checkout_step
 import 'package:nova_modest/features/checkout/presentation/widgets/contact_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/payment_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/review_step.dart';
+import 'package:nova_modest/features/checkout/presentation/widgets/success_step.dart';
 
 import '../../helpers/pump_app.dart';
 import '../../helpers/screen_blocs.dart';
@@ -36,10 +42,15 @@ import '../../helpers/screen_blocs.dart';
 class _MockCheckoutBloc extends MockBloc<CheckoutEvent, CheckoutState>
     implements CheckoutBloc {}
 
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
 void main() {
   late _MockCheckoutBloc bloc;
   late MockAddressListBloc addressList;
   late MockAddressFormBloc addressForm;
+  late _MockAuthBloc authBloc;
+  late MockCartBloc cartBloc;
 
   const home = Address(
     id: 'a1',
@@ -84,6 +95,8 @@ void main() {
     // every pump here ends in pumpAndSettle.
     addressList = stubAddressListBloc(const AddressListEmpty());
     addressForm = stubAddressFormBloc();
+    authBloc = _MockAuthBloc();
+    cartBloc = stubCartBloc();
   });
 
   /// Provides the two address blocs the way the checkout `ShellRoute` does —
@@ -97,12 +110,20 @@ void main() {
     AddressListState? addresses,
     Stream<CheckoutState>? states,
     bool settle = true,
+    AuthState auth = const AuthAuthenticated(
+      User(id: 'u1', email: 'sara@example.com', displayName: 'سارة'),
+    ),
+    CheckoutState? from,
   }) async {
+    // `from` seeds an earlier state so the listener sees a real transition;
+    // without one the screen opens already on `state` and a listenWhen guarded
+    // on "previous != current" would never fire.
     whenListen(
       bloc,
       states ?? Stream<CheckoutState>.value(state),
-      initialState: state,
+      initialState: from ?? state,
     );
+    whenListen(authBloc, Stream<AuthState>.value(auth), initialState: auth);
     if (addresses != null) addressList = stubAddressListBloc(addresses);
 
     await tester.pumpApp(
@@ -115,6 +136,8 @@ void main() {
         child: CheckoutScreen(key: UniqueKey()),
       ),
       locale: locale ?? const Locale('ar'),
+      authBloc: authBloc,
+      cartBloc: cartBloc,
     );
     // A spinner animates forever, so a placing state cannot be settled.
     if (settle) {
@@ -972,23 +995,87 @@ void main() {
     });
   });
 
-  group('the unbuilt steps', () {
-    testWidgets('are named rather than blank, and cannot advance', (
+  group('the confirmation', () {
+    final placed = Order(
+      number: 'ORD-260818-0001',
+      placedAt: DateTime(2026, 8, 18),
+      totals: const OrderTotals(subtotal: 450, shipping: 35, paymentFee: 15),
+      status: OrderStatus.processing,
+    );
+
+    final done = CheckoutInProgress(
+      step: CheckoutStep.success,
+      draft: CheckoutDraft(
+        cart: const CartTotals(subtotal: 450, shipping: 35),
+        order: placed,
+      ),
+    );
+
+    testWidgets('quotes the number the repository handed back', (tester) async {
+      await pump(tester, done);
+
+      expect(find.byType(SuccessStep), findsOneWidget);
+      expect(find.text('تم تأكيد طلبك بنجاح!'), findsOneWidget);
+      expect(find.text('ORD-260818-0001'), findsOneWidget);
+      expect(find.text('رقم الطلب:'), findsOneWidget);
+    });
+
+    testWidgets('drops the chrome the frame drops', (tester) async {
+      await pump(tester, done);
+
+      // No bar to title a finished order, nothing to go back to, and no step
+      // left to indicate.
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+      expect(find.byType(CheckoutStepIndicator), findsNothing);
+      // Its two actions live in the content instead.
+      expect(find.text('متابعة التسوق'), findsOneWidget);
+    });
+
+    testWidgets('empties the cart, because the order now holds it', (
       tester,
     ) async {
-      // Success is the last one left, and the next batch builds it.
-      await pump(tester, const CheckoutInProgress(step: CheckoutStep.success));
-
-      expect(find.byType(PlaceholderTab), findsOneWidget);
-      expect(find.byType(ContactStep), findsNothing);
-
-      final next = tester.widget<FilledButton>(
-        find.ancestor(
-          of: find.text('التالي'),
-          matching: find.byType(FilledButton),
-        ),
+      await pump(
+        tester,
+        done,
+        from: const CheckoutInProgress(step: CheckoutStep.review),
       );
-      expect(next.onPressed, isNull);
+
+      verify(() => cartBloc.add(const CartCleared())).called(1);
+    });
+
+    testWidgets('empties it on arriving, not on every state that follows', (
+      tester,
+    ) async {
+      // Already on the confirmation when this state lands, so nothing arrived:
+      // the listener is guarded on the transition, not on the step. Guarding on
+      // the step alone would clear again for any later state here.
+      await pump(tester, done, from: done);
+
+      verifyNever(() => cartBloc.add(const CartCleared()));
+    });
+
+    testWidgets('a guest is not offered order tracking', (tester) async {
+      await pump(tester, done, auth: const AuthUnauthenticated());
+
+      // `/orders` is behind the sign-in gate, so the button would send someone
+      // who has just paid to a login screen.
+      expect(find.text('تتبع الطلب'), findsNothing);
+      expect(find.text('متابعة التسوق'), findsOneWidget);
+    });
+
+    testWidgets('a signed-in shopper is', (tester) async {
+      await pump(tester, done);
+
+      expect(find.text('تتبع الطلب'), findsOneWidget);
+    });
+
+    testWidgets('survives both directions', (tester) async {
+      for (final locale in const [Locale('ar'), Locale('en')]) {
+        await pump(tester, done, locale: locale);
+        expect(find.byType(SuccessStep), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
     });
   });
 

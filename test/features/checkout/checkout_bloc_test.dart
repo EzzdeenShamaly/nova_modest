@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/features/address/domain/entities/address.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
-import 'package:nova_modest/features/checkout/domain/entities/order_totals.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_totals.dart';
 import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/checkout_draft.dart';
@@ -12,8 +12,9 @@ import 'package:nova_modest/features/checkout/domain/entities/checkout_step.dart
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
-import 'package:nova_modest/features/checkout/domain/entities/order.dart';
-import 'package:nova_modest/features/checkout/domain/repositories/order_repository.dart';
+import 'package:nova_modest/features/orders/domain/entities/order.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_status.dart';
+import 'package:nova_modest/features/orders/domain/repositories/order_repository.dart';
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart';
 
 class _MockOrderRepository extends Mock implements OrderRepository {}
@@ -316,12 +317,10 @@ void main() {
     test('the chosen method decides the shipping, not the cart quote', () {
       // They agree today because both are 35. Written so they still agree when
       // a second method makes them differ.
-      final totals = OrderTotals.of(
-        const CartTotals(subtotal: 450, shipping: 999),
-        shipping: ShippingMethod.standard,
-        payment: PaymentMethod.cashOnDelivery,
+      const draft = CheckoutDraft(
+        cart: CartTotals(subtotal: 450, shipping: 999),
       );
-      expect(totals.shipping, ShippingMethod.standard.cost);
+      expect(draft.totals!.shipping, ShippingMethod.standard.cost);
     });
 
     test('the card charges no fee, and cannot be chosen', () {
@@ -462,6 +461,7 @@ void main() {
       number: 'ORD-260818-0001',
       placedAt: DateTime(2026, 8, 18),
       totals: const OrderTotals(subtotal: 450, shipping: 35, paymentFee: 15),
+      status: OrderStatus.processing,
     );
 
     const ready = CheckoutInProgress(

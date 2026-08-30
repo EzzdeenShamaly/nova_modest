@@ -28,4 +28,12 @@ abstract class CartRepository {
 
   /// Drops one line entirely.
   Future<Result<List<CartItem>>> remove(String lineId);
+
+  /// Empties the cart.
+  ///
+  /// Called when an order is placed, not from any control the shopper taps:
+  /// leaving the lines behind means they come back to a cart of things they
+  /// have already bought and can buy again by accident. Returns the empty list
+  /// like every other method here, so the bloc has one emit path.
+  Future<Result<List<CartItem>>> clear();
 }

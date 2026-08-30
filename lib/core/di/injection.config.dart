@@ -63,10 +63,6 @@ import 'package:nova_modest/features/catalog/presentation/bloc/product_list_bloc
     as _i840;
 import 'package:nova_modest/features/catalog/presentation/bloc/search_bloc.dart'
     as _i1072;
-import 'package:nova_modest/features/checkout/data/repositories/fake_order_repository.dart'
-    as _i753;
-import 'package:nova_modest/features/checkout/domain/repositories/order_repository.dart'
-    as _i146;
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart'
     as _i1012;
 import 'package:nova_modest/features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -75,8 +71,16 @@ import 'package:nova_modest/features/onboarding/domain/repositories/onboarding_r
     as _i835;
 import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_bloc.dart'
     as _i267;
+import 'package:nova_modest/features/orders/data/repositories/fake_order_repository.dart'
+    as _i335;
+import 'package:nova_modest/features/orders/domain/repositories/order_repository.dart'
+    as _i827;
+import 'package:nova_modest/features/orders/presentation/bloc/order_detail_bloc.dart'
+    as _i83;
+import 'package:nova_modest/features/orders/presentation/bloc/orders_bloc.dart'
+    as _i106;
 import 'package:nova_modest/features/settings/data/repositories/locale_repository_impl.dart'
-    as _i147;
+    as _i146;
 import 'package:nova_modest/features/settings/data/repositories/notification_preferences_repository_impl.dart'
     as _i410;
 import 'package:nova_modest/features/settings/domain/repositories/locale_repository.dart'
@@ -121,7 +125,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i512.AddressListBloc>(
       () => _i512.AddressListBloc(gh<_i1039.AddressRepository>()),
     );
-    gh.lazySingleton<_i146.OrderRepository>(() => _i753.FakeOrderRepository());
     gh.lazySingleton<_i666.SearchHistoryRepository>(
       () => _i448.SearchHistoryRepositoryImpl(gh<_i460.SharedPreferences>()),
     );
@@ -133,11 +136,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i460.SharedPreferences>(),
       ),
     );
+    gh.lazySingleton<_i827.OrderRepository>(() => _i335.FakeOrderRepository());
     gh.lazySingleton<_i1022.LocaleRepository>(
-      () => _i147.LocaleRepositoryImpl(gh<_i460.SharedPreferences>()),
+      () => _i146.LocaleRepositoryImpl(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i479.CatalogRepository>(
       () => const _i623.FakeCatalogRepository(),
+    );
+    gh.factory<_i83.OrderDetailBloc>(
+      () => _i83.OrderDetailBloc(gh<_i827.OrderRepository>()),
+    );
+    gh.factory<_i106.OrdersBloc>(
+      () => _i106.OrdersBloc(gh<_i827.OrderRepository>()),
     );
     gh.lazySingleton<_i866.CartRepository>(
       () => _i290.CartRepositoryImpl(
@@ -157,7 +167,7 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.factory<_i1012.CheckoutBloc>(
-      () => _i1012.CheckoutBloc(gh<_i146.OrderRepository>()),
+      () => _i1012.CheckoutBloc(gh<_i827.OrderRepository>()),
     );
     gh.lazySingleton<_i776.CartBloc>(
       () => _i776.CartBloc(gh<_i866.CartRepository>()),

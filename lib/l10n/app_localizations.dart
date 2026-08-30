@@ -1339,6 +1339,150 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'خلال {days}'**
   String reviewShippingEta(String days);
+
+  /// Heading of the confirmation screen, the last thing checkout shows.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تأكيد طلبك بنجاح!'**
+  String get successTitle;
+
+  /// Label before the order number on the confirmation screen. Ends with a colon; the number follows it.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الطلب:'**
+  String get successOrderNumber;
+
+  /// Supporting line under the order number. Deliberately says 'contact', not 'email': a guest order carries only a phone number.
+  ///
+  /// In ar, this message translates to:
+  /// **'سنتواصل معك قريبًا لتأكيد التوصيل.'**
+  String get successBody;
+
+  /// Action opening the shopper's orders. Not shown to a guest, who has no account to track through.
+  ///
+  /// In ar, this message translates to:
+  /// **'تتبع الطلب'**
+  String get successTrackOrder;
+
+  /// Action returning to the shop front.
+  ///
+  /// In ar, this message translates to:
+  /// **'متابعة التسوق'**
+  String get successKeepShopping;
+
+  /// Heading of the order-history screen.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلباتي'**
+  String get ordersTitle;
+
+  /// Count beside the orders heading. Arabic has a dual and two plural bands, which a ternary cannot express.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{لا طلبات} =1{طلب واحد} =2{طلبان} few{{count} طلبات} many{{count} طلبًا} other{{count} طلب}}'**
+  String ordersCount(int count);
+
+  /// Heading of the empty order history.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات بعد'**
+  String get ordersEmpty;
+
+  /// Supporting line under the empty-orders heading.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل طلب تنهينه سيظهر هنا لتتابعيه'**
+  String get ordersEmptyBody;
+
+  /// Action on the empty order history, leading to the shop front.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدئي التسوق'**
+  String get ordersEmptyAction;
+
+  /// Badge on an order card counting the lines its single thumbnail does not show.
+  ///
+  /// In ar, this message translates to:
+  /// **'+{count}'**
+  String ordersMoreItems(int count);
+
+  /// Order status: placed, nothing done yet.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد الانتظار'**
+  String get orderStatusPending;
+
+  /// Order status: accepted by the shop.
+  ///
+  /// In ar, this message translates to:
+  /// **'مؤكد'**
+  String get orderStatusConfirmed;
+
+  /// Order status: being picked and packed.
+  ///
+  /// In ar, this message translates to:
+  /// **'قيد التحضير'**
+  String get orderStatusProcessing;
+
+  /// Order status: handed to the courier.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الشحن'**
+  String get orderStatusShipped;
+
+  /// Order status on a list badge, where the frame writes the short form.
+  ///
+  /// In ar, this message translates to:
+  /// **'مكتمل'**
+  String get orderStatusDelivered;
+
+  /// The same status on the details tracker, where the frame writes it in full. Two strings for one value, because the two frames word it differently.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التوصيل'**
+  String get orderStatusDeliveredLong;
+
+  /// App-bar title of the order-details screen.
+  ///
+  /// In ar, this message translates to:
+  /// **'تفاصيل الطلب'**
+  String get orderDetailTitle;
+
+  /// Line above the order number. The date is formatted by intl for the locale.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم الطلب في {date}'**
+  String orderPlacedOn(String date);
+
+  /// The order number as the details screen heads it, with the hash the frame draws.
+  ///
+  /// In ar, this message translates to:
+  /// **'الطلب #{number}'**
+  String orderNumberHeading(String number);
+
+  /// Heading over the five-stage tracker.
+  ///
+  /// In ar, this message translates to:
+  /// **'حالة الطلب'**
+  String get orderStatusHeading;
+
+  /// Screen-reader label for the tracker, which is dots and words a reader would otherwise announce five times.
+  ///
+  /// In ar, this message translates to:
+  /// **'حالة الطلب: {status}'**
+  String orderStatusCurrent(String status);
+
+  /// Heading over the ordered lines, counting quantities rather than lines.
+  ///
+  /// In ar, this message translates to:
+  /// **'المنتجات ({count})'**
+  String orderItemsHeading(int count);
+
+  /// Heading of the delivery-address card on the details screen.
+  ///
+  /// In ar, this message translates to:
+  /// **'عنوان التوصيل'**
+  String get orderDeliveryAddress;
 }
 
 class _AppLocalizationsDelegate

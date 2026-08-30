@@ -71,6 +71,33 @@ void main() {
     );
   });
 
+  group('clearing after an order is placed', () {
+    blocTest<CartBloc, CartState>(
+      'empties the cart',
+      setUp: () => when(
+        () => repository.clear(),
+      ).thenAnswer((_) async => const Ok(<CartItem>[])),
+      build: () => CartBloc(repository),
+      act: (bloc) => bloc.add(const CartCleared()),
+      // No loading state: there is nothing to fetch, and a spinner between two
+      // versions of a cart is a flicker rather than information.
+      expect: () => const [CartEmpty()],
+      verify: (_) => verify(() => repository.clear()).called(1),
+    );
+
+    blocTest<CartBloc, CartState>(
+      'a failed clear is reported rather than swallowed',
+      setUp: () => when(
+        () => repository.clear(),
+      ).thenAnswer((_) async => const Err(CacheFailure())),
+      build: () => CartBloc(repository),
+      act: (bloc) => bloc.add(const CartCleared()),
+      // The order was still placed; the cart simply did not empty. Saying so
+      // beats a badge that silently disagrees with the storage.
+      expect: () => const [CartError(CacheFailure())],
+    );
+  });
+
   group('adding', () {
     blocTest<CartBloc, CartState>(
       'passes the whole selection through to the repository',

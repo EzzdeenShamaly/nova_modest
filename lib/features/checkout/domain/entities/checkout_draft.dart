@@ -3,8 +3,8 @@ import 'package:nova_modest/features/address/domain/entities/address.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
-import 'package:nova_modest/features/checkout/domain/entities/order.dart';
-import 'package:nova_modest/features/checkout/domain/entities/order_totals.dart';
+import 'package:nova_modest/features/orders/domain/entities/order.dart';
+import 'package:nova_modest/features/orders/domain/entities/order_totals.dart';
 import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 
@@ -60,7 +60,21 @@ abstract class CheckoutDraft with _$CheckoutDraft {
 
   /// The four figures step 3 and the review screen show, or null before the
   /// cart is known.
+  ///
+  /// Built here rather than by a factory on `OrderTotals`: pricing a cart under
+  /// a chosen shipping and payment method is **checkout's** business, and a
+  /// constructor that knew those two enums would point the orders feature at
+  /// this one.
+  ///
+  /// Takes only the **subtotal** from the cart. The cart's own shipping is the
+  /// quote made before a method was picked; once one is, the method decides.
+  /// They agree today because both are 35, and this is written so they still
+  /// agree when a second method makes them differ.
   OrderTotals? get totals => cart == null
       ? null
-      : OrderTotals.of(cart!, shipping: shipping, payment: payment);
+      : OrderTotals(
+          subtotal: cart!.subtotal,
+          shipping: shipping.cost,
+          paymentFee: payment.fee,
+        );
 }

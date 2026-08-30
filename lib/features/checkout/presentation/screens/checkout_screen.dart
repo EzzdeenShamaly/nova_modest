@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
 import 'package:nova_modest/core/widgets/failure_view.dart';
-import 'package:nova_modest/core/widgets/placeholder_tab.dart';
+import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:nova_modest/features/checkout/domain/entities/checkout_step.dart';
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
 import 'package:nova_modest/features/checkout/presentation/bloc/checkout_bloc.dart';
@@ -12,7 +14,9 @@ import 'package:nova_modest/features/checkout/presentation/widgets/checkout_step
 import 'package:nova_modest/features/checkout/presentation/widgets/contact_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/payment_step.dart';
 import 'package:nova_modest/features/checkout/presentation/widgets/review_step.dart';
+import 'package:nova_modest/features/checkout/presentation/widgets/success_step.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
+import 'package:nova_modest/router/routes.dart';
 
 /// The checkout flow: one route, one screen, a body that follows the step.
 ///
@@ -29,11 +33,16 @@ class CheckoutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CheckoutBloc, CheckoutState>(
-      listenWhen: (previous, current) => current is CheckoutFailed,
-      // A snack bar rather than a FailureView: the whole reviewed order is
-      // still on screen and still correct, and replacing it with an error card
-      // would throw away what the shopper is about to confirm.
+      listenWhen: (previous, current) =>
+          current is CheckoutFailed ||
+          // The transition into the confirmation, not merely being on it: this
+          // must fire once per placed order, not once per rebuild.
+          (current.step == CheckoutStep.success &&
+              previous.step != CheckoutStep.success),
       listener: (context, state) {
+        // A snack bar rather than a FailureView: the whole reviewed order is
+        // still on screen and still correct, and replacing it with an error
+        // card would throw away what the shopper is about to confirm.
         if (state case CheckoutFailed(:final failure)) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -42,7 +51,17 @@ class CheckoutScreen extends StatelessWidget {
               ),
             ),
           );
+          return;
         }
+
+        // The order exists, so the cart must not — otherwise the shopper comes
+        // back to the things they have just bought and buys them again.
+        //
+        // Dispatched to `CartBloc` from here rather than done inside
+        // `CheckoutBloc`: `CartBloc` is the single owner of cart state, and a
+        // second writer would leave the navigation badge disagreeing with the
+        // storage until something re-read it.
+        context.read<CartBloc>().add(const CartCleared());
       },
       builder: (context, state) => _CheckoutView(state: state),
     );
@@ -95,57 +114,85 @@ class _CheckoutViewState extends State<_CheckoutView> {
     }
   }
 
+  /// The terminal step: no chrome, no way back into a flow that is finished.
+  bool get _isDone => widget.state.step == CheckoutStep.success;
+
+  /// Leaves checkout for the shop front, replacing the stack.
+  ///
+  /// `go`, not `pop`: popping would land on whatever opened checkout, which is
+  /// the cart the order has just emptied.
+  void _leave() => context.go(Routes.homePath);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final state = widget.state;
 
     return PopScope<Object?>(
-      // Back must walk the steps, not leave the flow from the middle of it.
-      canPop: !state.canMoveBack,
+      // Back must walk the steps, not leave the flow from the middle of it —
+      // and from the confirmation there is no walking back to a placed order.
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
+        if (_isDone) {
+          _leave();
+          return;
+        }
         _back();
       },
       child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(_titleFor(state.step, l10n)),
-          leading: IconButton(
-            onPressed: _back,
-            // Icons.arrow_back mirrors with the layout; arrow_left would not.
-            icon: const Icon(Icons.arrow_back),
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          ),
-        ),
+        // The confirmation frame draws no bar at all: nothing to title, and
+        // nothing to go back to.
+        appBar: _isDone
+            ? null
+            : AppBar(
+                centerTitle: true,
+                title: Text(_titleFor(state.step, l10n)),
+                leading: IconButton(
+                  onPressed: _back,
+                  // Icons.arrow_back mirrors with the layout; arrow_left would
+                  // not.
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                ),
+              ),
         // A fixed indicator over a step that fills what is left, rather than
         // one scrolling list holding both: a step body that wants the whole
         // height — the placeholder ones do — cannot live inside a ListView, and
         // asking for an unbounded height is exactly how that fails.
-        body: Column(
-          children: [
-            Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: AppSpacing.l,
-                end: AppSpacing.l,
-                top: AppSpacing.l,
+        // The confirmation owns its whole display; every other step is a fixed
+        // indicator over a body that fills what is left.
+        body: _isDone
+            ? _bodyFor(state, l10n)
+            : Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      start: AppSpacing.l,
+                      end: AppSpacing.l,
+                      top: AppSpacing.l,
+                    ),
+                    child: CheckoutStepIndicator(step: state.step),
+                  ),
+                  SizedBox(height: AppSpacing.xxl),
+                  Expanded(child: _bodyFor(state, l10n)),
+                ],
               ),
-              child: CheckoutStepIndicator(step: state.step),
-            ),
-            SizedBox(height: AppSpacing.xxl),
-            Expanded(child: _bodyFor(state, l10n)),
-          ],
-        ),
-        bottomNavigationBar: _NextBar(
-          label: _nextLabelFor(state.step, l10n),
-          // Only the built steps can move forward — and nothing may while the
-          // order is in flight, which is the one action in this app that must
-          // not happen twice.
-          onNext: _builtSteps.contains(state.step) && state is! CheckoutPlacing
-              ? _next
-              : null,
-          busy: state is CheckoutPlacing,
-        ),
+        // The confirmation carries its own two actions inside the content.
+        bottomNavigationBar: _isDone
+            ? null
+            : _NextBar(
+                label: _nextLabelFor(state.step, l10n),
+                // Only the built steps can move forward — and nothing may while
+                // the order is in flight, which is the one action in this app
+                // that must not happen twice.
+                onNext:
+                    _builtSteps.contains(state.step) &&
+                        state is! CheckoutPlacing
+                    ? _next
+                    : null,
+                busy: state is CheckoutPlacing,
+              ),
       ),
     );
   }
@@ -196,9 +243,15 @@ class _CheckoutViewState extends State<_CheckoutView> {
       onEdit: (step) =>
           context.read<CheckoutBloc>().add(CheckoutStepRequested(step)),
     ),
-    CheckoutStep.success => PlaceholderTab(
-      title: _titleFor(state.step, l10n),
-      icon: Icons.receipt_long_outlined,
+    CheckoutStep.success => SuccessStep(
+      order: state.draft.order,
+      // Hidden from a guest: `/orders` is behind the sign-in gate, so the
+      // button would send someone who has just paid to a login screen.
+      onTrackOrder: switch (context.read<AuthBloc>().state) {
+        AuthAuthenticated() => () => context.go(Routes.ordersPath),
+        _ => null,
+      },
+      onKeepShopping: _leave,
     ),
   };
 

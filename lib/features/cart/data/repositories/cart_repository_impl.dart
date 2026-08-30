@@ -93,6 +93,9 @@ class CartRepositoryImpl implements CartRepository {
     ],
   );
 
+  @override
+  Future<Result<List<CartItem>>> clear() => _mutate((_) => const []);
+
   /// Read, transform, write, then return the resulting cart — the shape every
   /// mutation shares.
   Future<Result<List<CartItem>>> _mutate(

@@ -682,4 +682,95 @@ class AppLocalizationsEn extends AppLocalizations {
   String reviewShippingEta(String days) {
     return 'Within $days';
   }
+
+  @override
+  String get successTitle => 'Your order is confirmed!';
+
+  @override
+  String get successOrderNumber => 'Order number:';
+
+  @override
+  String get successBody => 'We will contact you shortly to confirm delivery.';
+
+  @override
+  String get successTrackOrder => 'Track order';
+
+  @override
+  String get successKeepShopping => 'Keep shopping';
+
+  @override
+  String get ordersTitle => 'My orders';
+
+  @override
+  String ordersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count orders',
+      one: '1 order',
+      zero: 'No orders',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ordersEmpty => 'No orders yet';
+
+  @override
+  String get ordersEmptyBody => 'Every order you place will show up here';
+
+  @override
+  String get ordersEmptyAction => 'Start shopping';
+
+  @override
+  String ordersMoreItems(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get orderStatusPending => 'Pending';
+
+  @override
+  String get orderStatusConfirmed => 'Confirmed';
+
+  @override
+  String get orderStatusProcessing => 'Processing';
+
+  @override
+  String get orderStatusShipped => 'Shipped';
+
+  @override
+  String get orderStatusDelivered => 'Completed';
+
+  @override
+  String get orderStatusDeliveredLong => 'Delivered';
+
+  @override
+  String get orderDetailTitle => 'Order details';
+
+  @override
+  String orderPlacedOn(String date) {
+    return 'Placed on $date';
+  }
+
+  @override
+  String orderNumberHeading(String number) {
+    return 'Order #$number';
+  }
+
+  @override
+  String get orderStatusHeading => 'Order status';
+
+  @override
+  String orderStatusCurrent(String status) {
+    return 'Order status: $status';
+  }
+
+  @override
+  String orderItemsHeading(int count) {
+    return 'Items ($count)';
+  }
+
+  @override
+  String get orderDeliveryAddress => 'Delivery address';
 }

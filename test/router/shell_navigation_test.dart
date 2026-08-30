@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/core/theme/app_theme.dart';
 import 'package:nova_modest/core/widgets/app_bottom_nav.dart';
-import 'package:nova_modest/core/widgets/placeholder_tab.dart';
 import 'package:nova_modest/features/profile/presentation/widgets/profile_menu_tile.dart';
 import 'package:nova_modest/features/address/presentation/screens/address_list_screen.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
@@ -21,6 +20,7 @@ import 'package:nova_modest/features/onboarding/presentation/bloc/onboarding_blo
 import 'package:nova_modest/features/profile/presentation/screens/profile_screen.dart';
 import 'package:nova_modest/features/settings/presentation/screens/notifications_screen.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
+import 'package:nova_modest/features/orders/presentation/screens/orders_screen.dart';
 import 'package:nova_modest/router/app_router.dart';
 import 'package:nova_modest/router/app_shell.dart';
 import 'package:nova_modest/router/routes.dart';
@@ -149,7 +149,6 @@ void main() {
 
     expect(locationOf(router), Routes.categoriesPath);
     expect(find.byType(ProductListScreen), findsOneWidget);
-    expect(find.byType(PlaceholderTab), findsNothing);
 
     // Still the categories branch, so the bar keeps that tab active.
     final shell = tester.widget<AppShell>(find.byType(AppShell));
@@ -268,7 +267,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AddressListScreen), findsOneWidget);
-    expect(find.byType(PlaceholderTab), findsNothing);
     final shell = tester.widget<AppShell>(find.byType(AppShell));
     expect(
       shell.navigationShell.currentIndex,
@@ -287,7 +285,8 @@ void main() {
     await tester.tap(find.text('طلباتي'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(PlaceholderTab), findsOneWidget);
+    // A real screen now — the last PlaceholderTab in the app went with it.
+    expect(find.byType(OrdersScreen), findsOneWidget);
     final shell = tester.widget<AppShell>(find.byType(AppShell));
     expect(
       shell.navigationShell.currentIndex,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/settings_card.dart';
 import 'package:nova_modest/features/settings/presentation/bloc/locale_bloc.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
 
@@ -42,7 +43,22 @@ class LanguageScreen extends StatelessWidget {
         builder: (context, state) => ListView(
           padding: EdgeInsetsDirectional.all(AppSpacing.l),
           children: [
-            _OptionCard(selected: state.locale),
+            // The one frame drawn as a filled panel rather than an
+            // outlined card, so it names the variant; the rows are built here
+            // like every other caller's.
+            SettingsCard(
+              variant: SettingsCardVariant.filled,
+              children: [
+                for (final locale in AppLocalizations.supportedLocales)
+                  _LanguageOption(
+                    locale: locale,
+                    selected: locale.languageCode == state.locale.languageCode,
+                    onTap: () => context.read<LocaleBloc>().add(
+                      LocaleSelected(locale.languageCode),
+                    ),
+                  ),
+              ],
+            ),
             SizedBox(height: AppSpacing.l),
             Text(
               l10n.languageExplanation,
@@ -52,43 +68,6 @@ class LanguageScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// The design's single card holding one row per supported language.
-class _OptionCard extends StatelessWidget {
-  const _OptionCard({required this.selected});
-
-  final Locale selected;
-
-  @override
-  Widget build(BuildContext context) {
-    const locales = AppLocalizations.supportedLocales;
-
-    return Material(
-      color: AppColors.secondary,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.m),
-      ),
-      child: Column(
-        children: [
-          for (final locale in locales) ...[
-            _LanguageOption(
-              locale: locale,
-              selected: locale.languageCode == selected.languageCode,
-              onTap: () => context.read<LocaleBloc>().add(
-                LocaleSelected(locale.languageCode),
-              ),
-            ),
-            if (locale != locales.last)
-              // height 0: the rule alone, with none of the Divider theme's
-              // surrounding space, because the rows carry their own.
-              const Divider(height: 0, color: AppColors.secondary),
-          ],
-        ],
       ),
     );
   }
