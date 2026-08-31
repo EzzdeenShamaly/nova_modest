@@ -1,6 +1,6 @@
 # Active Context
 
-**Last Updated:** 2026-08-30 (Supabase merged; the project has a real backend)
+**Last Updated:** 2026-08-31 (three sign-in defects, found by running it for real)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
@@ -1562,6 +1562,82 @@ since 2026-08-18 for exactly this.
   the wiring, not the queries.
 
 Verified: `flutter analyze` — 1 info, 0 errors. **710 tests passing.**
+
+## Three defects, found the first time sign-in was real (2026-08-31)
+
+The local Supabase stack came up and email sign-in was tried end to end. It
+failed, and unpicking why took three separate fixes. **None of them any test
+could have caught as written**, and the first two were invisible in
+`flutter run`'s log — on web, `print` goes to the browser console, and GoRouter
+only logs navigations that happen. The evidence came from GoTrue's container log
+and from Postgres.
+
+### (a) PKCE against a typed code — sign-in could never succeed
+`supabase_flutter` defaults to `AuthFlowType.pkce` (`gotrue_client.dart:155`).
+Under PKCE, `signInWithOtp` sends a `code_challenge` and the server binds the
+emailed token to a flow row; redeeming it needs
+`exchangeCodeForSession(authCode)`, and that `auth_code` arrives **in a link**,
+never in six typed digits. `verifyOTP` has no PKCE branch at all — its body is
+`{email, token, type, …}` with no `code_verifier`.
+
+Every attempt returned `403 otp_expired`, including one **14 seconds** after the
+code was issued, with `GOTRUE_MAILER_OTP_EXP=3600`.
+
+**The evidence that settled it:** three rows in `auth.flow_state`,
+`code_challenge_method` s256, `auth_code_issued_at` null — one per attempt from
+the app, and **none** for the same requests issued by hand without a challenge,
+which succeeded. Fixed by pinning `AuthFlowType.implicit`, which is the flow a
+typed code belongs to; PKCE guards a redirect hop this design does not have.
+
+**A hypothesis that was wrong, and was dropped:** that `OtpType.email` was the
+wrong type for a token GoTrue had stored in `recovery_token`. Testing it against
+the live server showed **both** `email` and `magiclink` succeed with a
+non-PKCE token. Asserting it would have sent the fix in the wrong direction.
+
+### (b) The mapper hid (a) behind the wrong message
+GoTrue answers **403** both for "your session expired" and for "that code is
+wrong". `mapSupabaseError` checked `statusCode` before anything else, so an
+invalid code became `UnauthorizedFailure` → "your session expired, sign in
+again" — told to someone in the middle of signing in, about a code they had just
+been emailed. That message is what sent the search towards expiry and timing,
+both of which were innocent.
+
+`AuthException` carries `code` as well as `statusCode`. The mapper now switches
+on it first — only codes there is evidence for — and falls back to the status.
+The old text heuristic (`contains('otp')`) was **kept as a last resort** rather
+than deleted: removing it would have quietly turned some coded-less errors from
+`ValidationFailure` into `ServerFailure`, which is not what the fix was for.
+
+### (c) The OTP boxes mirrored under Arabic
+With (a) and (b) fixed, a valid code was still refused. It was neither stale nor
+mistyped: sending that exact code by hand returned **HTTP 200**.
+
+`OtpInput` set no `textDirection`, and its comment claimed that was correct —
+"so it mirrors with the rest of the UI". Under Arabic the row did mirror, so box
+index 0 rendered **rightmost** while `_code` joined 0..5. A shopper reading
+`338329` and typing it in focus order saw `923833`; one who typed to make the
+screen read right sent `923833`. Confirmed live: reversing the typing order
+signed in successfully.
+
+Pinned to LTR inside the control, with a `direction-fixed` tag — the call this
+app already made for an order number, a dialling code and a phone field. A
+number has no linguistic direction.
+
+**This one is ours, not the teammate's**, and it has nothing to do with
+Supabase. `FakeAuthRepository` accepted any code, so the order never mattered
+until a real server started checking.
+
+### Why the existing tests were green through all of it
+The screen test typed with `find.byType(TextField).at(i)` — **tree order, which
+is index order whatever the layout does**. It asserted the assembled code and
+passed while the row rendered backwards. The new `otp_input_test.dart` measures
+`dx` instead; three of its cases fail on the old widget.
+
+The same shape as the other false passes recorded in this file. The lesson is
+narrower than "test more": a test that reads the tree cannot see the screen.
+
+Verified: `flutter analyze` — 1 deprecation info, 0 errors. **730 tests
+passing**, the previous 724 untouched.
 
 ## Current focus
 

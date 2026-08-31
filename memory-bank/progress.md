@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-08-30
+**Last Updated:** 2026-08-31
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -276,9 +276,18 @@ Tracks what's Done, In Progress, and Blocked, per feature.
 
 ## Open after the Supabase merge
 
-- **Nothing has run against a live Supabase.** The suite covers the mapping and
-  the wiring; the queries themselves are unproven. `integration_test/` still
+- **Email sign-in works end to end against the live stack** (2026-08-31), after
+  three fixes: `AuthFlowType.implicit` (PKCE cannot redeem a typed code),
+  `mapSupabaseError` reading `error.code` before `statusCode`, and `OtpInput`
+  pinned LTR so the six boxes do not mirror under Arabic. The catalogue reads
+  and the RLS policies were verified live too — `42501` from
+  `order_number_sequences` is the authorisation refusal rule 08 describes.
+- **Still unproven against a live server:** placing an order (`place_order`),
+  saving an address, and reading order history. Those are the three seams the
+  merge ported and nothing has exercised them yet. `integration_test/` still
   does not exist, which is where a test with a real local stack would go.
+- **Google sign-in is untried** and needs a web client ID plus the provider
+  enabled, per the teammate's README.
 - **The cart is still device-local** while everything around it is server-backed
   — the recorded "server-side cart" gap, now more visible.
 - **`supabase_bootstrap.dart` uses the deprecated `anonKey`.** One analyzer

@@ -5,9 +5,20 @@ import 'package:nova_modest/core/theme/app_dimensions.dart';
 
 /// The six-box one-time-code field.
 ///
-/// Laid out in **logical** order with no `textDirection` set, so it mirrors with
-/// the rest of the UI. The digits themselves are always read start-to-end, which
-/// is what the user's typing order means.
+/// **Pinned left-to-right, in every locale.** A one-time code is a number, and a
+/// number has no linguistic direction — the same call already made for an order
+/// number, a dialling code and a phone field in this app.
+///
+/// This is a fix, and the comment it replaces was the bug: it claimed the row
+/// should mirror "with the rest of the UI". Under Arabic it did, so box index 0
+/// rendered rightmost while `_code` still joined 0..5. A shopper reading
+/// `338329` off the email and typing it in the order focus moved saw `923833`
+/// on screen; one who typed to make the screen read correctly sent `923833` to
+/// the server. Sign-in failed with a perfectly valid code, and the server
+/// reported only "token is invalid".
+///
+/// The indexing, the focus handling and `_code` are untouched — they were right.
+/// Only the rendering direction was wrong.
 ///
 /// Handles what a naive six-`TextField` version gets wrong: typing advances,
 /// backspace on an empty box steps back and clears the previous one, and pasting
@@ -123,61 +134,68 @@ class _OtpInputState extends State<OtpInput> {
     // 348pt inside 350pt, with no margin for a narrower device. scaleDown keeps
     // the design's proportions and shrinks only when it has to, so the row
     // cannot overflow at any width.
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var index = 0; index < widget.length; index++)
-            Padding(
-              padding: EdgeInsetsDirectional.symmetric(
-                horizontal: AppSpacing.xxs,
-              ),
-              child: SizedBox(
-                width: _boxWidth,
-                height: _boxHeight,
-                child: Focus(
-                  onKeyEvent: (_, event) => _onKey(index, event),
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _nodes[index],
-                    enabled: widget.enabled,
-                    autofocus: index == 0,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    // The code is digits, so it reads start-to-end whatever the
-                    // ambient direction is.
-                    // direction-fixed: a numeric code has no linguistic direction
-                    textDirection: TextDirection.ltr,
-                    style: textTheme.titleLarge,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      counterText: '',
-                      filled: true,
-                      fillColor: AppColors.secondary,
-                      contentPadding: EdgeInsetsDirectional.zero,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.s),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.s),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.s),
-                        borderSide: const BorderSide(
-                          color: AppColors.accent,
-                          width: 2,
+    // direction-fixed: a one-time code is digits, read left to right by every
+    // reader, so the boxes must not mirror with the layout. Applied here rather
+    // than by each host screen, because the direction is a property of this
+    // control and forgetting it once brings the defect back.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var index = 0; index < widget.length; index++)
+              Padding(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.xxs,
+                ),
+                child: SizedBox(
+                  width: _boxWidth,
+                  height: _boxHeight,
+                  child: Focus(
+                    onKeyEvent: (_, event) => _onKey(index, event),
+                    child: TextField(
+                      controller: _controllers[index],
+                      focusNode: _nodes[index],
+                      enabled: widget.enabled,
+                      autofocus: index == 0,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      // The code is digits, so it reads start-to-end whatever the
+                      // ambient direction is.
+                      // direction-fixed: a numeric code has no linguistic direction
+                      textDirection: TextDirection.ltr,
+                      style: textTheme.titleLarge,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        counterText: '',
+                        filled: true,
+                        fillColor: AppColors.secondary,
+                        contentPadding: EdgeInsetsDirectional.zero,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.s),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.s),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.s),
+                          borderSide: const BorderSide(
+                            color: AppColors.accent,
+                            width: 2,
+                          ),
                         ),
                       ),
+                      onChanged: (value) => _onChanged(index, value),
                     ),
-                    onChanged: (value) => _onChanged(index, value),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

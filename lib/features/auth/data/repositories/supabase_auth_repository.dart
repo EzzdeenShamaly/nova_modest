@@ -66,10 +66,7 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       // Always succeeds from the caller's point of view: a distinct response
       // for an unknown address would be an account-enumeration oracle.
-      await _client.auth.signInWithOtp(
-        email: email,
-        shouldCreateUser: true,
-      );
+      await _client.auth.signInWithOtp(email: email, shouldCreateUser: true);
       return const Ok(null);
     } catch (_) {
       return const Ok(null);
