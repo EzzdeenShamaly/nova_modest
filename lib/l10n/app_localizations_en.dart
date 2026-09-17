@@ -221,6 +221,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failureUnknown => 'Something went wrong.';
 
   @override
+  String get orderErrorSomeProduct => 'one of the items in your cart';
+
+  @override
+  String orderErrorProductSoldOut(String product) {
+    return '$product: sold out. Please remove it from your cart to place the order.';
+  }
+
+  @override
+  String orderErrorProductNotFound(String product) {
+    return '$product: no longer available in the shop. Please remove it from your cart.';
+  }
+
+  @override
+  String orderErrorColourNotForProduct(String product) {
+    return '$product: the colour you chose is no longer available. Please choose another.';
+  }
+
+  @override
+  String orderErrorSizeNotForProduct(String product) {
+    return '$product: the size you chose is no longer available. Please choose another.';
+  }
+
+  @override
+  String get orderErrorPaymentNotAvailable =>
+      'Card payment is not available yet. Please choose cash on delivery.';
+
+  @override
+  String get orderErrorTooManyLines =>
+      'An order cannot carry more than 20 different products. Please remove some items from your cart.';
+
+  @override
+  String get orderErrorNotSignedIn =>
+      'Your session has ended. Please sign in and try again.';
+
+  @override
+  String get orderErrorTechnical =>
+      'The order could not be placed because of a technical problem on our side. Please try again, and contact us if it keeps happening.';
+
+  @override
   String get cartTitle => 'Cart';
 
   @override

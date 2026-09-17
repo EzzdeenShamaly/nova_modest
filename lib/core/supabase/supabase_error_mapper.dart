@@ -65,7 +65,26 @@ Failure mapSupabaseError(Object error) {
     if (error.code == '42501' || error.code == 'PGRST301') {
       return UnauthorizedFailure(error.message);
     }
-    if (error.code == 'P0001' || error.code == '23514') {
+    if (error.code == 'P0001') {
+      // The order contract's format: a stable code in `message`, the prose
+      // explanation in `details`. The code is carried through so the UI can say
+      // which refusal this was instead of one generic sentence for all thirteen
+      // (`supabase/contract/customer.md`, *Place an order*).
+      return ValidationFailure(error.message, code: error.message);
+    }
+    if (error.code == '23514') {
+      // A CHECK violation, deliberately carrying **no** code: `message` here is
+      // Postgres's constraint text, not a contract code, and passing it as one
+      // would invent a fourteenth.
+      //
+      // No path in this app reaches one today. Every CHECK lives on `orders`,
+      // `order_items` or `products`; the app holds no INSERT or UPDATE
+      // privilege on any of them (revoked in `20260829120000_init.sql`), and
+      // `place_order` refuses with `P0001` long before its own insert. The one
+      // table the app does write, `user_addresses`, has no CHECK at all — only
+      // the partial unique index `user_addresses_one_default`, which raises
+      // **23505**, not this. Kept because a future constraint should degrade to
+      // a sensible message rather than to `UnknownFailure`.
       return ValidationFailure(error.message);
     }
     return ServerFailure(error.message);

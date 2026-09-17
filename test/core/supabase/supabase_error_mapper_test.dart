@@ -139,14 +139,33 @@ void main() {
       );
     });
 
-    test('P0001 and 23514 are validation — place_order raises P0001', () {
-      for (final code in const ['P0001', '23514']) {
-        expect(
-          mapSupabaseError(PostgrestException(message: 'refused', code: code)),
-          isA<ValidationFailure>(),
-          reason: code,
-        );
-      }
+    test('P0001 carries the contract code through, not just the type', () {
+      // Extended 2026-09-17. This used to assert `isA<ValidationFailure>()` for
+      // P0001 and 23514 alike and stop there — which is why all thirteen
+      // refusals reached the shopper as one generic sentence. The contract puts
+      // a stable code in `message`; the type alone throws it away.
+      final failure = mapSupabaseError(
+        const PostgrestException(message: 'product_sold_out', code: 'P0001'),
+      );
+
+      expect(failure, isA<ValidationFailure>());
+      expect((failure as ValidationFailure).code, 'product_sold_out');
+      // The repository attaches this, not the mapper — it has no cart to read.
+      expect(failure.subject, isNull);
+    });
+
+    test('23514 is validation with no code — its message is not one', () {
+      // Postgres's constraint text would become a fourteenth code if it were
+      // passed as one, and then render as raw English.
+      final failure = mapSupabaseError(
+        const PostgrestException(
+          message: 'new row violates check constraint "orders_subtotal_check"',
+          code: '23514',
+        ),
+      );
+
+      expect(failure, isA<ValidationFailure>());
+      expect((failure as ValidationFailure).code, isNull);
     });
 
     test('anything else from Postgrest is a server failure', () {

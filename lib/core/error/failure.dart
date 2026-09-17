@@ -56,14 +56,40 @@ final class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure([super.message = 'Session expired.']);
 }
 
-/// A 422 response, optionally carrying per-field messages.
+/// A 422 response, or a refusal the server describes in its own terms.
+///
+/// [code] and [subject] exist for one caller: the Supabase order contract.
+/// `place_order` raises `P0001` with a **stable code** in the message and the
+/// explanation in `details` — thirteen of them, documented in
+/// `supabase/contract/customer.md` in the dashboard repository. They share this
+/// one failure type because they are all "the server refused what was sent";
+/// what differs is only the sentence the shopper reads, which is a presentation
+/// concern (see `failureMessage`) and not a reason for thirteen subclasses.
 final class ValidationFailure extends Failure {
-  const ValidationFailure(super.message, {this.fieldErrors = const {}});
+  const ValidationFailure(
+    super.message, {
+    this.fieldErrors = const {},
+    this.code,
+    this.subject,
+  });
 
   final Map<String, String> fieldErrors;
 
+  /// The server's stable refusal code — `product_sold_out` and the twelve
+  /// others. Null for any validation failure that did not come from the order
+  /// contract, which renders the generic message.
+  final String? code;
+
+  /// A human-readable subject for [code]: today, the name of the product the
+  /// refusal is about.
+  ///
+  /// **Resolved from the app's own data, never from the server's prose.** Null
+  /// is a supported state, not a defect — the message is then phrased without a
+  /// name in it.
+  final String? subject;
+
   @override
-  List<Object?> get props => [message, fieldErrors];
+  List<Object?> get props => [message, fieldErrors, code, subject];
 }
 
 /// Local data could not be read or written.

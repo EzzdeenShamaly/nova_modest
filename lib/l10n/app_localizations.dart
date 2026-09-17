@@ -500,6 +500,60 @@ abstract class AppLocalizations {
   /// **'حدث خطأ ما.'**
   String get failureUnknown;
 
+  /// Stands in for a product name when the app could not resolve one from the order it sent. Written to read naturally in the sentences below, which is why it is a noun phrase and not a word like 'unknown'.
+  ///
+  /// In ar, this message translates to:
+  /// **'أحد منتجات سلتك'**
+  String get orderErrorSomeProduct;
+
+  /// place_order refused with `product_sold_out`.
+  ///
+  /// In ar, this message translates to:
+  /// **'{product}: نفدت الكمية. يرجى حذف المنتج من السلة لإتمام الطلب.'**
+  String orderErrorProductSoldOut(String product);
+
+  /// place_order refused with `product_not_found` — the product was removed while it sat in the cart.
+  ///
+  /// In ar, this message translates to:
+  /// **'{product}: لم يعد متوفراً في المتجر. يرجى حذف المنتج من السلة.'**
+  String orderErrorProductNotFound(String product);
+
+  /// place_order refused with `colour_not_for_product`.
+  ///
+  /// In ar, this message translates to:
+  /// **'{product}: اللون المختار لم يعد متاحاً. يرجى اختيار لون آخر.'**
+  String orderErrorColourNotForProduct(String product);
+
+  /// place_order refused with `size_not_for_product`.
+  ///
+  /// In ar, this message translates to:
+  /// **'{product}: المقاس المختار لم يعد متاحاً. يرجى اختيار مقاس آخر.'**
+  String orderErrorSizeNotForProduct(String product);
+
+  /// place_order refused with `payment_not_available`. Cash on delivery is the only method the shop has.
+  ///
+  /// In ar, this message translates to:
+  /// **'الدفع بالبطاقة غير متاح حالياً. يرجى اختيار الدفع عند الاستلام.'**
+  String get orderErrorPaymentNotAvailable;
+
+  /// place_order refused with `too_many_lines`. The limit is the server's.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكن إتمام طلب يحتوي أكثر من ٢٠ منتجاً مختلفاً. يرجى حذف بعض المنتجات من السلة.'**
+  String get orderErrorTooManyLines;
+
+  /// place_order refused with `not_signed_in` — the session lapsed mid-checkout.
+  ///
+  /// In ar, this message translates to:
+  /// **'انتهت جلستك. يرجى تسجيل الدخول والمحاولة من جديد.'**
+  String get orderErrorNotSignedIn;
+
+  /// The six refusal codes the app validates against before sending, plus any code this build does not know. Reaching one means a defect on our side, so the wording blames nothing the shopper did.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.'**
+  String get orderErrorTechnical;
+
   /// Heading of the cart screen. Also the bottom-navigation destination it belongs to.
   ///
   /// In ar, this message translates to:

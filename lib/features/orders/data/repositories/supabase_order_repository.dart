@@ -84,8 +84,95 @@ order_items (product_id, product_name, unit_price, colour_id, colour_name, size,
 
       return Ok(orderFromRpc(response, draft));
     } catch (error) {
-      return Err(mapSupabaseError(error));
+      return Err(refusalFrom(error, draft));
     }
+  }
+
+  // --- Refusals -------------------------------------------------------------
+
+  /// The four refusal codes that are about one product in the order.
+  ///
+  /// `customer.md`, *Place an order*. The other nine name nothing a shopper
+  /// could be shown, so no subject is looked for.
+  static const Set<String> _codesNamingAProduct = {
+    'product_sold_out',
+    'product_not_found',
+    'colour_not_for_product',
+    'size_not_for_product',
+  };
+
+  /// [mapSupabaseError], then the product's name attached when the refusal is
+  /// about one.
+  ///
+  /// Public for testing: this is the only place the app reads a server's prose,
+  /// and the degradation path matters more than the happy one.
+  static Failure refusalFrom(Object error, CheckoutDraft draft) {
+    final failure = mapSupabaseError(error);
+    if (failure is! ValidationFailure) return failure;
+
+    final code = failure.code;
+    if (code == null || error is! PostgrestException) return failure;
+
+    final subject = _subjectIn(code, error.details, draft);
+    if (subject == null) return failure;
+
+    return ValidationFailure(failure.message, code: code, subject: subject);
+  }
+
+  /// The name of the product a refusal is about, or null.
+  ///
+  /// **This reads a format the contract does not guarantee, and that is written
+  /// down here on purpose.** `customer.md` pins the *code* — that is the stable
+  /// part, and the whole reason the codes exist. It describes `details` only as
+  /// "the explanation". Production writes it with
+  /// `format('%L is sold out …', v_product.id)`, so the id arrives
+  /// single-quoted; that is an observation of today's function body, not a
+  /// promise anyone made.
+  ///
+  /// Three consequences, all deliberate:
+  ///
+  /// 1. **Returning null is expected behaviour, not a defect.** Reworded prose,
+  ///    an unquoted id, a code that carries no id — each falls through to a
+  ///    message phrased without a name. Nothing here throws, and no English
+  ///    from the server ever reaches a screen.
+  /// 2. **The source of truth for the name is the [draft], not the database.**
+  ///    This extracts an *id*; the name is then read from the order the app
+  ///    just sent. A token the draft does not know yields null rather than a
+  ///    name invented from server text.
+  /// 3. Quoted runs are tried before bare words, because `%L` is what
+  ///    production emits. Bare words are the fallback for if that changes.
+  static String? _subjectIn(
+    String code,
+    Object? details,
+    CheckoutDraft draft,
+  ) {
+    if (!_codesNamingAProduct.contains(code)) return null;
+    if (details is! String) return null;
+
+    final names = {
+      for (final item in draft.items) item.product.id: item.product.name,
+    };
+
+    for (final token in _tokensIn(details)) {
+      final name = names[token];
+      if (name != null) return name;
+    }
+    return null;
+  }
+
+  static final RegExp _quoted = RegExp("'([^']+)'");
+  static final RegExp _separators = RegExp(r'[^A-Za-z0-9_-]+');
+
+  /// Every candidate id in [text]: quoted runs first, then bare words.
+  ///
+  /// `colour_not_for_product` quotes the colour before the product
+  /// (`'%L is not a colour of %L.'`), so order alone cannot pick the right one
+  /// — the draft lookup in [_subjectIn] is what does.
+  static Iterable<String> _tokensIn(String text) sync* {
+    for (final match in _quoted.allMatches(text)) {
+      yield match.group(1)!;
+    }
+    yield* text.split(_separators).where((token) => token.isNotEmpty);
   }
 
   @override

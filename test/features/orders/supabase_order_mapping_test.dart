@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/features/address/domain/entities/address.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
@@ -7,6 +8,7 @@ import 'package:nova_modest/features/checkout/domain/entities/checkout_draft.dar
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
 import 'package:nova_modest/features/orders/data/repositories/supabase_order_repository.dart';
 import 'package:nova_modest/features/orders/domain/entities/order_status.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Covers the half of `SupabaseOrderRepository` that can break without a
 /// server: turning rows and RPC payloads into an [Order].
@@ -214,6 +216,101 @@ void main() {
         OrderStatus.pending,
       );
       expect(SupabaseOrderRepository.statusFrom(null), OrderStatus.pending);
+    });
+  });
+
+  group('naming the product a refusal is about', () {
+    // The only place this app reads a server's prose. `customer.md` pins the
+    // *code*; it describes `details` as "the explanation" and nothing more. So
+    // the degradation path is tested harder than the happy one.
+    ValidationFailure refuse(String code, Object? details) {
+      final failure = SupabaseOrderRepository.refusalFrom(
+        PostgrestException(message: code, code: 'P0001', details: details),
+        draft,
+      );
+      expect(failure, isA<ValidationFailure>());
+      return failure as ValidationFailure;
+    }
+
+    test('the quoted id production emits resolves to a name', () {
+      // `format('%L is sold out …', v_product.id)` — read from the real
+      // function body in production_schema_baseline.sql.
+      final failure = refuse(
+        'product_sold_out',
+        "'p1' is sold out and cannot be ordered.",
+      );
+
+      expect(failure.code, 'product_sold_out');
+      // From the draft, never from the server's sentence.
+      expect(failure.subject, 'معطف كلاسيكي خفيف');
+    });
+
+    test('an unquoted id still resolves, in case the wording changes', () {
+      expect(
+        refuse('product_sold_out', 'p1 is sold out.').subject,
+        'معطف كلاسيكي خفيف',
+      );
+      expect(
+        refuse('product_not_found', 'No product has the id p1.').subject,
+        'معطف كلاسيكي خفيف',
+      );
+    });
+
+    test('the product is picked out even when the colour is quoted first', () {
+      // `'%L is not a colour of %L.'` puts the colour ahead of the product, so
+      // taking the first quoted run would name the wrong thing. The draft
+      // lookup is what decides, not the order.
+      expect(
+        refuse(
+          'colour_not_for_product',
+          "'sand' is not a colour of 'p1'.",
+        ).subject,
+        'معطف كلاسيكي خفيف',
+      );
+    });
+
+    test('an id the draft does not know yields no name, never an invented one', () {
+      // Theoretically impossible — the server can only refuse what was sent —
+      // but a name taken from server text rather than our own data is exactly
+      // what must not happen.
+      final failure = refuse('product_sold_out', "'p99' is sold out.");
+
+      expect(failure.code, 'product_sold_out');
+      expect(failure.subject, isNull);
+    });
+
+    test('prose with no id in it degrades quietly', () {
+      for (final details in <Object?>[
+        'Something was refused.',
+        '',
+        null,
+        <String, Object?>{'unexpected': 'shape'},
+      ]) {
+        final failure = refuse('product_sold_out', details);
+        expect(failure.subject, isNull, reason: '$details');
+        // Degraded, not lost: the code still reaches the screen.
+        expect(failure.code, 'product_sold_out');
+      }
+    });
+
+    test('a refusal that is about no product is not given one', () {
+      // `too_many_lines` detail carries numbers, not ids. Hunting for a subject
+      // there could only produce a coincidence.
+      final failure = refuse(
+        'too_many_lines',
+        'An order carries at most 20 lines; this one carried 21.',
+      );
+
+      expect(failure.subject, isNull);
+    });
+
+    test('a failure that is not a refusal passes straight through', () {
+      final failure = SupabaseOrderRepository.refusalFrom(
+        const PostgrestException(message: 'denied', code: '42501'),
+        draft,
+      );
+
+      expect(failure, isA<UnauthorizedFailure>());
     });
   });
 }

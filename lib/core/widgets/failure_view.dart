@@ -83,7 +83,44 @@ String failureMessage(Failure failure, AppLocalizations l10n) =>
       ServerFailure() => l10n.failureServer,
       NotFoundFailure() => l10n.failureNotFound,
       UnauthorizedFailure() => l10n.failureUnauthorized,
+      ValidationFailure(:final code?, :final subject) => _orderRefusal(
+        code,
+        subject,
+        l10n,
+      ),
       ValidationFailure() => l10n.failureValidation,
       CacheFailure() => l10n.failureCache,
       UnknownFailure() => l10n.failureUnknown,
     };
+
+/// The message for one `place_order` refusal code.
+///
+/// The codes are the dashboard repository's `supabase/contract/customer.md`,
+/// *Place an order*. They fall into three groups, and the grouping is the point:
+///
+/// * **The shopper can act, and the product can be named.** [subject] carries
+///   that name when the app resolved one; when it did not, the sentence still
+///   reads, with "one of the items in your cart" in its place.
+/// * **The shopper can act.** Pay differently, carry fewer lines, sign in again.
+/// * **The shopper did nothing wrong.** The app checks every one of these before
+///   it sends — a blank field, a repeated line, a quantity outside 1–10, an
+///   unknown shipping or payment or address kind. One arriving means the defect
+///   is *ours*. So the message names a technical problem and asks them to try
+///   again; it must not imply they mistyped something, because they did not.
+///
+/// An unrecognised code — one the database gains after this build ships — takes
+/// that same technical message. Deliberately: the alternative is falling through
+/// to `Failure.message`, which is the server's raw English.
+String _orderRefusal(String code, String? subject, AppLocalizations l10n) {
+  final product = subject ?? l10n.orderErrorSomeProduct;
+  return switch (code) {
+    'product_sold_out' => l10n.orderErrorProductSoldOut(product),
+    'product_not_found' => l10n.orderErrorProductNotFound(product),
+    'colour_not_for_product' => l10n.orderErrorColourNotForProduct(product),
+    'size_not_for_product' => l10n.orderErrorSizeNotForProduct(product),
+    'payment_not_available' => l10n.orderErrorPaymentNotAvailable,
+    'too_many_lines' => l10n.orderErrorTooManyLines,
+    'not_signed_in' => l10n.orderErrorNotSignedIn,
+    _ => l10n.orderErrorTechnical,
+  };
+}

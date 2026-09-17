@@ -220,6 +220,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String get failureUnknown => 'حدث خطأ ما.';
 
   @override
+  String get orderErrorSomeProduct => 'أحد منتجات سلتك';
+
+  @override
+  String orderErrorProductSoldOut(String product) {
+    return '$product: نفدت الكمية. يرجى حذف المنتج من السلة لإتمام الطلب.';
+  }
+
+  @override
+  String orderErrorProductNotFound(String product) {
+    return '$product: لم يعد متوفراً في المتجر. يرجى حذف المنتج من السلة.';
+  }
+
+  @override
+  String orderErrorColourNotForProduct(String product) {
+    return '$product: اللون المختار لم يعد متاحاً. يرجى اختيار لون آخر.';
+  }
+
+  @override
+  String orderErrorSizeNotForProduct(String product) {
+    return '$product: المقاس المختار لم يعد متاحاً. يرجى اختيار مقاس آخر.';
+  }
+
+  @override
+  String get orderErrorPaymentNotAvailable =>
+      'الدفع بالبطاقة غير متاح حالياً. يرجى اختيار الدفع عند الاستلام.';
+
+  @override
+  String get orderErrorTooManyLines =>
+      'لا يمكن إتمام طلب يحتوي أكثر من ٢٠ منتجاً مختلفاً. يرجى حذف بعض المنتجات من السلة.';
+
+  @override
+  String get orderErrorNotSignedIn =>
+      'انتهت جلستك. يرجى تسجيل الدخول والمحاولة من جديد.';
+
+  @override
+  String get orderErrorTechnical =>
+      'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.';
+
+  @override
   String get cartTitle => 'سلة التسوق';
 
   @override
