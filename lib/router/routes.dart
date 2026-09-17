@@ -162,15 +162,36 @@ abstract final class Routes {
   /// signed-in user, and the router redirects a guest attempting one to the
   /// login screen.
   ///
-  /// **`/checkout` is deliberately not here**, and it used to be. A guest may
-  /// buy: the contact
-  /// step opens empty for them and pre-filled for a signed-in shopper, which is
-  /// the whole point of collecting a name and a number there. Requiring an
-  /// account first is the largest single drop-off in a shopping cart.
+  /// **`/checkout` is here, and guest checkout is refused outright** (user,
+  /// 2026-09-17) — not deferred. The server settled it first: `place_order` had
+  /// `EXECUTE` revoked from `anon`, so an anonymous call now answers `401` with
+  /// `42501`. The reason is not friction but visibility — a guest order was a
+  /// black hole. It wrote a row nobody could read back: no `user_id`, so
+  /// `orders_select_own` hides it from the buyer, and there is no admin read
+  /// policy either. The shopper paid and neither side could see the order.
   ///
-  /// The cost is recorded rather than hidden: the design's step 1 collects no
-  /// email, so a guest order has no address to confirm to. See `progress.md`.
-  static const List<String> protectedPrefixes = <String>['/orders', '/profile'];
+  /// This also replaces a guard that worked only by accident. Nothing stopped a
+  /// guest reaching `place_order`; the address step happened to fail first,
+  /// because every `SupabaseAddressRepository` method needs a user id. Three
+  /// unrelated facts intersecting is not a control — one edit to the address
+  /// screen would have reopened it.
+  static const List<String> protectedPrefixes = <String>[
+    '/orders',
+    '/profile',
+    checkoutPath,
+  ];
+
+  /// Where sign-in returns a shopper it stopped at [location].
+  ///
+  /// Normally the page they asked for. Checkout is the exception: `CheckoutBloc`
+  /// starts a fresh draft on every entry, so returning there would drop someone
+  /// into step 1 of a flow they did not re-request, moments after an
+  /// interruption. The cart is where they actually were, it still holds
+  /// everything, and checkout is one tap from it.
+  static String returnDestinationFor(String location) =>
+      location == checkoutPath || location.startsWith('$checkoutPath/')
+      ? cartPath
+      : location;
 
   /// Whether [location] falls inside a protected area. Prefix-matched, so
   /// `/orders/42` is protected by `/orders`.

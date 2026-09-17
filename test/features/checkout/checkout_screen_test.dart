@@ -1055,16 +1055,18 @@ void main() {
       verifyNever(() => cartBloc.add(const CartCleared()));
     });
 
-    testWidgets('a guest is not offered order tracking', (tester) async {
+    testWidgets('order tracking is offered unconditionally', (tester) async {
+      // Reversed 2026-09-17. This used to assert the button was hidden from a
+      // guest, because `/orders` would have bounced them to sign-in. `/checkout`
+      // is itself gated now, so anyone on this step has a session — and the
+      // auth state passed here no longer decides anything.
       await pump(tester, done, auth: const AuthUnauthenticated());
 
-      // `/orders` is behind the sign-in gate, so the button would send someone
-      // who has just paid to a login screen.
-      expect(find.text('تتبع الطلب'), findsNothing);
+      expect(find.text('تتبع الطلب'), findsOneWidget);
       expect(find.text('متابعة التسوق'), findsOneWidget);
     });
 
-    testWidgets('a signed-in shopper is', (tester) async {
+    testWidgets('and to a signed-in shopper likewise', (tester) async {
       await pump(tester, done);
 
       expect(find.text('تتبع الطلب'), findsOneWidget);

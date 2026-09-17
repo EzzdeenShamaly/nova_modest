@@ -242,11 +242,17 @@ void main() {
       expect(Routes.isProtected('/profile'), isTrue);
     });
 
+    test('checkout needs a session — guest checkout is refused', () {
+      // Reversed 2026-09-17. This used to assert `isFalse`, and that assertion
+      // is what the decision overturns: a guest order was invisible to the
+      // shopper who placed it and to the shop alike, and `place_order` no
+      // longer accepts an anonymous caller in any case.
+      expect(Routes.isProtected(Routes.checkoutPath), isTrue);
+    });
+
     test('leaves the public areas alone', () {
-      // Checkout is deliberately among them: a guest may buy, and the contact
-      // step opens empty for them. It was protected until the flow was built.
-      expect(Routes.isProtected(Routes.checkoutPath), isFalse);
       expect(Routes.isProtected(Routes.homePath), isFalse);
+      expect(Routes.isProtected(Routes.cartPath), isFalse);
       expect(Routes.isProtected(Routes.loginPath), isFalse);
       expect(Routes.isProtected(Routes.splashPath), isFalse);
       expect(Routes.isProtected(Routes.onboardingPath), isFalse);
@@ -254,6 +260,20 @@ void main() {
 
     test('does not match a path that merely starts with the same letters', () {
       expect(Routes.isProtected('/ordersomething'), isFalse);
+    });
+  });
+
+  group('Routes.returnDestinationFor', () {
+    test('checkout returns the shopper to the cart, not to checkout', () {
+      // A fresh CheckoutBloc would put them at step 1 of a flow they did not
+      // re-request. The cart still holds everything and is one tap away.
+      expect(Routes.returnDestinationFor(Routes.checkoutPath), Routes.cartPath);
+    });
+
+    test('every other protected path returns to itself', () {
+      expect(Routes.returnDestinationFor('/orders'), '/orders');
+      expect(Routes.returnDestinationFor('/orders/42'), '/orders/42');
+      expect(Routes.returnDestinationFor('/profile'), '/profile');
     });
   });
 }

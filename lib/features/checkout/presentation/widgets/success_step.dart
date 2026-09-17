@@ -26,10 +26,13 @@ class SuccessStep extends StatelessWidget {
   /// omitted rather than the screen refusing to draw.
   final Order? order;
 
-  /// Null for a guest, who has no account to track an order through. The frame
-  /// draws the button unconditionally; showing it to a guest would send them to
-  /// a sign-in screen moments after they paid.
-  final VoidCallback? onTrackOrder;
+  /// Always supplied, and non-nullable on purpose.
+  ///
+  /// This was `VoidCallback?` for the guest who had no account to track an order
+  /// through. **Guest checkout is refused** (user, 2026-09-17), so reaching this
+  /// step implies a session, and the type now says so rather than a `null` that
+  /// can no longer occur. See `Routes.protectedPrefixes`.
+  final VoidCallback onTrackOrder;
 
   final VoidCallback onKeepShopping;
 
@@ -92,16 +95,14 @@ class SuccessStep extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: AppSpacing.xl),
-                  if (onTrackOrder case final track?) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: track,
-                        child: Text(l10n.successTrackOrder),
-                      ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: onTrackOrder,
+                      child: Text(l10n.successTrackOrder),
                     ),
-                    SizedBox(height: AppSpacing.m),
-                  ],
+                  ),
+                  SizedBox(height: AppSpacing.m),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(

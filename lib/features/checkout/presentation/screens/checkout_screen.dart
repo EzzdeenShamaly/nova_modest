@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
 import 'package:nova_modest/core/widgets/failure_view.dart';
-import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:nova_modest/features/checkout/domain/entities/checkout_step.dart';
 import 'package:nova_modest/features/checkout/domain/entities/contact_details.dart';
@@ -245,12 +244,9 @@ class _CheckoutViewState extends State<_CheckoutView> {
     ),
     CheckoutStep.success => SuccessStep(
       order: state.draft.order,
-      // Hidden from a guest: `/orders` is behind the sign-in gate, so the
-      // button would send someone who has just paid to a login screen.
-      onTrackOrder: switch (context.read<AuthBloc>().state) {
-        AuthAuthenticated() => () => context.go(Routes.ordersPath),
-        _ => null,
-      },
+      // Unconditional now. `/checkout` is itself behind the sign-in gate, so
+      // anyone on this step has a session and `/orders` will let them in.
+      onTrackOrder: () => context.go(Routes.ordersPath),
       onKeepShopping: _leave,
     ),
   };

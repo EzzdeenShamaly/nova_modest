@@ -164,7 +164,12 @@ void main() {
     return router;
   }
 
-  testWidgets('a guest reaches checkout without being sent to sign in', (
+  /// Reversed 2026-09-17. This test used to assert that a guest **reaches**
+  /// checkout, and passing was the defect: the guest got as far as the address
+  /// step and hit a `FailureView`, because every address call needs a user id.
+  /// Nothing before this gate stopped them reaching `place_order` — the address
+  /// step failing first was an accident, not a control.
+  testWidgets('a guest is sent to sign in instead of reaching checkout', (
     tester,
   ) async {
     final router = await boot(tester, auth: const AuthUnauthenticated());
@@ -172,8 +177,25 @@ void main() {
     router.go(Routes.checkoutPath);
     await tester.pumpAndSettle();
 
-    expect(find.byType(CheckoutScreen), findsOneWidget);
-    expect(find.byType(ContactStep), findsOneWidget);
+    expect(find.byType(CheckoutScreen), findsNothing);
+    expect(find.byType(ContactStep), findsNothing);
+
+    final location = router.state.uri;
+    expect(location.path, Routes.loginPath);
+  });
+
+  testWidgets('and sign-in will return that guest to the cart', (tester) async {
+    // Not to `/checkout`: `CheckoutBloc` starts a fresh draft on every entry, so
+    // returning there drops them into step 1 of a flow they did not re-request.
+    final router = await boot(tester, auth: const AuthUnauthenticated());
+
+    router.go(Routes.checkoutPath);
+    await tester.pumpAndSettle();
+
+    expect(
+      router.state.uri.queryParameters[Routes.fromQueryParam],
+      Routes.cartPath,
+    );
   });
 
   /// The regression this file was written to catch, and did.
@@ -290,32 +312,11 @@ void main() {
     expect(find.byType(SuccessStep), findsNothing);
   });
 
-  testWidgets('a guest is not offered order tracking after paying', (
-    tester,
-  ) async {
-    // `/orders` is behind the sign-in gate, so the button would send someone
-    // who has just paid to a login screen.
-    final router = await boot(tester, auth: const AuthUnauthenticated());
-
-    router.go(Routes.checkoutPath);
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextFormField).at(0), 'ليلى');
-    await tester.enterText(find.byType(TextFormField).at(1), '550001111');
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('التالي'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('حفظ ومتابعة'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('مراجعة الطلب'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('تأكيد الطلب'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SuccessStep), findsOneWidget);
-    expect(find.text('تتبع الطلب'), findsNothing);
-    expect(find.text('متابعة التسوق'), findsOneWidget);
-  });
+  // Removed 2026-09-17: 'a guest is not offered order tracking after paying'
+  // walked a guest through the whole flow to a placed order. That journey no
+  // longer exists — the guest is stopped at the gate, which the two tests at the
+  // top of this file assert. Keeping it would have meant keeping the guest path
+  // alive in test code alone.
 
   testWidgets('a placed order shows up in the order history', (tester) async {
     // The seam end to end: checkout writes through the real repository and the

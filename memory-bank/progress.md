@@ -1,8 +1,19 @@
 # Progress
 
-**Last Updated:** 2026-08-31
+**Last Updated:** 2026-09-17
 
 Tracks what's Done, In Progress, and Blocked, per feature.
+
+> **A line in this file is a record, not a measurement.** It was true on the day
+> it was written and nothing re-checks it afterwards. Before repeating one as
+> fact — especially a "not yet done" — either re-verify it or hand it over
+> marked with its date: *"as of 2026-08-31, progress.md recorded X"*.
+>
+> This is here because of a real failure on 2026-09-17: the line below saying
+> `place_order` was unproven against a live server was 16 days old, and a real
+> order had been placed in production the day it was written. It was repeated
+> as current fact in an audit deliverable. The record was not wrong — reading
+> it as present tense was.
 
 ## Done
 
@@ -260,12 +271,35 @@ Tracks what's Done, In Progress, and Blocked, per feature.
 
 ## Decisions taken, not tasks
 
-- **A guest order has no email — accepted, not outstanding** (user,
-  2026-08-24). Checkout step 1 collects a name and a phone only, as the frame
-  draws it, and a guest has no account to borrow one from. **The phone is
-  enough to track an order by**, and adding an email field or SMS confirmation
-  is a real client decision to make when there is a real client to make it. Do
-  not "fix" this by adding a third field.
+- **Guest checkout is refused outright — decided against, not deferred** (user,
+  2026-09-17). `/checkout` is now in `Routes.protectedPrefixes`; a signed-out
+  shopper who opens it is sent to sign-in and returns to `/cart`.
+
+  **The reason is visibility, not conversion.** A guest order was a black hole:
+  the row had no `user_id`, so `orders_select_own` hid it from the buyer who
+  had just paid, and no admin read policy exists either. Nobody on either side
+  could see it. The database reached the same conclusion first and
+  independently — M1 (2026-09-16) revoked `EXECUTE` on `place_order` from
+  `anon`, so the anonymous call answers `401` / `42501` regardless of what the
+  app does.
+
+  It also removed a guard that only worked by accident: nothing stopped a guest
+  reaching `place_order`; the address step happened to fail first, because every
+  `SupabaseAddressRepository` method needs a user id. Three unrelated facts
+  intersecting is not a control.
+
+  Consequences, so they are not rediscovered: `SuccessStep.onTrackOrder` is
+  non-nullable — reaching that step implies a session. The 2026-08-24 decision
+  below that a guest order carries no email is **moot**, kept only because code
+  written against it may still be read. Do not reintroduce a guest path; if the
+  business ever wants one, it needs a way for the buyer to see the order, and
+  that is a server change first.
+
+- ~~**A guest order has no email — accepted, not outstanding**~~ (user,
+  2026-08-24; **superseded 2026-09-17** by the entry above — there are no guest
+  orders). Checkout step 1 collects a name and a phone only, as the frame draws
+  it. The phone is still what an order is tracked by; the fields did not change,
+  only who may reach them.
 
 - **No first-launch language chooser** (user, 2026-08-30). `1:2304` draws a
   full-screen "اختر لغتك" with the brandmark and large option cards. **It will
@@ -282,10 +316,26 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   pinned LTR so the six boxes do not mirror under Arabic. The catalogue reads
   and the RLS policies were verified live too — `42501` from
   `order_number_sequences` is the authorisation refusal rule 08 describes.
-- **Still unproven against a live server:** placing an order (`place_order`),
-  saving an address, and reading order history. Those are the three seams the
-  merge ported and nothing has exercised them yet. `integration_test/` still
-  does not exist, which is where a test with a real local stack would go.
+- **The signed-in customer path is proven end to end, in production**
+  (established 2026-09-17 from evidence dated 2026-08-31). Order
+  `ORD-260831-0001` exists in the cloud project, placed 2026-08-31 13:28 UTC
+  from a real account. That one row exercises the whole chain the merge ported:
+  sign-in → cart → address (`user_addresses` write) → `place_order` → an order
+  row with its lines. **It was placed from the app**, not by a script: no
+  session transcript contains a REST call to `rpc/place_order`, every `psql` ran
+  as `docker exec supabase_db_nova_modest` against the local stack that was
+  already shut down, and at 13:28 UTC the agent session was running `git commit`
+  and `git push`.
+
+  **The account was an ordinary customer at the time** — the `admins` row was
+  written 2026-09-02 12:04 UTC, two days later. So this is not an admin
+  bypassing anything; it is the customer path, and it is the strongest evidence
+  this storefront has. It stayed hidden for sixteen days behind the "unproven"
+  line this bullet replaces.
+
+  Still genuinely unexercised: reading order history back (`orders()` /
+  `orderByNumber()`). `integration_test/` does not exist, which is where a
+  repeatable version of any of this would live.
 - **Google sign-in is untried** and needs a web client ID plus the provider
   enabled, per the teammate's README.
 - **The cart is still device-local** while everything around it is server-backed

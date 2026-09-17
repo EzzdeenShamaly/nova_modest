@@ -410,7 +410,9 @@ String? resolveRedirect({
   if (!isSignedIn && Routes.isProtected(location)) {
     return Uri(
       path: Routes.loginPath,
-      queryParameters: {Routes.fromQueryParam: location},
+      queryParameters: {
+        Routes.fromQueryParam: Routes.returnDestinationFor(location),
+      },
     ).toString();
   }
 
