@@ -1,3 +1,30 @@
+-- ┌──────────────────────────────────────────────────────────────────────────┐
+-- │ SUPERSEDED IN PRODUCTION BY M5, APPLIED 2026-09-17.                       │
+-- │                                                                          │
+-- │ This file is history, and correct as history — it is what ran here on     │
+-- │ 2026-08-30. It is **not** what production runs now, and the difference is │
+-- │ not cosmetic: M5 rewrote the whole function.                              │
+-- │                                                                          │
+-- │ Do not read the body below to learn how `place_order` behaves. In         │
+-- │ particular, **the six English error sentences it raises no longer         │
+-- │ exist** — M5 replaced every one with a stable code in `message` and the   │
+-- │ explanation in `detail`, `P0001` throughout. Code written against those   │
+-- │ sentences matches nothing.                                               │
+-- │                                                                          │
+-- │ M5 also added: `search_path = ''`, one read per product, an Asia/Riyadh   │
+-- │ day for both the counter and the printed date, a 20-line limit, refusal   │
+-- │ of a repeated product+colour+size, and a guard before every cast.         │
+-- │                                                                          │
+-- │ The current behaviour is specified in the dashboard repository:           │
+-- │   nova_modest_admin/supabase/contract/customer.md  — *Place an order*     │
+-- │ and the exact body it describes is in                                     │
+-- │   nova_modest_admin/supabase/contract/baseline/production_schema_baseline.sql
+-- │                                                                          │
+-- │ Left unedited on purpose: a migration that has run is append-only         │
+-- │ (`.claude/rules/08-flutter-baas-security-guard.md` §6). Editing it would  │
+-- │ make a fresh database and an existing one diverge in silence.             │
+-- └──────────────────────────────────────────────────────────────────────────┘
+
 -- `place_order` now reports the status it wrote.
 --
 -- It answered with the number, the timestamp and the totals — everything only

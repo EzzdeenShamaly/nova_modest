@@ -554,6 +554,12 @@ abstract class AppLocalizations {
   /// **'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.'**
   String get orderErrorTechnical;
 
+  /// Shown when the cart already holds 20 lines and a 21st is asked for. Says the move, not the rule: a shopper cannot act on "the maximum is 20", but can act on "remove one to add another".
+  ///
+  /// In ar, this message translates to:
+  /// **'سلتك ممتلئة. احذف منتجاً لتضيف غيره.'**
+  String get cartFull;
+
   /// Heading of the cart screen. Also the bottom-navigation destination it belongs to.
   ///
   /// In ar, this message translates to:

@@ -350,6 +350,10 @@
   "@orderErrorTechnical": {
     "description": "The six refusal codes the app validates against before sending, plus any code this build does not know. Reaching one means a defect on our side, so the wording blames nothing the shopper did."
   },
+  "cartFull": "\u0633\u0644\u062a\u0643 \u0645\u0645\u062a\u0644\u0626\u0629. \u0627\u062d\u0630\u0641 \u0645\u0646\u062a\u062c\u0627\u064b \u0644\u062a\u0636\u064a\u0641 \u063a\u064a\u0631\u0647.",
+  "@cartFull": {
+    "description": "Shown when the cart already holds 20 lines and a 21st is asked for. Says the move, not the rule: a shopper cannot act on \"the maximum is 20\", but can act on \"remove one to add another\"."
+  },
   "cartTitle": "\u0633\u0644\u0629 \u0627\u0644\u062a\u0633\u0648\u0642",
   "@cartTitle": {
     "description": "Heading of the cart screen. Also the bottom-navigation destination it belongs to."

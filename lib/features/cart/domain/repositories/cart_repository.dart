@@ -8,6 +8,14 @@ import 'package:nova_modest/features/catalog/domain/entities/product.dart';
 /// bloc has one emit path for a load and for a mutation instead of a read
 /// after every write.
 abstract class CartRepository {
+  /// The code carried by the [ValidationFailure] [add] returns when the cart
+  /// already holds [CartItem.maxLines] lines.
+  ///
+  /// Part of this interface, not of one implementation, because the bloc reads
+  /// it to tell a cart that is **declining** from a cart that has **failed** —
+  /// and those are different screens. Nothing is written when it is returned.
+  static const String fullCode = 'cart_full';
+
   /// The cart as it stands, with each product refreshed from the catalogue.
   Future<Result<List<CartItem>>> load();
 
@@ -16,6 +24,11 @@ abstract class CartRepository {
   /// A line matching the same product, colour and size has its quantity raised
   /// instead of a second line appearing; the result is capped at
   /// [CartItem.maxQuantity].
+  ///
+  /// Returns `Err(ValidationFailure(code: `[fullCode]`))` when the addition
+  /// would be the twenty-first **line**. Raising the quantity of a line that is
+  /// already there is never refused — the limit counts lines, as
+  /// `place_order` does.
   Future<Result<List<CartItem>>> add({
     required Product product,
     String? colourId,

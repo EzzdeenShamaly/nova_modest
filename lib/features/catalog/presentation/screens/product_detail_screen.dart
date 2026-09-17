@@ -390,6 +390,32 @@ class _ActionBar extends StatelessWidget {
                       state.product.isSoldOut || !state.isSelectionComplete
                       ? null
                       : () {
+                          // The cart is full **and this garment is not already
+                          // in it**, so nothing would be written. Asked before
+                          // dispatching because the snack bar below is
+                          // optimistic: it is shown without waiting for the
+                          // bloc, and telling someone their item was added when
+                          // it was refused is worse than not adding it.
+                          //
+                          // `isFull` is a rule the state carries, not a count
+                          // done here. The repository refuses independently —
+                          // this is the message, not the control.
+                          final cart = context.read<CartBloc>().state;
+                          final alreadyIn =
+                              cart is CartLoaded &&
+                              cart.items.any(
+                                (item) =>
+                                    item.product.id == state.product.id &&
+                                    item.colourId == state.selectedColourId &&
+                                    item.size == state.selectedSize,
+                              );
+                          if (cart.isFull && !alreadyIn) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.cartFull)),
+                            );
+                            return;
+                          }
+
                           context.read<CartBloc>().add(
                             CartItemAdded(
                               product: state.product,

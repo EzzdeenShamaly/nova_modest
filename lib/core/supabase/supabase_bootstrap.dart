@@ -15,7 +15,18 @@ Future<void> initializeSupabase() async {
 
   await Supabase.initialize(
     url: SupabaseEnv.url,
-    anonKey: SupabaseEnv.anonKey,
+    // `publishableKey`, not `anonKey`: a **pure rename** in the SDK, verified
+    // rather than assumed. `supabase_flutter` 2.17.2 does
+    // `final effectiveKey = publishableKey ?? anonKey!` and uses that one value
+    // and nothing else — the two parameters cannot behave differently, because
+    // after that line there is only one of them
+    // (`supabase-2.17.2/lib/src/supabase.dart:102`).
+    //
+    // `SupabaseEnv.anonKey` keeps its own name: it reads `SUPABASE_ANON_KEY`
+    // from `config/*.json`, which the running app and the committed example
+    // both depend on. Renaming a define is a separate change with a cost this
+    // one does not carry.
+    publishableKey: SupabaseEnv.anonKey,
     // **Not the default.** `supabase_flutter` defaults to PKCE
     // (`gotrue_client.dart`: `AuthFlowType flowType = AuthFlowType.pkce`), and
     // PKCE is incompatible with the sign-in this app actually has.

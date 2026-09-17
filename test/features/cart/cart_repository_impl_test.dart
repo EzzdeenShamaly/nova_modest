@@ -7,6 +7,7 @@ import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
 import 'package:nova_modest/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
+import 'package:nova_modest/features/cart/domain/repositories/cart_repository.dart';
 import 'package:nova_modest/features/catalog/domain/entities/product.dart';
 import 'package:nova_modest/features/catalog/domain/repositories/catalog_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -271,6 +272,86 @@ void main() {
       // Not a NotFound, so this is not a vanished product — showing an empty
       // cart here would tell the shopper their cart had been cleared.
       expect((result as Err<List<CartItem>>).failure, isA<NetworkFailure>());
+    });
+  });
+
+  group('the twenty-line limit', () {
+    /// Fills the cart with [count] distinct lines and teaches the catalogue
+    /// about every one, so nothing is pruned on the way back.
+    Future<void> fillTo(int count) async {
+      for (var i = 0; i < count; i++) {
+        final filler = Product(
+          id: 'f$i',
+          name: 'منتج $i',
+          price: 100,
+          categoryId: 'abayas',
+        );
+        catalogue['f$i'] = filler;
+        final result = await repository.add(product: filler);
+        expect(result, isA<Ok<List<CartItem>>>(), reason: 'line ${i + 1}');
+      }
+    }
+
+    test('the twenty-first line is refused, and nothing is written', () async {
+      await fillTo(CartItem.maxLines);
+      final before = stored;
+
+      final result = await repository.add(product: dress);
+
+      final failure = (result as Err<List<CartItem>>).failure;
+      expect(failure, isA<ValidationFailure>());
+      expect((failure as ValidationFailure).code, CartRepository.fullCode);
+      // The refusal is before the write, not a rollback after one.
+      expect(stored, before);
+      expect(storedLines(), hasLength(CartItem.maxLines));
+    });
+
+    test('a full cart still accepts more of something already in it', () async {
+      // The limit counts **lines**. Twenty lines of ten is two hundred
+      // garments and `place_order` accepts it, so raising a quantity inside a
+      // full cart must not be refused.
+      await fillTo(CartItem.maxLines - 1);
+      await repository.add(product: dress, quantity: 1);
+      expect(storedLines(), hasLength(CartItem.maxLines));
+
+      final result = await repository.add(product: dress, quantity: 4);
+
+      expect(result, isA<Ok<List<CartItem>>>());
+      expect(storedLines(), hasLength(CartItem.maxLines));
+      final line = itemsOf(result).firstWhere((i) => i.product.id == 'p1');
+      expect(line.quantity, 5);
+    });
+
+    test('the same garment in a different size is a new line, and is refused', () async {
+      // Different size means a different line, so this one does hit the limit
+      // even though the product is already in the cart.
+      await fillTo(CartItem.maxLines - 1);
+      await repository.add(product: dress, size: 'M');
+      expect(storedLines(), hasLength(CartItem.maxLines));
+
+      final result = await repository.add(product: dress, size: 'L');
+
+      expect(result, isA<Err<List<CartItem>>>());
+      expect(storedLines(), hasLength(CartItem.maxLines));
+    });
+
+    test('the nineteenth and twentieth lines are both accepted', () async {
+      // The boundary from the allowed side: an off-by-one here would refuse a
+      // cart the server is happy with.
+      await fillTo(CartItem.maxLines);
+
+      expect(storedLines(), hasLength(20));
+    });
+
+    test('removing a line makes room again', () async {
+      await fillTo(CartItem.maxLines);
+      expect(await repository.add(product: dress), isA<Err<List<CartItem>>>());
+
+      await repository.remove('f0||');
+      final result = await repository.add(product: dress);
+
+      expect(result, isA<Ok<List<CartItem>>>());
+      expect(storedLines(), hasLength(CartItem.maxLines));
     });
   });
 }

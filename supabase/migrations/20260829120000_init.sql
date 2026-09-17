@@ -323,6 +323,28 @@ create table public.order_number_sequences (
   last_value int not null
 );
 
+-- ┌──────────────────────────────────────────────────────────────────────────┐
+-- │ THE ORIGINAL `place_order`. SUPERSEDED TWICE.                             │
+-- │                                                                          │
+-- │ Replaced here by 20260830090100 (returns the status), and then rewritten  │
+-- │ wholesale in production by **M5, applied 2026-09-17**. This body is the   │
+-- │ oldest of the three and matches production least.                         │
+-- │                                                                          │
+-- │ Its six English error sentences are gone: M5 raises a stable code in      │
+-- │ `message` with the explanation in `detail`, `P0001` throughout. Anything  │
+-- │ matching on the text below matches nothing in production.                 │
+-- │                                                                          │
+-- │ Read the contract instead, never this:                                    │
+-- │   nova_modest_admin/supabase/contract/customer.md  — *Place an order*     │
+-- │                                                                          │
+-- │ Two other things production has changed since this file and this file     │
+-- │ does not show: `anon` lost EXECUTE on this function (M1, 2026-09-16), so  │
+-- │ the grant further down is no longer true of production; and M4 added      │
+-- │ insert-time triggers and non-blank address CHECKs to `orders`.            │
+-- │                                                                          │
+-- │ Unedited on purpose — migrations are append-only                          │
+-- │ (`.claude/rules/08-flutter-baas-security-guard.md` §6).                   │
+-- └──────────────────────────────────────────────────────────────────────────┘
 create or replace function public.place_order(payload jsonb)
 returns jsonb
 language plpgsql

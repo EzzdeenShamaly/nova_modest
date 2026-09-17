@@ -32,6 +32,20 @@ abstract class CartItem with _$CartItem {
   /// which the backend will supply.
   static const int maxQuantity = 10;
 
+  /// The most **lines** one cart may hold, mirroring `place_order`'s
+  /// `k_max_lines`.
+  ///
+  /// A limit on lines, not on garments: twenty lines of ten is two hundred
+  /// garments and the server accepts it. Confusing the two would refuse an
+  /// order the contract allows.
+  ///
+  /// Mirrored rather than discovered — the server refuses a twenty-first line
+  /// with `too_many_lines`, and this stops the shopper finding that out at the
+  /// end of checkout, after filling in an address. The server stays the
+  /// authority; this is the courtesy in front of it
+  /// (`supabase/contract/customer.md`, *Place an order*).
+  static const int maxLines = 20;
+
   /// Identity of the line.
   ///
   /// The same garment in two sizes is two lines, so the key is the product and

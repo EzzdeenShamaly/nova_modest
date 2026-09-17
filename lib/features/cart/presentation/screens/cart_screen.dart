@@ -40,6 +40,9 @@ class CartScreen extends StatelessWidget {
           ),
           CartEmpty() => const _EmptyCart(),
           CartLoaded() => _Body(state: state),
+          // The cart is unchanged and correct; only an addition was declined.
+          // Drawn exactly as a loaded cart, because that is what it is.
+          CartAdditionRefused(:final cart) => _Body(state: cart),
         },
       ),
       // bottomNavigationBar is the slot that pins: the bar stays put while the

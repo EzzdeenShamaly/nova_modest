@@ -259,6 +259,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.';
 
   @override
+  String get cartFull => 'سلتك ممتلئة. احذف منتجاً لتضيف غيره.';
+
+  @override
   String get cartTitle => 'سلة التسوق';
 
   @override

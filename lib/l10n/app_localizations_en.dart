@@ -260,6 +260,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The order could not be placed because of a technical problem on our side. Please try again, and contact us if it keeps happening.';
 
   @override
+  String get cartFull => 'Your cart is full. Remove an item to add another.';
+
+  @override
   String get cartTitle => 'Cart';
 
   @override

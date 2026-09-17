@@ -76,6 +76,7 @@
   "orderErrorTooManyLines": "An order cannot carry more than 20 different products. Please remove some items from your cart.",
   "orderErrorNotSignedIn": "Your session has ended. Please sign in and try again.",
   "orderErrorTechnical": "The order could not be placed because of a technical problem on our side. Please try again, and contact us if it keeps happening.",
+  "cartFull": "Your cart is full. Remove an item to add another.",
   "cartTitle": "Cart",
   "cartVariant": "Colour: {colour} | Size: {size}",
   "cartVariantColour": "Colour: {colour}",

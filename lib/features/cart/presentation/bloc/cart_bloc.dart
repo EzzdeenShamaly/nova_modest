@@ -56,15 +56,29 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     CartItemAdded event,
     Emitter<CartState> emit,
   ) async {
-    _emitCart(
-      await _repository.add(
-        product: event.product,
-        colourId: event.colourId,
-        size: event.size,
-        quantity: event.quantity,
-      ),
-      emit,
+    final result = await _repository.add(
+      product: event.product,
+      colourId: event.colourId,
+      size: event.size,
+      quantity: event.quantity,
     );
+
+    // A full cart is the cart working, not failing: nothing was written and the
+    // previous state is still exactly right. Emitting CartError here would
+    // replace a correct cart with an error card.
+    if (result case Err(:final failure)
+        when failure is ValidationFailure &&
+            failure.code == CartRepository.fullCode) {
+      final current = state;
+      if (current is CartLoaded) {
+        emit(
+          CartAdditionRefused(items: current.items, totals: current.totals),
+        );
+      }
+      return;
+    }
+
+    _emitCart(result, emit);
   }
 
   Future<void> _onQuantityChanged(

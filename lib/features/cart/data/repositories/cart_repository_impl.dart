@@ -26,6 +26,7 @@ class CartRepositoryImpl implements CartRepository {
 
   static const String _linesKey = 'cart.lines';
 
+
   final SharedPreferences _preferences;
   final CatalogRepository _catalog;
 
@@ -53,6 +54,12 @@ class CartRepositoryImpl implements CartRepository {
     );
 
     if (index == -1) {
+      // A new line, so the count matters. Checked here and not on the merge
+      // path below: adding more of something already in the cart changes a
+      // quantity, and `place_order` counts lines.
+      if (lines.length >= CartItem.maxLines) {
+        throw const _CartFull();
+      }
       return [
         ...lines,
         CartLineDto(
@@ -104,7 +111,18 @@ class CartRepositoryImpl implements CartRepository {
     final stored = _readLines();
     if (stored is Err<List<CartLineDto>>) return Err(stored.failure);
 
-    final next = change((stored as Ok<List<CartLineDto>>).value);
+    final List<CartLineDto> next;
+    try {
+      next = change((stored as Ok<List<CartLineDto>>).value);
+    } on _CartFull {
+      // Thrown by `add` rather than returned, because `change` is a pure
+      // transform and giving it a Result return would complicate the three
+      // mutations that cannot refuse. Nothing has been written.
+      return const Err(
+        ValidationFailure('Cart is full.', code: CartRepository.fullCode),
+      );
+    }
+
     final written = await _writeLines(next);
     if (written is Err<void>) return Err(written.failure);
 
@@ -189,4 +207,9 @@ class CartRepositoryImpl implements CartRepository {
   /// line can be found without hydrating first.
   static String _lineIdOf(CartLineDto line) =>
       '${line.productId}|${line.colourId ?? ''}|${line.size ?? ''}';
+}
+
+/// Signals that a twenty-first line was asked for. Never leaves this file.
+class _CartFull implements Exception {
+  const _CartFull();
 }
