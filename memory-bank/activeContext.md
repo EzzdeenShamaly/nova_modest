@@ -1,9 +1,42 @@
 # Active Context
 
-**Last Updated:** 2026-08-31 (three sign-in defects, found by running it for real)
+**Last Updated:** 2026-09-19 (the database contract changed under the store;
+audited, three fixes, and the first live run shared with the dashboard)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
+
+## Where things stand — 2026-09-19
+
+The dashboard repository (`nova_modest_admin`) applied eight migrations to the
+shared production database (M1–M8, 2026-09-16/17) while this storefront sat
+idle. Its contract is `nova_modest_admin/supabase/contract/customer.md`
+(version 2, digest `a892643e…`, confirmed fresh from here on 2026-09-19). Read
+it before touching orders, addresses, profiles or `place_order`.
+
+Done since, in order:
+- **Audit** of every storefront call against the contract. The base schema the
+  dashboard team could not find is **this repo's**
+  `supabase/migrations/20260829120000_init.sql`.
+- `02ddde7` — `/checkout` requires a session; guest checkout refused outright.
+- `92508e3` — the thirteen `place_order` refusal codes each reach the shopper
+  as their own Arabic message.
+- `82f718e` — the cart refuses a 21st line; the two local `place_order` bodies
+  are marked superseded by M5; `anonKey` → `publishableKey`.
+- `29e7e97` — the add-to-cart snack bar dismisses itself (it persisted, and
+  blocked checkout during the run).
+- **The live end-to-end run closed**: `ORD-260919-0001`, storefront to
+  dashboard; D1 and D2 (negative) measured. Details in `progress.md`.
+
+**How to run the app against production:** from a terminal —
+`flutter run -d chrome --dart-define-from-file=config/prod.json`. F5 in VS Code
+has no `launch.json` and starts the app without its key: a white page.
+
+**Next logical step:** the owner chooses from the debts `progress.md` recorded
+during the run — the admin seeing everyone's orders in "طلباتي", the cart total
+missing the 15 fee, `Product.images` never filled, the snack bar's timing, the
+reachable `23505`, and the untested `request.jwt.claims` security debt (the
+last belongs as much to the dashboard as to this repo).
 
 ## Startup bug fixes (2026-08-19)
 
