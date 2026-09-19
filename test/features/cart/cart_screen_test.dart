@@ -176,15 +176,21 @@ void main() {
   });
 
   group('the summary', () {
-    testWidgets('shows subtotal, shipping and total', (tester) async {
+    testWidgets('shows subtotal, shipping, the payment fee and total', (
+      tester,
+    ) async {
       await pump(tester, loaded);
 
       expect(find.text('المجموع الفرعي'), findsOneWidget);
       expect(find.text('الشحن'), findsOneWidget);
+      // Its own line, under the label the payment step uses, so the 15 is never
+      // a surprise hidden inside the total.
+      expect(find.text('رسوم الدفع'), findsOneWidget);
       expect(find.text('الإجمالي'), findsOneWidget);
-      // 450 + 240 = 690, plus 35 shipping — the same 35 checkout charges.
+      // 450 + 240 = 690, plus 35 shipping and 15 cash on delivery. Until
+      // 2026-09-19 this read 725 — and the order then came to 740.
       expect(find.textContaining('690'), findsOneWidget);
-      expect(find.textContaining('725'), findsOneWidget);
+      expect(find.textContaining('740'), findsOneWidget);
     });
   });
 

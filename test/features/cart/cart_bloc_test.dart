@@ -5,6 +5,7 @@ import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_totals.dart';
+import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 import 'package:nova_modest/features/cart/domain/repositories/cart_repository.dart';
 import 'package:nova_modest/features/cart/presentation/bloc/cart_bloc.dart';
@@ -197,7 +198,10 @@ void main() {
 
       expect(totals.subtotal, 450 + 120 * 2);
       expect(totals.shipping, CartTotals.shippingFee);
-      expect(totals.total, 690 + 35);
+      // Changed 2026-09-19: the cash-on-delivery fee is in the cart's total
+      // now. This line used to assert 690 + 35 — the number that was 15 short
+      // of every order.
+      expect(totals.total, 690 + 35 + PaymentMethod.cashOnDelivery.fee);
     });
 
     test('the quote is the shipping method checkout will charge', () {
@@ -211,6 +215,8 @@ void main() {
 
       expect(totals.subtotal, 0);
       expect(totals.shipping, 0);
+      // Nor a payment fee: there is nothing to pay for.
+      expect(totals.total, 0);
     });
   });
 

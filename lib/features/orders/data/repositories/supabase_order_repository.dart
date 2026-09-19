@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 // hide Order: injectable exports an `Order` annotation that shadows this
 // feature's entity.
 import 'package:injectable/injectable.dart' hide Order;
@@ -23,14 +24,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Writing goes through an RPC because placing an order is one transaction —
 /// price the lines from the catalogue, take the day's next number, insert the
 /// order and its items — and none of that should be four round trips a phone
-/// could interleave. Reading is two ordinary selects, because RLS
-/// (`orders_select_own`, `order_items_select_own`) already scopes them to the
-/// signed-in shopper and there is nothing to make atomic.
+/// could interleave. Reading is two ordinary selects: RLS
+/// (`orders_select_own`, `order_items_select_own`) is the boundary, and each
+/// select also names the signed-in shopper explicitly — see [orders] for why
+/// RLS alone does not mean "mine" once an admin is the one reading.
 @LazySingleton(as: OrderRepository, env: [Environment.dev])
 class SupabaseOrderRepository implements OrderRepository {
   const SupabaseOrderRepository();
 
-  SupabaseClient get _client => Supabase.instance.client;
+  /// The live client. Overridable only so a test can point this class at a
+  /// fake PostgREST; production never overrides it.
+  @visibleForTesting
+  SupabaseClient get client => Supabase.instance.client;
+
+  /// The signed-in shopper's id, or null. Its own seam for the same reason.
+  @visibleForTesting
+  String? get currentUserId => client.auth.currentUser?.id;
 
   /// Columns of one order plus its lines, in the shape [_orderFromRow] reads.
   static const String _orderColumns = '''
@@ -57,7 +66,7 @@ order_items (product_id, product_name, unit_price, colour_id, colour_name, size,
     }
 
     try {
-      final response = await _client.rpc<Map<String, dynamic>>(
+      final response = await client.rpc<Map<String, dynamic>>(
         'place_order',
         params: {
           'payload': {
@@ -175,12 +184,28 @@ order_items (product_id, product_name, unit_price, colour_id, colour_name, size,
     yield* text.split(_separators).where((token) => token.isNotEmpty);
   }
 
+  /// The signed-in shopper's own orders, newest first.
+  ///
+  /// **The `user_id` predicate states meaning; RLS stays the boundary.** For a
+  /// customer, `orders_select_own` already returns only their rows. But an
+  /// admin's session also matches `orders_admin_read` (M3), and permissive
+  /// policies are OR'd, so without this predicate "طلباتي" listed every
+  /// customer's orders to an admin (measured live, 2026-09-19). The predicate
+  /// only narrows what RLS already allowed: deleting it can never expose a row
+  /// RLS would refuse, which is why it is not a security control and must never
+  /// be treated as one (`08-flutter-baas-security-guard.md` §1).
   @override
   Future<Result<List<Order>>> orders() async {
+    final uid = currentUserId;
+    // The route is behind the sign-in gate, so this is a backstop: answered
+    // locally rather than spending a request RLS would refuse anyway.
+    if (uid == null) return const Err(UnauthorizedFailure());
+
     try {
-      final rows = await _client
+      final rows = await client
           .from('orders')
           .select(_orderColumns)
+          .eq('user_id', uid)
           // Newest first, as `1:1356` lists them.
           .order('placed_at', ascending: false);
 
@@ -190,13 +215,22 @@ order_items (product_id, product_name, unit_price, colour_id, colour_name, size,
     }
   }
 
+  /// One of the signed-in shopper's own orders.
+  ///
+  /// Scoped the same way as [orders], for the same reason: without it an admin
+  /// could open any customer's order through the storefront's own
+  /// `/orders/<number>` route. Someone else's number is simply not found.
   @override
   Future<Result<Order>> orderByNumber(String number) async {
+    final uid = currentUserId;
+    if (uid == null) return const Err(UnauthorizedFailure());
+
     try {
-      final row = await _client
+      final row = await client
           .from('orders')
           .select(_orderColumns)
           .eq('number', number)
+          .eq('user_id', uid)
           // maybeSingle, not single: PostgREST raises PGRST116 for no rows and
           // this returns null instead, so "no such order" stays a
           // NotFoundFailure rather than arriving as a thrown ServerFailure.

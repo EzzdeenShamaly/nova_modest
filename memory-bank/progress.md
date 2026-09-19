@@ -514,7 +514,7 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   authenticated`. A role outside `authenticated` would then match no policy at
   all, whatever it sets. Whether that is right is the owner's call.
 
-- **"طلباتي" shows an admin every customer's orders.** Production carries
+- **FIXED 2026-09-19 — "طلباتي" showed an admin every customer's orders.** Closed by an explicit `.eq('user_id', uid)` on `orders()` and `orderByNumber()`, on top of RLS, not instead of it; rule 08 §1's example rewritten to match. Proved against a fake PostgREST that answers like an admin session (every row when unfiltered): deleting the predicate fails three tests on behaviour. The record as found: Production carries
   `orders_admin_read` and `order_items_admin_read` (M3): `permissive`,
   `for select to authenticated using (is_admin())`. Permissive policies are
   OR'd, so for an admin's session RLS returns **every** row.
@@ -548,7 +548,7 @@ Tracks what's Done, In Progress, and Blocked, per feature.
      second SELECT policy. The rule's principle stands (never treat a Dart
      filter as the boundary); its example no longer does.
 
-- **Debt: the cart's total is always 15 short of what the shopper pays**
+- **FIXED 2026-09-19 — the cart's total was always 15 short of what the shopper paid.** Closed by option A (user): `CartTotals` carries the default method's fee and shows it as its own "رسوم الدفع" line; a test states it against `CheckoutDraft.totals` itself, so the cart and checkout cannot drift apart again. The record as found:
   (reported by the user 2026-09-19, during the live run: the cart showed 555,
   the order came to 570). `CartTotals.total` is `subtotal + shipping`
   (`cart_totals.dart:40`); the cash-on-delivery fee of 15

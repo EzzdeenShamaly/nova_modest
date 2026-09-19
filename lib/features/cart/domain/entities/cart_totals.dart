@@ -1,10 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:nova_modest/features/cart/domain/entities/cart_item.dart';
+import 'package:nova_modest/features/checkout/domain/entities/payment_method.dart';
 import 'package:nova_modest/features/checkout/domain/entities/shipping_method.dart';
 
 part 'cart_totals.freezed.dart';
 
-/// What the summary card shows: subtotal, shipping, and their sum.
+/// What the summary card shows: subtotal, shipping, the payment fee, and the
+/// sum the shopper will actually pay.
 ///
 /// A domain value, not a widget calculation — a `fold` over prices inside a
 /// `build()` is exactly the business logic `01-flutter-architecture-guard`
@@ -13,8 +15,26 @@ part 'cart_totals.freezed.dart';
 abstract class CartTotals with _$CartTotals {
   const CartTotals._();
 
-  const factory CartTotals({required num subtotal, required num shipping}) =
-      _CartTotals;
+  const factory CartTotals({
+    required num subtotal,
+    required num shipping,
+
+    /// What the payment method checkout starts on adds. Zero unless built by
+    /// [of], so a total assembled by hand elsewhere is not silently changed.
+    @Default(0) num paymentFee,
+  }) = _CartTotals;
+
+  /// The fee of the method checkout opens on — `CheckoutDraft.payment`'s
+  /// default, cash on delivery.
+  ///
+  /// **Included in the cart's total, not left for checkout to add** (user,
+  /// 2026-09-19). The cart said 555 and the order came to 570: the same jump
+  /// mid-purchase with nothing on screen to explain it that [shippingFee]
+  /// was introduced to stop. Cash on delivery is the only method that can
+  /// place an order, so the fee is not a maybe. It is shown as its own line
+  /// rather than folded silently into the total. The day a second method
+  /// goes live, this is the default's fee, and the line needs to say so.
+  static num get defaultPaymentFee => PaymentMethod.cashOnDelivery.fee;
 
   /// The quote shown before a shipping method has been chosen.
   ///
@@ -31,11 +51,12 @@ abstract class CartTotals with _$CartTotals {
   /// expression.
   static num get shippingFee => ShippingMethod.standard.cost;
 
-  /// Totals for [items]. An empty cart is charged nothing to ship.
+  /// Totals for [items]. An empty cart is charged nothing to ship or to pay.
   static CartTotals of(List<CartItem> items) => CartTotals(
     subtotal: items.fold<num>(0, (sum, item) => sum + item.lineTotal),
     shipping: items.isEmpty ? 0 : shippingFee,
+    paymentFee: items.isEmpty ? 0 : defaultPaymentFee,
   );
 
-  num get total => subtotal + shipping;
+  num get total => subtotal + shipping + paymentFee;
 }

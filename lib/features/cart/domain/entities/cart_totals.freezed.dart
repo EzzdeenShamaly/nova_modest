@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CartTotals {
 
- num get subtotal; num get shipping;
+ num get subtotal; num get shipping;/// What the payment method checkout starts on adds. Zero unless built by
+/// [of], so a total assembled by hand elsewhere is not silently changed.
+ num get paymentFee;
 /// Create a copy of CartTotals
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $CartTotalsCopyWith<CartTotals> get copyWith => _$CartTotalsCopyWithImpl<CartTot
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartTotals&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shipping, shipping) || other.shipping == shipping));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartTotals&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shipping, shipping) || other.shipping == shipping)&&(identical(other.paymentFee, paymentFee) || other.paymentFee == paymentFee));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,subtotal,shipping);
+int get hashCode => Object.hash(runtimeType,subtotal,shipping,paymentFee);
 
 @override
 String toString() {
-  return 'CartTotals(subtotal: $subtotal, shipping: $shipping)';
+  return 'CartTotals(subtotal: $subtotal, shipping: $shipping, paymentFee: $paymentFee)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $CartTotalsCopyWith<$Res>  {
   factory $CartTotalsCopyWith(CartTotals value, $Res Function(CartTotals) _then) = _$CartTotalsCopyWithImpl;
 @useResult
 $Res call({
- num subtotal, num shipping
+ num subtotal, num shipping, num paymentFee
 });
 
 
@@ -62,10 +64,11 @@ class _$CartTotalsCopyWithImpl<$Res>
 
 /// Create a copy of CartTotals
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? subtotal = null,Object? shipping = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? subtotal = null,Object? shipping = null,Object? paymentFee = null,}) {
   return _then(_self.copyWith(
 subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
 as num,shipping: null == shipping ? _self.shipping : shipping // ignore: cast_nullable_to_non_nullable
+as num,paymentFee: null == paymentFee ? _self.paymentFee : paymentFee // ignore: cast_nullable_to_non_nullable
 as num,
   ));
 }
@@ -151,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( num subtotal,  num shipping)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( num subtotal,  num shipping,  num paymentFee)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CartTotals() when $default != null:
-return $default(_that.subtotal,_that.shipping);case _:
+return $default(_that.subtotal,_that.shipping,_that.paymentFee);case _:
   return orElse();
 
 }
@@ -172,10 +175,10 @@ return $default(_that.subtotal,_that.shipping);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( num subtotal,  num shipping)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( num subtotal,  num shipping,  num paymentFee)  $default,) {final _that = this;
 switch (_that) {
 case _CartTotals():
-return $default(_that.subtotal,_that.shipping);case _:
+return $default(_that.subtotal,_that.shipping,_that.paymentFee);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -192,10 +195,10 @@ return $default(_that.subtotal,_that.shipping);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( num subtotal,  num shipping)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( num subtotal,  num shipping,  num paymentFee)?  $default,) {final _that = this;
 switch (_that) {
 case _CartTotals() when $default != null:
-return $default(_that.subtotal,_that.shipping);case _:
+return $default(_that.subtotal,_that.shipping,_that.paymentFee);case _:
   return null;
 
 }
@@ -207,11 +210,14 @@ return $default(_that.subtotal,_that.shipping);case _:
 
 
 class _CartTotals extends CartTotals {
-  const _CartTotals({required this.subtotal, required this.shipping}): super._();
+  const _CartTotals({required this.subtotal, required this.shipping, this.paymentFee = 0}): super._();
   
 
 @override final  num subtotal;
 @override final  num shipping;
+/// What the payment method checkout starts on adds. Zero unless built by
+/// [of], so a total assembled by hand elsewhere is not silently changed.
+@override@JsonKey() final  num paymentFee;
 
 /// Create a copy of CartTotals
 /// with the given fields replaced by the non-null parameter values.
@@ -223,16 +229,16 @@ _$CartTotalsCopyWith<_CartTotals> get copyWith => __$CartTotalsCopyWithImpl<_Car
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartTotals&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shipping, shipping) || other.shipping == shipping));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartTotals&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shipping, shipping) || other.shipping == shipping)&&(identical(other.paymentFee, paymentFee) || other.paymentFee == paymentFee));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,subtotal,shipping);
+int get hashCode => Object.hash(runtimeType,subtotal,shipping,paymentFee);
 
 @override
 String toString() {
-  return 'CartTotals(subtotal: $subtotal, shipping: $shipping)';
+  return 'CartTotals(subtotal: $subtotal, shipping: $shipping, paymentFee: $paymentFee)';
 }
 
 
@@ -243,7 +249,7 @@ abstract mixin class _$CartTotalsCopyWith<$Res> implements $CartTotalsCopyWith<$
   factory _$CartTotalsCopyWith(_CartTotals value, $Res Function(_CartTotals) _then) = __$CartTotalsCopyWithImpl;
 @override @useResult
 $Res call({
- num subtotal, num shipping
+ num subtotal, num shipping, num paymentFee
 });
 
 
@@ -260,10 +266,11 @@ class __$CartTotalsCopyWithImpl<$Res>
 
 /// Create a copy of CartTotals
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? subtotal = null,Object? shipping = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? subtotal = null,Object? shipping = null,Object? paymentFee = null,}) {
   return _then(_CartTotals(
 subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
 as num,shipping: null == shipping ? _self.shipping : shipping // ignore: cast_nullable_to_non_nullable
+as num,paymentFee: null == paymentFee ? _self.paymentFee : paymentFee // ignore: cast_nullable_to_non_nullable
 as num,
   ));
 }

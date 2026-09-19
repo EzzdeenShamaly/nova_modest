@@ -25,9 +25,16 @@ app**. Anyone holding the binary can issue any query the key allows. So:
   `auth.uid()`. The gate is a convenience; the policy is the control.
 - **Never** filter by user id in Dart and treat that as protection. A `.eq('user_id', …)`
   the client chooses is a client-side filter, not a boundary.
-- A repository that reads someone's own rows should carry **no** user predicate
-  at all: RLS applies it. `SupabaseOrderRepository.orders()` selects from
-  `orders` with no `where`, and that is correct.
+- A user predicate may still be needed for **meaning**. RLS decides what a
+  session *may* read; "my orders" is a narrower question once a role reads more
+  than its own. `SupabaseOrderRepository.orders()` carries
+  `.eq('user_id', uid)` because an admin's session also matches
+  `orders_admin_read` — permissive policies are OR'd — and without it "طلباتي"
+  listed every customer's orders (measured 2026-09-19). The test for such a
+  predicate: deleting it must never expose a row RLS would refuse. If it could,
+  the predicate has become the boundary, and that is the defect.
+  *(Until 2026-09-19 this bullet said a repository reading its own rows should
+  carry no predicate at all — true before M3 added a second SELECT policy.)*
 
 ## 2. RLS on every table, and a policy for every intended access
 

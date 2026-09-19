@@ -54,6 +54,19 @@ class CartSummary extends StatelessWidget {
                 color: AppColors.mutedStrong,
               ),
             ),
+            // Its own line, under the same label the payment step uses, so the
+            // total the shopper sees here is the one they are charged and the
+            // 15 is never a surprise inside it.
+            if (totals.paymentFee > 0) ...[
+              SizedBox(height: AppSpacing.xs),
+              _Row(
+                label: l10n.checkoutPaymentFee,
+                value: money.format(totals.paymentFee),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: AppColors.mutedStrong,
+                ),
+              ),
+            ],
             const Divider(),
             _Row(
               label: l10n.cartTotal,
