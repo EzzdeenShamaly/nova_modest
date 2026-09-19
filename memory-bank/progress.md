@@ -317,6 +317,19 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   has no cancel button at all, so it would be proving a path no shopper can
   take. It gets measured when the feature exists, as part of building it.
 
+- **Working-method note (user, 2026-09-19), recorded in the user's words:**
+  "Our decision was *no crop, four images*, and you cropped and came out with
+  seven. The result is better and I accept it — but you went against an
+  explicit decision without coming back to ask." **The rule:** when a decision
+  of the owner's would lose a better result, come back with one line *before*
+  executing; delivering the deviation and explaining it afterwards does not
+  count. (The agent's reading of the transcript differed and was put once; the
+  user reaffirmed their account, which settles the record.)
+
+- **p3 keeps its generated image — decided, not pending** (user, 2026-09-19).
+  No category change to fit a photo, and no search for a shawl photo. The
+  catalogue-photo work is closed.
+
 - **No first-launch language chooser** (user, 2026-08-30). `1:2304` draws a
   full-screen "اختر لغتك" with the brandmark and large option cards. **It will
   not be built.** Arabic is the default and the language is switchable from the
@@ -581,24 +594,82 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   The cart-full refusal snack bar added on 2026-09-17 has no action, so it
   already dismisses after the default four seconds.
 
-- **Three screens read a field nothing fills.** `Product` carries **two**
-  places for artwork: `imageUrl` (`@JsonKey(name: 'image_url')`) and
-  `images` (`@Default(<String>[])`). `SupabaseCatalogRepository` fills
-  **`imageUrl` only** (`supabase_catalog_repository.dart:175`); `images` is
-  left empty on every product the server returns.
+- **Catalogue photographs prepared for the dashboard to upload — 2026-09-19.**
+  The eight Pillow-generated images read as placeholders beside a real product
+  photograph. The agent's own search found no usable open-licensed source
+  (Openverse and Wikimedia hold museum garments in the wrong colours; Unsplash
+  search answers 401 to anything but a browser, though its image host is
+  reachable). The user downloaded nine Unsplash photographs (Unsplash License)
+  into `E:\repo\catalogue-photos\` — outside both repositories.
 
-  So `product_card.dart:63` shows a picture once `products.image_url` is set,
-  while `cart_item_tile.dart:57`, `orders_screen.dart:149` and
-  `order_item_line.dart:51` read `images` and therefore draw the palette
-  placeholder **forever**, whatever is uploaded.
+  Processed by the agent, originals untouched: every photo cropped **from the
+  neck down** — the licence does not cover the models' publicity rights, so no
+  identifiable face goes on a product page — and resized to fit 1200x1800
+  (138–244 KB each, down from ~3 MB; no EXIF). Seven survived, in
+  `E:\repo\catalogue-photos\ready\`: `p1 p2 p4 p5 p6 p7 p8`. Excluded: the
+  seated shot (a neck-down crop left it either landscape or without its
+  embroidered sleeve), and one duplicate of the same garment. **p3 keeps its
+  generated image** (decided — see *Decisions*).
 
-  Nothing crashes — `ProductThumbnail` handles an empty list and a broken URL
-  alike — which is exactly why this is easy to miss: the cart and the order
-  screens look deliberate rather than wrong. Found 2026-09-17 while checking
-  whether a live order run could proceed with no artwork. **Not fixed**: the
-  run does not depend on it, and the right fix is one field rather than a
-  patch at three call sites. Expect the order-detail screen to look
-  artwork-free during the run and do not read that as a defect in the run.
+  Names proposed for the dashboard to apply, prices unchanged: p1 → «عباءة
+  سوداء بتطريز زهري», p4 → «طقم عباءة سوداء بفستان وردي», p7 → «عباءة سوداء
+  رسمية بخطوط ساتان». Uploading, renaming and deleting the eight old `webp`
+  objects are the dashboard's, under its recorded seeding exception.
+
+- **`Product.images` is a field with no source anywhere.** *(Reworded
+  2026-09-19. The first version, of 2026-09-17, said the repository "fills
+  `imageUrl` only" and left `images` empty, as if it had forgotten one. That
+  framing was wrong, and so was its count of three screens.)*
+
+  **There is nothing to fill it from.** Production has **one** image field per
+  product: `products.image_url` (text). Read as `claude_reader` on 2026-09-19:
+  `products` has no `images` column, no table in any user schema has "image" in
+  its name, and `products.image_url` is the only such column in `public`. The
+  dashboard's entity has a single image field, and so does the contract.
+  `Product.images` (`@Default(<String>[])`, `product.dart:41`) is an app-side
+  field with no column behind it, so it is `[]` on every product for ever. The
+  repository did not forget anything; there is nothing for it to read.
+
+  `imageUrl` (`@JsonKey(name: 'image_url')`) is the field that has a source.
+  As of 2026-09-19 all eight products have one (uploaded from the dashboard,
+  served `200 image/webp` from the public URL).
+
+  **Who reads which field:**
+
+  | Surface | Reads | Where the `Product` comes from |
+  |---|---|---|
+  | Catalogue card | `imageUrl` | the catalogue — **shows the photo** |
+  | Product page carousel | `images` | the catalogue (`product_detail_screen.dart:117`) |
+  | Cart line | `images` | the catalogue, via cart hydration (`cart_item_tile.dart:57`) |
+  | Checkout review | `images` | the catalogue, via the draft (`review_step.dart:109` → `order_item_line.dart:51`) |
+  | Orders list | `images` | **an `order_items` snapshot** (`orders_screen.dart:149`) |
+  | Order detail | `images` | **an `order_items` snapshot** (`order_detail_screen.dart:97` → `order_item_line.dart:51`) |
+
+  Nothing crashes — `ProductThumbnail` and the carousel draw a placeholder for
+  an empty list — which is why it reads as deliberate rather than broken.
+
+  **The two options, not decided, not fixed:**
+
+  1. **Derive it in the mapper.** `SupabaseCatalogRepository` sets
+     `images: [if (imageUrl != null) imageUrl]`. The screens stay as they are,
+     and the carousel keeps a list-shaped API in case the schema ever grows a
+     gallery. The cost: one fact now lives in two fields, and something has to
+     keep them in step.
+  2. **Remove `images`, and the screens read `imageUrl`.** One field, matching
+     the database, the dashboard and the contract. The cost: the carousel
+     becomes a single image or a one-page carousel, and a real gallery later
+     means bringing a list back.
+
+  **Neither option reaches the order screens alone.** Their `Product` is built
+  by `SupabaseOrderRepository._itemFromRow` from an `order_items` row, which
+  has no image column. It also has no foreign key to `products`, because a line
+  is a snapshot, so PostgREST cannot embed the product's picture. The orders
+  list and order detail stay artwork-free under either option. Closing them is
+  its own decision: look the current picture up by `product_id` (showing
+  today's photo, not the one at purchase), or snapshot `image_url` into
+  `order_items` at order time (a schema change, so the dashboard's owner's).
+  That method's own comment — "nothing on an order screen asks for those" — is
+  no longer true: both order screens draw a thumbnail.
 
 - **Google sign-in is untried** and needs a web client ID plus the provider
   enabled, per the teammate's README.

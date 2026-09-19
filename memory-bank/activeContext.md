@@ -34,7 +34,8 @@ has no `launch.json` and starts the app without its key: a white page.
 
 **Next logical step:** the owner chooses from the debts `progress.md` recorded
 during the run — the admin seeing everyone's orders in "طلباتي", the cart total
-missing the 15 fee, `Product.images` never filled, the snack bar's timing, the
+missing the 15 fee, `Product.images` (a field with no source — the database has
+only `image_url`), the snack bar's timing, the
 reachable `23505`, and the untested `request.jwt.claims` security debt (the
 last belongs as much to the dashboard as to this repo).
 
