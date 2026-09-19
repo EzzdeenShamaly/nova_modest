@@ -262,6 +262,50 @@ void main() {
       expect(find.text('عرض السلة'), findsOneWidget);
     });
 
+    // The test above only ever asked whether the confirmation *appears*. It
+    // passed while the confirmation never left: a SnackBar with an action
+    // persists by default (`persist = persist ?? action != null`), and the
+    // app-wide ScaffoldMessenger carried it onto the cart, where it sat over
+    // the checkout button until someone found the swipe. Found live on
+    // 2026-09-19, in the middle of placing an order.
+    testWidgets('the confirmation leaves on its own', (tester) async {
+      await pump(tester, loaded);
+
+      await tester.tap(find.text('أضف إلى السلة'));
+      // Settle first: the messenger starts the four-second timer only once the
+      // entrance animation has *completed*. One big pump would finish the
+      // entrance at the end of its jump, start the timer there, and then
+      // pumpAndSettle — with nothing animating — would never advance the clock
+      // to fire it.
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('تمت الإضافة إلى السلة'), findsNothing);
+    });
+
+    testWidgets('one tap confirms once, and nothing queues behind it', (
+      tester,
+    ) async {
+      await pump(tester, loaded);
+
+      await tester.tap(find.text('أضف إلى السلة'));
+      await tester.pump();
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // A second confirmation for the same tap would surface only once the
+      // first had gone, so wait through both lifetimes before looking.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
     testWidgets('is disabled for a sold-out product', (tester) async {
       await pump(
         tester,

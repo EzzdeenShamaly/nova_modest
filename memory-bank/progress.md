@@ -301,6 +301,22 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   it. The phone is still what an order is tracked by; the fields did not change,
   only who may reach them.
 
+- **The owner-cancel path of `transition_order_status` is measured only in the
+  negative direction** (user, 2026-09-17). Deferred check D2 in the dashboard's
+  `customer.md` wants both halves. The **negative** half is what was at stake:
+  an owner attempting a move the graph forbids must be refused with
+  `transition_not_allowed`, **not** `not_authorised` — the first means the
+  database recognised them as the owner and evaluated the graph, the second
+  means the ownership check failed and any signed-in stranger could cancel
+  someone else's order. That is the security question, and it is answered
+  without spending anything.
+
+  The **positive** half — an owner actually cancelling their own pending
+  order — is **deliberately not measured**, and this is not a gap to close
+  later on its own. Measuring it needs an order to destroy, and the storefront
+  has no cancel button at all, so it would be proving a path no shopper can
+  take. It gets measured when the feature exists, as part of building it.
+
 - **No first-launch language chooser** (user, 2026-08-30). `1:2304` draws a
   full-screen "اختر لغتك" with the brandmark and large option cards. **It will
   not be built.** Arabic is the default and the language is switchable from the
@@ -333,9 +349,196 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   this storefront has. It stayed hidden for sixteen days behind the "unproven"
   line this bullet replaces.
 
-  Still genuinely unexercised: reading order history back (`orders()` /
-  `orderByNumber()`). `integration_test/` does not exist, which is where a
-  repeatable version of any of this would live.
+  The timestamps close it completely (read 2026-09-17): `as92@smail.ucas.edu.ps`
+  was created in `auth.users` at **2026-08-31 13:23:07 UTC** and the order was
+  placed at **13:28** — five minutes later, on the first sign-in that ever
+  worked against the cloud. It became an admin on 2026-09-02.
+
+  **That is also why the dashboard's deferred checks D1 and D2 were born
+  deferred.** Both need one thing: an order owned by an account that is not an
+  admin. Such an order was placed on day one and *was* that, for two days —
+  then its owner was promoted and the only qualifying row stopped qualifying.
+  Nothing was overlooked and no check was written wrong; a promotion two days
+  later retroactively disqualified the evidence. Worth remembering as a shape:
+  **a measurement can be invalidated by a change to something it never
+  measured.**
+
+  **A second live order, `ORD-260917-0001`** (placed 2026-09-17 12:51 UTC).
+  Read back from the database on 2026-09-19.
+
+  > **Corrected 2026-09-19.** This entry first said the order was placed by
+  > `as92+shopper@smail.ucas.edu.ps`. That was written **before** the owner was
+  > measured, and it was wrong: the run signed in with the main address by
+  > mistake, and the row's owner is **`as92@smail.ucas.edu.ps` — the admin**.
+  > It is the exact failure the note at the top of this file warns about, made
+  > by the agent that wrote the note. Only what a query returned belongs in this
+  > file as fact.
+
+  What the row **does** prove, measured:
+
+  - **Defect 1f is closed, with evidence.** The counter row for the day is
+    `2026-09-17 → 1`, and `(placed_at at time zone 'Asia/Riyadh')::date` is
+    also `2026-09-17` (12:51 UTC = 15:51 Riyadh). Before M5 those two
+    expressions diverged — the counter keyed on the UTC day, the printed number
+    on the session's zone. They are now one value. The number
+    `ORD-260917-0001` was predicted before the order was placed and matched.
+  - `total` = **430** = 380 + 35 + 15. A `GENERATED ALWAYS` column, so the
+    server computed it; one line; `orders_total` went 1 → 2.
+  - `orders()` ran against the live server and the storefront's orders screen
+    listed the order. **`orderByNumber()` is not established** — nobody opened
+    the detail screen — and was wrongly claimed here before.
+
+  What it does **not** prove: anything about a customer. It is the admin's
+  order, so D1 and D2 stay deferred — the same trap `ORD-260831-0001` fell
+  into, for a different reason.
+
+  **Also measured from the storefront side for the first time, 2026-09-19:**
+  - Contract rule 5: reading `orders` with no session answers `42501`,
+    *permission denied for table orders* — not `200 []`.
+  - `contract_version()` answered `version 2`, `schema_digest
+    a892643ec4bde3567fd435900e75dfe5` — both equal to the contract's lines, so
+    the contract described the database on that date. The first time the
+    freshness check has actually been run rather than planned.
+
+  Still unexercised: `integration_test/` does not exist, so none of this is
+  repeatable without a person driving it.
+- **SECURITY DEBT — untested, deliberately: `claude_reader` can probably read
+  any customer's rows by impersonating them** (recorded 2026-09-19; the owner
+  decides whether and how to test it — on a separate project, never on
+  production).
+
+  *The claim.* `claude_reader` — the read-only role the dashboard's agent uses,
+  whose connection string sits in `nova_modest_admin/.claude_db_url` — was
+  measured to see **zero** rows in `orders`, `order_items`, `auth.users` and
+  `order_number_sequences`. That is probably true only until it sets one
+  variable.
+
+  *The mechanism.* The own-row policies on `orders`, `order_items`, `profiles`
+  and `user_addresses` apply **`to public`** and test `auth.uid()`, which reads
+  the `request.jwt.claims` setting. PostgREST sets that setting itself from a
+  verified JWT, and an API client cannot touch it. A role that connects to
+  Postgres **directly** can: `set local request.jwt.claims =
+  '{"sub":"<uuid>"}'` makes `auth.uid()` return whatever it chose, and every
+  `to public` own-row policy then admits that customer's rows. `claude_reader`
+  holds SELECT on all four tables through `pg_read_all_data`, and does not need
+  to be a member of `authenticated`, because the policies are not restricted to
+  it.
+
+  *What limits it.* It needs the target's UUID, and `auth.users` is invisible
+  to the role. The admin-read policies are `to authenticated`, so impersonation
+  would not reach them.
+
+  *Scope.* Not a storefront defect — the storefront never connects directly. It
+  is a property of any direct-login role against these policies, and the
+  dashboard's agent uses exactly such a role.
+
+  *Why it was not tested.* Testing it means impersonating a real customer to
+  read their name, phone and address on production. That is not a probe to run
+  because a hypothesis is interesting.
+
+  *A candidate fix, not decided:* restrict the own-row policies `to
+  authenticated`. A role outside `authenticated` would then match no policy at
+  all, whatever it sets. Whether that is right is the owner's call.
+
+- **"طلباتي" shows an admin every customer's orders.** Production carries
+  `orders_admin_read` and `order_items_admin_read` (M3): `permissive`,
+  `for select to authenticated using (is_admin())`. Permissive policies are
+  OR'd, so for an admin's session RLS returns **every** row.
+  `SupabaseOrderRepository.orders()` has no user predicate — deliberately, per
+  `08-flutter-baas-security-guard.md` §1 — so an admin signed into the
+  storefront sees other people's orders under "My orders", and
+  `orderByNumber()` opens any customer's order by number.
+
+  **Not a breach**: the admin is authorised to read those rows; that is what M3
+  is for, in the dashboard. It is a storefront screen that says "mine" and
+  means "everything this session may read". Invisible until 2026-09-17 because
+  every order belonged to the admin.
+
+  **The customer side is measured, and it is correct** (2026-09-19, by the
+  user, before the shopper's first order): signed in as
+  `as92+shopper@smail.ucas.edu.ps`, "طلباتي" showed **"لا توجد طلبات بعد"** —
+  zero orders — while the database held two, both the admin's. So
+  `orders_select_own` filters exactly as intended for a customer: the negative
+  direction is proven, with no predicate in Dart. It is also the first time the
+  orders screen's empty state rendered against a live server rather than a fake.
+
+  That pins the defect down precisely: it exists **only in an admin's
+  session**, where `orders_admin_read` is OR'd in. For every customer the
+  predicate-free query is correct today.
+
+  Two consequences, flagged 2026-09-19, **neither fixed**:
+  1. The storefront needs `.eq('user_id', <uid>)` on both reads — as a
+     statement of *meaning*, not as protection. RLS stays the control.
+  2. **Rule 08 §1 is now stale.** It says `orders()` "selects from `orders`
+     with no `where`, and that is correct". It was correct before M3 added a
+     second SELECT policy. The rule's principle stands (never treat a Dart
+     filter as the boundary); its example no longer does.
+
+- **Debt: the cart's total is always 15 short of what the shopper pays**
+  (reported by the user 2026-09-19, during the live run: the cart showed 555,
+  the order came to 570). `CartTotals.total` is `subtotal + shipping`
+  (`cart_totals.dart:40`); the cash-on-delivery fee of 15
+  (`payment_method.dart:13`) joins only at checkout, via
+  `CheckoutDraft` (`checkout_draft.dart:78`). Cash on delivery is the only
+  method that can place an order — card is refused with
+  `payment_not_available` — so the fee is never optional, and the cart
+  understates every order by exactly 15. The same shape the shipping comment in
+  `cart_totals.dart` already warns about: a total that jumps mid-purchase with
+  nothing on screen to explain it. Not blocking; not fixed.
+
+- **FIXED 2026-09-19 — the "added to cart" snack bar never went away, and
+  blocked checkout.** Found live: it sat over the cart's checkout button for
+  minutes. Cause, from the code: not `duration` (the default 4 s), not a
+  listener re-showing it — the call is in `onPressed`, once per tap. The
+  snack bar carries a `SnackBarAction`, and `SnackBar` sets
+  `persist = persist ?? action != null`, so it never timed out; the app-wide
+  `ScaffoldMessenger` carried it from the product page onto the cart. It was
+  the **only** one of eleven snack bars in the app with an action. Fixed with an
+  explicit `persist: false`. The existing test only asserted that the
+  confirmation *appears*, which is why it passed throughout; two tests now
+  assert it *leaves*, and that one tap queues nothing behind it — both failed
+  against the old code on behaviour.
+
+  **Still open, a UI decision:** the user finds four seconds too long for a
+  plain confirmation.
+  It is not the 4-second default running long. The snack bar in
+  `product_detail_screen.dart` carries a `SnackBarAction` ("عرض السلة"), and
+  Flutter's `SnackBar` sets `persist = persist ?? action != null`
+  (`snack_bar.dart:303`) — **a snack bar with an action does not auto-dismiss
+  at all**; it stays until the action or the close icon is tapped. So setting
+  `duration: 2s` alone would change nothing.
+
+  The user's intent — a simple confirmation should be gone in a second or two —
+  runs into a real accessibility reason: Flutter persists action snack bars
+  because an action that times out is unreachable for someone navigating by
+  screen reader or switch. The choice to make later, not now:
+  - drop the action and let the cart badge be the route to the cart — then a
+    short `duration` is right and costs nobody anything; or
+  - keep the action with `persist: false` and a duration long enough to reach
+    it — which a one-to-two-second window is not.
+
+  The cart-full refusal snack bar added on 2026-09-17 has no action, so it
+  already dismisses after the default four seconds.
+
+- **Three screens read a field nothing fills.** `Product` carries **two**
+  places for artwork: `imageUrl` (`@JsonKey(name: 'image_url')`) and
+  `images` (`@Default(<String>[])`). `SupabaseCatalogRepository` fills
+  **`imageUrl` only** (`supabase_catalog_repository.dart:175`); `images` is
+  left empty on every product the server returns.
+
+  So `product_card.dart:63` shows a picture once `products.image_url` is set,
+  while `cart_item_tile.dart:57`, `orders_screen.dart:149` and
+  `order_item_line.dart:51` read `images` and therefore draw the palette
+  placeholder **forever**, whatever is uploaded.
+
+  Nothing crashes — `ProductThumbnail` handles an empty list and a broken URL
+  alike — which is exactly why this is easy to miss: the cart and the order
+  screens look deliberate rather than wrong. Found 2026-09-17 while checking
+  whether a live order run could proceed with no artwork. **Not fixed**: the
+  run does not depend on it, and the right fix is one field rather than a
+  patch at three call sites. Expect the order-detail screen to look
+  artwork-free during the run and do not read that as a defect in the run.
+
 - **Google sign-in is untried** and needs a web client ID plus the provider
   enabled, per the teammate's README.
 - **The cart is still device-local** while everything around it is server-backed

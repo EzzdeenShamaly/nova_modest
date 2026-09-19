@@ -427,6 +427,17 @@ class _ActionBar extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(l10n.productAddedToCart),
+                              // Explicit, because the default is the defect: a
+                              // SnackBar with an action persists until tapped
+                              // (`persist = persist ?? action != null`). The
+                              // messenger is app-wide, so this one followed the
+                              // shopper onto the cart and sat over the checkout
+                              // button indefinitely. It now leaves after the
+                              // default duration like every other snack bar
+                              // here. How long, and whether the action should
+                              // stay at all, is a separate UI decision recorded
+                              // in progress.md.
+                              persist: false,
                               action: SnackBarAction(
                                 label: l10n.cartViewCart,
                                 // The snack bar outlives the screen: the action
