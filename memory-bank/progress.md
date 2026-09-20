@@ -63,25 +63,34 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   mandatory; the email and the privacy policy are. The owner decides the real
   values (2026-09-20) and this stays open until they land.
 
-- **The session token is stored in plain text, on both platforms.**
-  `supabase_flutter` persists the session through `SharedPreferences`: on
-  Android that is
-  `/data/data/<id>/shared_prefs/FlutterSharedPreferences.xml`, key
-  `flutter.sb-ydreyrxzilrmynapsgpi-auth-token`; on web, `localStorage`. Neither
-  is the Keystore or the Keychain, and the refresh token inside is long-lived.
-  The Android package also carries `ALLOW_BACKUP` (the platform default,
-  read from `dumpsys` on 2026-09-20), so that plaintext file is eligible for
-  automatic cloud backup — the token leaves the device without anyone asking.
-  `03-flutter-security-guard` requires tokens to go through
-  `flutter_secure_storage`.
+- **SETTLED 2026-09-20 — the session is in the keystore, not a preference file.**
+  `supabase_flutter`'s default wrote it, refresh token and all, through
+  `SharedPreferences`: a plaintext XML file on Android, `localStorage` on web.
+  `SecureSessionStorage` (`core/supabase/`) implements the SDK's `LocalStorage`
+  over the `flutter_secure_storage` this project already depended on and
+  already registered for the REST path nothing uses — so the fix was wiring,
+  not a new package. It is passed to `Supabase.initialize` through
+  `FlutterAuthClientOptions.localStorage`.
 
-  **Half the solution is already built and pointing the wrong way:**
-  `flutter_secure_storage` is a dependency and is registered as
-  `SecureTokenStorage` (`core/storage/`) — for the REST path, which nothing
-  routes through. Closing this means giving `Supabase.initialize` a
-  `LocalStorage` backed by that same secure storage, not adding a package.
-  **Before release, not after:** every copy shipped before the change keeps a
-  plaintext token on the device until the user signs out.
+  **Migration:** on first launch it moves a session written by the old storage
+  — found under the SDK's own key, `sb-<project ref>-auth-token`, rebuilt from
+  the project URL rather than guessed — into the keystore and deletes the
+  plaintext copy. A newer keystore session is left alone.
+
+  **Every failure wipes and starts clean** (user's constraint): a keystore that
+  cannot be read or written ends with both stores cleared and the shopper
+  signing in again. Never an exception, never a dead screen, and never left on
+  the plaintext session. Nine tests cover the migration and each failure path.
+
+  `android:allowBackup="false"` in the same change, so the app's files are no
+  longer eligible for automatic cloud backup. Note for Android 12+: that stops
+  cloud backup; device-to-device transfer is governed by
+  `android:dataExtractionRules`, which this app does not define.
+
+  **A consequence for future live runs:** the token can no longer be read off
+  the emulator with `adb run-as`, which is how it was taken on 2026-09-20. That
+  was the point. A future run needs another route — a second one-time code
+  through the auth API, or the VM service.
 
 ## Done
 

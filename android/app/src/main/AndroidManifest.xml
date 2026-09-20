@@ -1,8 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- No automatic cloud backup. The session now lives in the keystore, whose
+         ciphertext is useless off the device, but the old plaintext preference
+         file was eligible for backup and a future preference could be too.
+         Backing a shopper's data up to a Google account is a decision to take
+         deliberately, not a platform default to inherit.
+         Android 12+: this stops cloud backup; device-to-device transfer is
+         governed by android:dataExtractionRules, which this app does not
+         define. -->
     <application
         android:label="nova_modest"
         android:name="${applicationName}"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity

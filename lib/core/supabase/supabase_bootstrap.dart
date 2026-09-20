@@ -1,3 +1,4 @@
+import 'package:nova_modest/core/supabase/secure_session_storage.dart';
 import 'package:nova_modest/core/supabase/supabase_env.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -48,8 +49,13 @@ Future<void> initializeSupabase() async {
     // off a screen and types them (Figma `1:2438`). Adopting PKCE properly
     // would mean emailing a link instead, handling deep links on every
     // platform, and deleting that screen — a different product, not a fix.
-    authOptions: const FlutterAuthClientOptions(
+    authOptions: FlutterAuthClientOptions(
       authFlowType: AuthFlowType.implicit,
+      // The session goes to the keystore, not to a preference file. The
+      // default would write it, refresh token and all, as plaintext — see
+      // SecureSessionStorage, which also moves an older plaintext session
+      // across on first launch and clears it.
+      localStorage: SecureSessionStorage(),
     ),
   );
 }
