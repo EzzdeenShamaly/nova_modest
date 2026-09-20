@@ -813,4 +813,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderStatusCancelled => 'Cancelled';
+
+  @override
+  String get profileAvatarChange => 'Change your photo';
+
+  @override
+  String get profileAvatarUpdated => 'Your photo has been updated';
+
+  @override
+  String get avatarErrorFormat =>
+      'That format is not supported. Choose a PNG, JPEG or WebP image.';
+
+  @override
+  String get avatarErrorTooLarge =>
+      'That image is too large. Choose a smaller one.';
 }

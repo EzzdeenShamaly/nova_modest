@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
 import 'package:nova_modest/core/storage/token_storage.dart';
@@ -73,6 +75,16 @@ class AuthRepositoryImpl implements AuthRepository {
     // alongside the other unconfirmed endpoints.
     throw UnimplementedError(
       'updateProfile needs a confirmed backend endpoint.',
+    );
+  }
+
+  @override
+  Future<Result<User>> uploadAvatar(Uint8List imageBytes) async {
+    // Same reason as the two above: unregistered, and there is no confirmed
+    // upload endpoint. The live path is Supabase Storage, in
+    // `SupabaseAuthRepository`.
+    throw UnimplementedError(
+      'uploadAvatar needs a confirmed backend endpoint.',
     );
   }
 

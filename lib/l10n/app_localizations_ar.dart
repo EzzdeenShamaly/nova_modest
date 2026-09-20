@@ -816,4 +816,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orderStatusCancelled => 'ملغي';
+
+  @override
+  String get profileAvatarChange => 'تغيير صورتك';
+
+  @override
+  String get profileAvatarUpdated => 'تم تحديث صورتك';
+
+  @override
+  String get avatarErrorFormat =>
+      'هذه الصيغة غير مدعومة. اختاري صورة PNG أو JPEG أو WebP.';
+
+  @override
+  String get avatarErrorTooLarge => 'الصورة كبيرة جدًا. اختاري صورة أصغر.';
 }

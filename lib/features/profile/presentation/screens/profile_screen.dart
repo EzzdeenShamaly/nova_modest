@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/avatar_circle.dart';
 import 'package:nova_modest/core/widgets/settings_card.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
@@ -169,16 +170,6 @@ class _HeaderCard extends StatelessWidget {
 
   final User user;
 
-  /// The design's 64pt disc.
-  static const double _avatarSize = 64;
-
-  /// The first character of the name, by code point rather than by index, so a
-  /// name starting outside the basic plane is not cut in half.
-  String get _initial {
-    final name = user.displayName.trim();
-    return name.isEmpty ? '' : String.fromCharCode(name.runes.first);
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -192,17 +183,11 @@ class _HeaderCard extends StatelessWidget {
         padding: EdgeInsetsDirectional.all(AppSpacing.l),
         child: Row(
           children: [
-            Container(
-              width: _avatarSize,
-              height: _avatarSize,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-              ),
-              // No photography yet. `avatarUrl` is already on the entity, so an
-              // image later replaces this without another field.
-              child: Text(_initial, style: textTheme.headlineMedium),
+            // Read-only here: the picture is changed on the personal-
+            // information screen, one tap away, rather than from two places.
+            AvatarCircle(
+              imageUrl: user.avatarUrl,
+              displayName: user.displayName,
             ),
             SizedBox(width: AppSpacing.m),
             Expanded(

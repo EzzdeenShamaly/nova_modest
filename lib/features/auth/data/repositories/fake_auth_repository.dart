@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:injectable/injectable.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
+import 'package:nova_modest/core/media/image_bytes.dart';
 import 'package:nova_modest/core/storage/token_storage.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart';
@@ -90,6 +93,43 @@ class FakeAuthRepository implements AuthRepository {
     _current = _current.copyWith(displayName: displayName, phone: phone);
     return Ok(_current);
   }
+
+  @override
+  Future<Result<User>> uploadAvatar(Uint8List imageBytes) async {
+    await Future<void>.delayed(_latency);
+
+    // The two refusals are real, and deliberately the same two the live
+    // repository makes: they are the only part of this operation the app
+    // decides for itself, so a test that exercises them is testing the app's
+    // own rule rather than a stand-in's invention.
+    if (ImageFormat.of(imageBytes) == null) {
+      return const Err(
+        ValidationFailure(
+          'Unsupported image format.',
+          code: 'avatar_unsupported_format',
+        ),
+      );
+    }
+    if (imageBytes.length > _maxAvatarBytes) {
+      return const Err(
+        ValidationFailure('Image too large.', code: 'avatar_too_large'),
+      );
+    }
+
+    // No storage behind this, so no link to hand back: the accepted picture is
+    // counted and the entity keeps whatever it had. A fabricated URL would
+    // render as a broken image and look like a defect in the avatar widget
+    // rather than what it is — a fake with nowhere to put bytes.
+    uploadedAvatarBytes.add(imageBytes);
+    return Ok(_current);
+  }
+
+  /// Every picture this fake was handed, for a test to assert on.
+  final List<Uint8List> uploadedAvatarBytes = [];
+
+  /// The live `avatars` bucket's ceiling, mirrored so the fake refuses what the
+  /// real one would.
+  static const int _maxAvatarBytes = 2 * 1024 * 1024;
 
   @override
   Future<Result<void>> logout() async {

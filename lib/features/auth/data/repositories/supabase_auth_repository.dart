@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
+import 'package:nova_modest/core/media/image_bytes.dart';
 import 'package:nova_modest/core/supabase/supabase_error_mapper.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart';
@@ -19,7 +23,42 @@ class SupabaseAuthRepository implements AuthRepository {
     'GOOGLE_WEB_CLIENT_ID',
   );
 
-  SupabaseClient get _client => Supabase.instance.client;
+  /// Private bucket, `png/jpeg/webp`, 2 MiB — read from the live project on
+  /// 2026-09-20 rather than assumed. The size is repeated here so a picture the
+  /// bucket will refuse is refused in Arabic, before the upload, instead of
+  /// coming back as a bare 413.
+  static const String _avatarBucket = 'avatars';
+  static const int _maxAvatarBytes = 2 * 1024 * 1024;
+
+  /// One object per shopper, at `<uid>/avatar`.
+  ///
+  /// The first path segment must be the uid: all three storage policies are
+  /// `(storage.foldername(name))[1] = auth.uid()`. A fixed name under it means
+  /// the second upload **overwrites** the first — which is the only way to
+  /// replace a picture here, because the bucket grants INSERT, SELECT and
+  /// UPDATE and **no DELETE** (measured 2026-09-20). Dated names would leave
+  /// every old picture behind with nothing able to remove them.
+  String _avatarPath(String userId) => '$userId/avatar';
+
+  /// How long a display link stays good for.
+  ///
+  /// One hour, matching the access token's own lifetime: a link that outlived
+  /// the session would keep a private object reachable after sign-out, and one
+  /// much shorter would expire while the shopper is still looking at the
+  /// screen it was minted for.
+  static const int _signedUrlSeconds = 60 * 60;
+
+  SupabaseClient get _client => client;
+
+  /// The seam a test substitutes a loopback Supabase through, exactly as
+  /// `SupabaseOrderRepository` does. The app always gets the real one.
+  @visibleForTesting
+  SupabaseClient get client => Supabase.instance.client;
+
+  /// The signed-in shopper, as the second seam: a loopback client has no
+  /// session, and every write below needs to know whose row it is writing.
+  @visibleForTesting
+  String? get currentUserId => client.auth.currentUser?.id;
 
   @override
   Future<Result<User>> signInWithGoogle() async {
@@ -96,7 +135,7 @@ class SupabaseAuthRepository implements AuthRepository {
     String? phone,
   }) async {
     try {
-      final userId = _client.auth.currentUser?.id;
+      final userId = currentUserId;
       if (userId == null) {
         return const Err(UnauthorizedFailure());
       }
@@ -104,6 +143,60 @@ class SupabaseAuthRepository implements AuthRepository {
       await _client
           .from('profiles')
           .update({'display_name': displayName, 'phone': phone})
+          .eq('id', userId);
+
+      return _readCurrentUser();
+    } catch (error) {
+      return Err(mapSupabaseError(error));
+    }
+  }
+
+  @override
+  Future<Result<User>> uploadAvatar(Uint8List imageBytes) async {
+    try {
+      final userId = currentUserId;
+      if (userId == null) {
+        return const Err(UnauthorizedFailure());
+      }
+
+      // From the bytes, never from a file name: the picker reports whatever the
+      // device called the file, and the bucket checks the content type against
+      // its own list.
+      final format = ImageFormat.of(imageBytes);
+      if (format == null) {
+        return const Err(
+          ValidationFailure(
+            'Unsupported image format.',
+            code: 'avatar_unsupported_format',
+          ),
+        );
+      }
+      if (imageBytes.length > _maxAvatarBytes) {
+        return const Err(
+          ValidationFailure('Image too large.', code: 'avatar_too_large'),
+        );
+      }
+
+      await _client.storage
+          .from(_avatarBucket)
+          .uploadBinary(
+            _avatarPath(userId),
+            imageBytes,
+            fileOptions: FileOptions(
+              contentType: format.mimeType,
+              // Replace in place. See _avatarPath: there is no DELETE policy,
+              // so overwriting is how a picture changes.
+              upsert: true,
+            ),
+          );
+
+      // The **path** is stored, not a link: a signed link expires, and a row
+      // holding a dead URL is worse than one holding the object's name. Nothing
+      // else reads this column — the dashboard does not render shopper
+      // avatars — so the storefront owns its shape.
+      await _client
+          .from('profiles')
+          .update({'avatar_url': _avatarPath(userId)})
           .eq('id', userId);
 
       return _readCurrentUser();
@@ -144,27 +237,60 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   Future<Result<User>> _readCurrentUser() async {
-    final authUser = _client.auth.currentUser;
-    if (authUser == null) {
+    final userId = currentUserId;
+    if (userId == null) {
       return const Err(UnauthorizedFailure());
     }
+    final email = _client.auth.currentUser?.email;
 
     final row = await _client
         .from('profiles')
         .select()
-        .eq('id', authUser.id)
+        .eq('id', userId)
         .maybeSingle();
 
     if (row == null) {
       return Ok(
         User(
-          id: authUser.id,
-          email: authUser.email ?? '',
-          displayName: authUser.email?.split('@').first ?? 'Shopper',
+          id: userId,
+          email: email ?? '',
+          displayName: email?.split('@').first ?? 'Shopper',
         ),
       );
     }
 
-    return Ok(User.fromJson(row));
+    return Ok(await withSignedAvatar(User.fromJson(row)));
+  }
+
+  /// Turns the stored avatar **path** into a link the app can draw.
+  ///
+  /// Signed once here, per profile read, rather than once per widget: every
+  /// screen then reads the one `User.avatarUrl` it already has, and a list of
+  /// ten rows does not mint ten links for the same object. A profile is read on
+  /// launch, after a sign-in and after an edit, so the link is never much older
+  /// than the screen showing it.
+  ///
+  /// **Failure leaves it null.** An expired session or a dead network returns
+  /// the user with no picture, and the avatar falls back to the shopper's
+  /// initial — not an error screen, and not a broken-image icon, for something
+  /// decorative (user, 2026-09-20).
+  @visibleForTesting
+  Future<User> withSignedAvatar(User user) async {
+    final path = user.avatarUrl;
+    if (path == null || path.isEmpty) return user;
+
+    // A value written before this version, or by anything else, may already be
+    // a full URL. Signing that would fail; passing it through costs nothing.
+    if (path.startsWith('http')) return user;
+
+    try {
+      final signed = await _client.storage
+          .from(_avatarBucket)
+          .createSignedUrl(path, _signedUrlSeconds);
+      return user.copyWith(avatarUrl: signed);
+    } catch (error) {
+      debugPrint('avatar: could not sign $path ($error)');
+      return user.copyWith(avatarUrl: null);
+    }
   }
 }

@@ -45,3 +45,25 @@ final class ProfileEditSucceeded extends ProfileEditState {
   @override
   List<Object?> get props => [user];
 }
+
+/// A picture is on its way up.
+///
+/// Deliberately **not** `isSubmitting`: the form is not what is busy. Locking
+/// the name and phone fields because a photograph is uploading would stop a
+/// shopper doing something unrelated and unaffected — the two writes touch
+/// different columns.
+final class ProfileAvatarUploading extends ProfileEditState {
+  const ProfileAvatarUploading();
+}
+
+/// The picture is up. Distinct from [ProfileEditSucceeded] because the screen
+/// responds differently: a saved form closes, a changed picture stays put so
+/// she can see it.
+final class ProfileAvatarUpdated extends ProfileEditState {
+  const ProfileAvatarUpdated(this.user);
+
+  final User user;
+
+  @override
+  List<Object?> get props => [user];
+}

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
+import 'package:nova_modest/core/widgets/avatar_circle.dart';
 import 'package:nova_modest/core/widgets/failure_view.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
@@ -64,6 +65,10 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
     // visible rather than something the shopper discovers by tapping.
     _name.addListener(_onChanged);
     _phone.addListener(_onChanged);
+    // Android can kill the app while the gallery is open. If it did, the
+    // photograph she chose is waiting to be collected; on every other platform
+    // this finds nothing and costs one method call.
+    context.read<ProfileEditBloc>().add(const ProfileAvatarRecoveryRequested());
   }
 
   @override
@@ -144,6 +149,14 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
               context,
             ).showSnackBar(SnackBar(content: Text(l10n.personalInfoSaved)));
             Navigator.of(context).pop();
+          case ProfileAvatarUpdated(:final user):
+            // Same hand-off as a saved form — but the screen stays open, so she
+            // sees the picture she just chose rather than being returned to a
+            // list.
+            context.read<AuthBloc>().add(AuthProfileUpdated(user));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.profileAvatarUpdated)));
           case ProfileEditFailureState(:final failure):
             // A snack bar, not a FailureView: what the shopper typed is still
             // on screen and still correct, so replacing the form would throw
@@ -151,7 +164,9 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(failureMessage(failure, l10n))),
             );
-          case ProfileEditIdle() || ProfileEditSubmitting():
+          case ProfileEditIdle() ||
+              ProfileEditSubmitting() ||
+              ProfileAvatarUploading():
             break;
         }
       },
@@ -195,7 +210,19 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
                       color: AppColors.muted,
                     ),
                   ),
-                  SizedBox(height: AppSpacing.xxl),
+                  SizedBox(height: AppSpacing.l),
+                  Align(
+                    child: AvatarCircle(
+                      imageUrl: widget.user.avatarUrl,
+                      displayName: widget.user.displayName,
+                      size: _avatarSize,
+                      busy: state is ProfileAvatarUploading,
+                      onTap: () => context.read<ProfileEditBloc>().add(
+                        const ProfileAvatarRequested(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.l),
                   _Field(
                     label: l10n.personalInfoFullName,
                     child: TextFormField(
@@ -289,6 +316,12 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
 
   /// Short enough to admit a local number, long enough to reject a typo.
   static const int _minPhoneDigits = 7;
+
+  /// Larger than the account header's disc, because here it is the control she
+  /// is meant to tap rather than a detail beside her name. Owned by this screen
+  /// (`12-flutter-design-system-guard` §5) — it is one element in one place and
+  /// not a step on the spacing scale.
+  static const double _avatarSize = 96;
 }
 
 /// A label, the field, and an optional note beneath it.

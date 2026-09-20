@@ -23,3 +23,21 @@ final class ProfileEditSubmitted extends ProfileEditEvent {
   @override
   List<Object?> get props => [displayName, phone];
 }
+
+/// The shopper asked to change her picture.
+///
+/// The bytes are not on the event: choosing the photograph is the bloc's job
+/// through [AvatarPicker], so no widget calls a plugin and a test can hand the
+/// bloc a picture without a gallery.
+final class ProfileAvatarRequested extends ProfileEditEvent {
+  const ProfileAvatarRequested();
+}
+
+/// The screen opened; ask Android whether it dropped a pick.
+///
+/// A separate event rather than something the bloc does on construction: it
+/// reaches the network when it finds something, and that must be tied to a
+/// screen being shown rather than to a bloc being built.
+final class ProfileAvatarRecoveryRequested extends ProfileEditEvent {
+  const ProfileAvatarRecoveryRequested();
+}

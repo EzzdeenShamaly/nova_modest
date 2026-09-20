@@ -1,12 +1,47 @@
 # Active Context
 
-**Last Updated:** 2026-09-19 (the database contract changed under the store;
-audited, three fixes, and the first live run shared with the dashboard)
+**Last Updated:** 2026-09-20 (release blockers settled, the six UI findings
+closed, and the profile picture built)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
 
-## Where things stand — 2026-09-19
+## Where things stand — 2026-09-20
+
+The Android run is closed (`ORD-260920-0001` from the emulator), the six
+screen-by-screen UI findings are fixed, and three of the four release blockers
+are settled: the application id is `com.novamodest.store`, the session now
+lives in the keystore with the plaintext one migrated out and wiped on any
+failure, and support has a real address (`ezzdeenshamali@gmail.com`) with no
+invented phone number. **Blocker 2, signing, is with the owner** — Play App
+Signing with an enrolled upload key was agreed; `key.properties` is expected,
+and `android/app/build.gradle.kts` still signs release with the debug config
+until it arrives. **Blocker 4's other half**, a privacy policy page on GitHub
+Pages, is waiting on a bilingual draft the owner will ask for.
+
+Just finished — **task أ, the profile picture**: `AvatarCircle`, a fixed
+`<uid>/avatar` object written with upsert, the path in `profiles.avatar_url`,
+one-hour signed links minted per profile read, and the shopper's initial as the
+fallback for every failure. 33 tests, ten of eleven mutations caught (the
+eleventh proved a line redundant and it was removed). Full suite: **827
+passing**, `flutter analyze` clean. The bucket's policies and limits were read
+from the live project rather than assumed — INSERT/SELECT/UPDATE scoped to
+`auth.uid()`, **no DELETE**, which is what the design is shaped around.
+
+**Not yet exercised on a device.** The upload path is proven against a fake
+Supabase on loopback; nothing has yet put a real photograph through the real
+bucket, and the RLS path is exactly the kind that works in a unit test and
+fails on a policy.
+
+**How to run the app against production:** from a terminal —
+`flutter run -d <android-device> --dart-define-from-file=config/prod.json`.
+F5 in VS Code has no `launch.json` and starts the app without its key.
+
+**Next logical step:** task ب — the terms and conditions draft, Arabic and
+English, describing only what the code actually does, sent for review before it
+is placed anywhere.
+
+## Where things stood — 2026-09-19
 
 The dashboard repository (`nova_modest_admin`) applied eight migrations to the
 shared production database (M1–M8, 2026-09-16/17) while this storefront sat

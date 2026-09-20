@@ -302,5 +302,21 @@
     }
   },
   "orderDeliveryAddress": "Delivery address",
-  "orderStatusCancelled": "Cancelled"
+  "orderStatusCancelled": "Cancelled",
+  "profileAvatarChange": "Change your photo",
+  "@profileAvatarChange": {
+    "description": "Label of the control that changes the profile picture; also its screen-reader name."
+  },
+  "profileAvatarUpdated": "Your photo has been updated",
+  "@profileAvatarUpdated": {
+    "description": "Confirmation shown after a new profile picture finishes uploading."
+  },
+  "avatarErrorFormat": "That format is not supported. Choose a PNG, JPEG or WebP image.",
+  "@avatarErrorFormat": {
+    "description": "Shown when the chosen file is not one of the formats the avatars bucket accepts, decided from the bytes rather than the file name."
+  },
+  "avatarErrorTooLarge": "That image is too large. Choose a smaller one.",
+  "@avatarErrorTooLarge": {
+    "description": "Shown when the chosen picture is over the bucket ceiling even after the picker scaled it down."
+  }
 }

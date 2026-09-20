@@ -1108,5 +1108,21 @@
   "orderStatusCancelled": "\u0645\u0644\u063a\u064a",
   "@orderStatusCancelled": {
     "description": "Order status: called off. Not drawn in either frame \u2014 it exists because public.order_status has it, and a status with no counterpart would fail to parse."
+  },
+  "profileAvatarChange": "\u062a\u063a\u064a\u064a\u0631 \u0635\u0648\u0631\u062a\u0643",
+  "@profileAvatarChange": {
+    "description": "Label of the control that changes the profile picture; also its screen-reader name."
+  },
+  "profileAvatarUpdated": "\u062a\u0645 \u062a\u062d\u062f\u064a\u062b \u0635\u0648\u0631\u062a\u0643",
+  "@profileAvatarUpdated": {
+    "description": "Confirmation shown after a new profile picture finishes uploading."
+  },
+  "avatarErrorFormat": "\u0647\u0630\u0647 \u0627\u0644\u0635\u064a\u063a\u0629 \u063a\u064a\u0631 \u0645\u062f\u0639\u0648\u0645\u0629. \u0627\u062e\u062a\u0627\u0631\u064a \u0635\u0648\u0631\u0629 PNG \u0623\u0648 JPEG \u0623\u0648 WebP.",
+  "@avatarErrorFormat": {
+    "description": "Shown when the chosen file is not one of the formats the avatars bucket accepts, decided from the bytes rather than the file name."
+  },
+  "avatarErrorTooLarge": "\u0627\u0644\u0635\u0648\u0631\u0629 \u0643\u0628\u064a\u0631\u0629 \u062c\u062f\u064b\u0627. \u0627\u062e\u062a\u0627\u0631\u064a \u0635\u0648\u0631\u0629 \u0623\u0635\u063a\u0631.",
+  "@avatarErrorTooLarge": {
+    "description": "Shown when the chosen picture is over the bucket ceiling even after the picker scaled it down."
   }
 }

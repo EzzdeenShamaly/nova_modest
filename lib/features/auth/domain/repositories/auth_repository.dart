@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:nova_modest/core/error/result.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 
@@ -38,6 +40,19 @@ abstract class AuthRepository {
     required String displayName,
     String? phone,
   });
+
+  /// Replaces the shopper's profile picture with [imageBytes] and returns the
+  /// user as it now stands, its `avatarUrl` ready to draw.
+  ///
+  /// The bytes are what the caller picked, already scaled down. The format is
+  /// decided **from the bytes** rather than from any file name, and anything
+  /// outside what the store accepts comes back as a [ValidationFailure] the
+  /// shopper can act on, not as a raw backend error.
+  ///
+  /// There is no `removeAvatar`: the store grants the owner no DELETE, so a
+  /// picture can be replaced but not taken away. Offering the action in this
+  /// contract would promise something the backend refuses.
+  Future<Result<User>> uploadAvatar(Uint8List imageBytes);
 
   /// Clears the stored session. Succeeds locally even if the server call fails,
   /// because a user who taps "sign out" must end up signed out.

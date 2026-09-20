@@ -1537,6 +1537,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ملغي'**
   String get orderStatusCancelled;
+
+  /// Label of the control that changes the profile picture; also its screen-reader name.
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير صورتك'**
+  String get profileAvatarChange;
+
+  /// Confirmation shown after a new profile picture finishes uploading.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم تحديث صورتك'**
+  String get profileAvatarUpdated;
+
+  /// Shown when the chosen file is not one of the formats the avatars bucket accepts, decided from the bytes rather than the file name.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذه الصيغة غير مدعومة. اختاري صورة PNG أو JPEG أو WebP.'**
+  String get avatarErrorFormat;
+
+  /// Shown when the chosen picture is over the bucket ceiling even after the picker scaled it down.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصورة كبيرة جدًا. اختاري صورة أصغر.'**
+  String get avatarErrorTooLarge;
 }
 
 class _AppLocalizationsDelegate

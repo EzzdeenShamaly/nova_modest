@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/error/failure.dart';
+import 'package:nova_modest/core/widgets/avatar_circle.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/profile_edit_bloc.dart';
@@ -31,6 +32,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const AuthLogoutRequested());
     registerFallbackValue(const ProfileEditSubmitted(displayName: ''));
+    registerFallbackValue(const ProfileAvatarRequested());
     return loadAppFonts();
   });
 
@@ -203,6 +205,83 @@ void main() {
       final name = tester.widget<TextFormField>(fieldFor('سارة'));
       expect(name.enabled, isFalse);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+  });
+
+  group('the picture', () {
+    testWidgets('asks the bloc to open the gallery when tapped', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      await tester.tap(find.byType(AvatarCircle));
+      await tester.pump();
+
+      // The widget dispatches an event; choosing the photograph is the bloc's
+      // job, so no screen calls the plugin.
+      verify(() => editBloc.add(const ProfileAvatarRequested())).called(1);
+    });
+
+    testWidgets('asks Android for a dropped pick as soon as it opens', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      verify(
+        () => editBloc.add(const ProfileAvatarRecoveryRequested()),
+      ).called(1);
+    });
+
+    testWidgets(
+      'an upload in flight shows progress and leaves the form alone',
+      (tester) async {
+        await pump(
+          tester,
+          state: const ProfileAvatarUploading(),
+          settle: false,
+        );
+
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        // The two writes touch different columns: a photograph uploading is no
+        // reason to stop her correcting her name.
+        expect(tester.widget<TextFormField>(fieldFor('سارة')).enabled, isTrue);
+      },
+    );
+
+    testWidgets('a new picture is reported to AuthBloc and the screen stays', (
+      tester,
+    ) async {
+      const withPicture = User(
+        id: 'u1',
+        email: 'sara@example.com',
+        displayName: 'سارة',
+        avatarUrl: 'https://example.invalid/signed',
+      );
+      await pump(tester, state: const ProfileAvatarUpdated(withPicture));
+
+      verify(
+        () => authBloc.add(const AuthProfileUpdated(withPicture)),
+      ).called(1);
+      expect(find.text('تم تحديث صورتك'), findsOneWidget);
+      // Unlike a saved form, which closes: she has to be able to see it.
+      expect(find.byType(AvatarCircle), findsOneWidget);
+    });
+
+    testWidgets('a refused picture says why, in Arabic', (tester) async {
+      await pump(
+        tester,
+        state: const ProfileEditFailureState(
+          ValidationFailure(
+            'Unsupported image format.',
+            code: 'avatar_unsupported_format',
+          ),
+        ),
+      );
+
+      expect(
+        find.text('هذه الصيغة غير مدعومة. اختاري صورة PNG أو JPEG أو WebP.'),
+        findsOneWidget,
+      );
     });
   });
 

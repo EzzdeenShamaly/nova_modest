@@ -83,7 +83,7 @@ String failureMessage(Failure failure, AppLocalizations l10n) =>
       ServerFailure() => l10n.failureServer,
       NotFoundFailure() => l10n.failureNotFound,
       UnauthorizedFailure() => l10n.failureUnauthorized,
-      ValidationFailure(:final code?, :final subject) => _orderRefusal(
+      ValidationFailure(:final code?, :final subject) => _coded(
         code,
         subject,
         l10n,
@@ -91,6 +91,21 @@ String failureMessage(Failure failure, AppLocalizations l10n) =>
       ValidationFailure() => l10n.failureValidation,
       CacheFailure() => l10n.failureCache,
       UnknownFailure() => l10n.failureUnknown,
+    };
+
+/// The message for a coded [ValidationFailure].
+///
+/// Two sources produce one: the database's `place_order`, which refuses an
+/// order with one of thirteen codes, and the app's own avatar check, which
+/// refuses a picture before it is uploaded. They are kept apart because their
+/// defaults differ — an unknown order code means the database gained one after
+/// this build shipped, while an unknown avatar code cannot happen without a
+/// mistake in this file.
+String _coded(String code, String? subject, AppLocalizations l10n) =>
+    switch (code) {
+      'avatar_unsupported_format' => l10n.avatarErrorFormat,
+      'avatar_too_large' => l10n.avatarErrorTooLarge,
+      _ => _orderRefusal(code, subject, l10n),
     };
 
 /// The message for one `place_order` refusal code.

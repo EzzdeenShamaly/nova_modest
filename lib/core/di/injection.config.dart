@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:nova_modest/core/media/avatar_picker.dart' as _i1046;
 import 'package:nova_modest/core/network/api_client.dart' as _i401;
 import 'package:nova_modest/core/network/dio_api_client.dart' as _i742;
 import 'package:nova_modest/core/network/interceptors/auth_interceptor.dart'
@@ -118,6 +119,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => preferencesModule.preferences,
       preResolve: true,
     );
+    gh.lazySingleton<_i1046.AvatarPicker>(() => _i1046.AvatarPicker.live());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => storageModule.secureStorage,
     );
@@ -182,6 +184,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i479.CatalogRepository>(),
       ),
     );
+    gh.factory<_i703.ProfileEditBloc>(
+      () => _i703.ProfileEditBloc(
+        gh<_i643.AuthRepository>(),
+        gh<_i1046.AvatarPicker>(),
+      ),
+    );
     gh.factory<_i913.NotificationPreferencesBloc>(
       () => _i913.NotificationPreferencesBloc(
         gh<_i247.NotificationPreferencesRepository>(),
@@ -204,9 +212,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i795.AuthBloc>(
       () => _i795.AuthBloc(gh<_i643.AuthRepository>()),
-    );
-    gh.factory<_i703.ProfileEditBloc>(
-      () => _i703.ProfileEditBloc(gh<_i643.AuthRepository>()),
     );
     gh.factory<_i129.SignInBloc>(
       () => _i129.SignInBloc(gh<_i643.AuthRepository>()),

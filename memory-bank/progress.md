@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-09-17
+**Last Updated:** 2026-09-20
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -67,6 +67,52 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   phone, address — why, that it is stored in Supabase, and who can read it.
 
 ## Done
+
+- **Profile picture (task أ, 2026-09-20)** — a shopper can set her own photo.
+  `AvatarCircle` (`core/widgets/`) draws it in the account header and on the
+  personal-information screen, with the first letter of her name standing in
+  whenever there is no picture *or* the link cannot be drawn. The picture lives
+  at `<uid>/avatar` in the private `avatars` bucket, written with **upsert**,
+  and `profiles.avatar_url` holds that **path**, never a link. The repository
+  signs it for one hour on every profile read — one link per read, not per
+  widget — and a signature that cannot be minted leaves `avatarUrl` null, which
+  falls through to the letter.
+
+  Measured live on 2026-09-20 rather than assumed: `avatars` is private,
+  2 MiB, `png/jpeg/webp`, and its policies are INSERT, SELECT and UPDATE for
+  `authenticated`, each `(storage.foldername(name))[1] = auth.uid()`, with
+  **no DELETE** — which is why the design is a fixed path plus upsert, and why
+  `AuthRepository` has no `removeAvatar`. The format is decided from the
+  **bytes** (`core/media/image_bytes.dart`), never from a file name, and an
+  oversized or unsupported picture is refused in Arabic before anything is
+  sent.
+
+  33 new tests, all of which were mutation-checked: ten deliberate breakages
+  (upsert off, path segments swapped, content type dropped, TTL shortened,
+  signing failure rethrown, `http` passthrough removed, the WebP tag
+  unchecked, cancel treated as a failure, the image `errorBuilder` removed,
+  the letter left in semantics) were each caught by the test that claims to
+  pin them. An eleventh survived — removing `container: true` from the avatar's
+  `Semantics` changed nothing — which showed the line was redundant once the
+  fallback letter was excluded from semantics. It was deleted rather than kept
+  as untested ceremony with a comment claiming it was load-bearing.
+
+- **`image_picker` on Android is not `image_picker` on the web** — recorded so
+  the dashboard's web experience is not carried over by analogy. On Android
+  `maxWidth`/`maxHeight`/`imageQuality` are applied **natively**, before the
+  bytes reach Dart, so 512x512 at quality 85 is a real resize and not a hint;
+  on web those arguments are ignored and the full-size file arrives. Android
+  alone can **destroy the activity** while the gallery is open, which loses the
+  result unless `retrieveLostData` is called — `PersonalInfoScreen` dispatches
+  `ProfileAvatarRecoveryRequested` on open for exactly that. And Android's
+  system Photo Picker is opt-in below Android 15 through
+  `ImagePickerAndroid.useAndroidPhotoPicker`; with it, no storage permission is
+  needed at any level this app supports (minSdk 24 falls back to
+  `ACTION_OPEN_DOCUMENT`, which also needs none), so `AndroidManifest.xml`
+  stays as it is. `image_picker_android` and `image_picker_platform_interface`
+  are declared in `pubspec.yaml` because that opt-in requires reaching the
+  implementation directly; both were already in the tree as `image_picker`'s
+  own dependencies.
 
 - **Stack lock** — `/platform-init`: Bloc · REST only · multi-locale
   (`ar` template + `en`). `02-flutter-state-guard.md` (bloc) and

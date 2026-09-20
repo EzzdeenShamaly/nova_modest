@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:injectable/injectable.dart' show Environment;
 import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/network/api_client.dart';
+import 'package:nova_modest/core/media/avatar_picker.dart';
 import 'package:nova_modest/core/network/interceptors/auth_interceptor.dart';
 import 'package:nova_modest/core/storage/token_storage.dart';
 import 'package:nova_modest/features/address/domain/repositories/address_repository.dart';
@@ -100,6 +101,10 @@ void main() {
       resolves<Dio>();
       resolves<ApiClient>();
       resolves<AuthInterceptor>();
+      // Constructing it opts the Android photo picker in, so a container that
+      // cannot build it means the legacy picker — and a permission this app
+      // never declares.
+      resolves<AvatarPicker>();
     });
   });
 
