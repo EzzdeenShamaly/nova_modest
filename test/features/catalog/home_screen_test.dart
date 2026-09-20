@@ -116,6 +116,15 @@ void main() {
       await pump(tester, loaded);
 
       expect(find.byType(HomeHeroBanner), findsOneWidget);
+      // With a photograph in it, not the empty hanger the shopper saw on the
+      // emulator on 2026-09-20.
+      final hero = tester.widget<Image>(
+        find.descendant(
+          of: find.byType(HomeHeroBanner),
+          matching: find.byType(Image),
+        ),
+      );
+      expect((hero.image as AssetImage).assetName, 'assets/images/home/hero.jpg');
       expect(find.byType(FilterChipRow), findsOneWidget);
       expect(find.byType(ProductCard), findsNWidgets(2));
       expect(find.text('عباءة كلاسيكية'), findsOneWidget);

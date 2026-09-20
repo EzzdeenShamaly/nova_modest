@@ -51,6 +51,9 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   `/data/data/<id>/shared_prefs/FlutterSharedPreferences.xml`, key
   `flutter.sb-ydreyrxzilrmynapsgpi-auth-token`; on web, `localStorage`. Neither
   is the Keystore or the Keychain, and the refresh token inside is long-lived.
+  The Android package also carries `ALLOW_BACKUP` (the platform default,
+  read from `dumpsys` on 2026-09-20), so that plaintext file is eligible for
+  automatic cloud backup — the token leaves the device without anyone asking.
   `03-flutter-security-guard` requires tokens to go through
   `flutter_secure_storage`.
 
@@ -376,6 +379,31 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 - **p3 keeps its generated image — decided, not pending** (user, 2026-09-19).
   No category change to fit a photo, and no search for a shawl photo. The
   catalogue-photo work is closed.
+
+- **The home banner is a bundled asset, not content** (user, 2026-09-20).
+  Read before deciding: the banner's copy is `homeHeroTagline`, an ARB string
+  compiled into the app, and `HomeHeroBanner.image` is a widget parameter the
+  home screen simply never passed — hence the empty hanger. Production has no
+  banners table and no column named like one; its fourteen tables were read on
+  2026-09-20. So a database-driven picture would have been editable while the
+  words over it were not. `assets/images/home/hero.jpg` is one of the catalogue
+  photographs, already cropped and resized (195 KB at 1165x1800, the widest the
+  banner is drawn). **Changing the banner is a release, like changing its
+  words.** The alternatives, if that ever stops being acceptable: a banners
+  table with a dashboard screen, or drawing a `products.is_featured` row, which
+  needs no new table.
+
+- **A payment receipt is deferred, and why** (user, 2026-09-20). Cash on
+  delivery is the only method that can place an order — `place_order` refuses
+  `card` with `payment_not_available` — so **no money changes hands before
+  delivery and there is no receipt to upload.** Building one now would be a
+  feature with no payer.
+
+  It becomes real the day a bank transfer is offered, and then it is a whole
+  feature rather than a field: a column on `orders`, a storage bucket with its
+  policies, an upload screen in the storefront and a review screen in the
+  dashboard. Recorded so the deferral is read as a consequence of having one
+  payment method, not as an oversight.
 
 - **No first-launch language chooser** (user, 2026-08-30). `1:2304` draws a
   full-screen "اختر لغتك" with the brandmark and large option cards. **It will

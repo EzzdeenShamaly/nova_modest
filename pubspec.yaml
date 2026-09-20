@@ -80,6 +80,13 @@ flutter:
     # (12-flutter-design-system-guard.md).
     - assets/images/auth/
 
+    # The home banner. A bundled photograph rather than a row in the database:
+    # the copy over it (homeHeroTagline) is an ARB string compiled into the app,
+    # so the picture is changed the same way the words are — by a release.
+    # Cropped and resized with the catalogue photographs; 195 KB at 1165x1800,
+    # which is the widest the banner is ever drawn (390pt at 3x).
+    - assets/images/home/
+
   # IBM Plex Sans Arabic is bundled rather than fetched through google_fonts:
   # this app's primary locale is Arabic, and a runtime font download would show
   # a fallback face on first launch and fail entirely offline.

@@ -137,6 +137,16 @@ class _Catalogue extends StatelessWidget {
           Padding(
             padding: EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.l),
             child: HomeHeroBanner(
+              // A bundled asset, not a row: the banner's copy is an ARB string
+              // compiled into the app, so a photograph from the database would
+              // be editable while the words over it were not.
+              // Decorative — the tagline beside it carries the meaning, so it
+              // is kept out of the semantics tree rather than announced twice.
+              image: Image.asset(
+                'assets/images/home/hero.jpg',
+                fit: BoxFit.cover,
+                excludeFromSemantics: true,
+              ),
               // The abayas listing is the storefront's front door today.
               onShopNow: () =>
                   context.go(Routes.productList(Routes.entryCategoryId)),
