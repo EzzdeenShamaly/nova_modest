@@ -119,9 +119,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFilterEmpty => 'لا توجد منتجات في هذه الفئة';
 
   @override
-  String get homeFavourite => 'إضافة للمفضلة';
-
-  @override
   String get homeSearch => 'بحث';
 
   @override
@@ -152,13 +149,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productDetails => 'التفاصيل';
 
   @override
-  String get productAddToCart => 'أضف إلى السلة';
+  String get productAddToCart => 'أضيفي إلى السلة';
 
   @override
   String get productAddedToCart => 'تمت الإضافة إلى السلة';
-
-  @override
-  String get productShare => 'مشاركة';
 
   @override
   String get productDecreaseQuantity => 'إنقاص الكمية';
@@ -184,7 +178,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailRequired => 'البريد الإلكتروني مطلوب';
 
   @override
-  String get emailInvalid => 'أدخل بريدًا إلكترونيًا صحيحًا';
+  String get emailInvalid => 'أدخلي بريدًا إلكترونيًا صحيحًا';
 
   @override
   String get retry => 'إعادة المحاولة';
@@ -259,7 +253,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.';
 
   @override
-  String get cartFull => 'سلتك ممتلئة. احذف منتجاً لتضيف غيره.';
+  String get cartFull => 'سلتك ممتلئة. احذفي منتجاً لتضيفي غيره.';
 
   @override
   String get cartTitle => 'سلة التسوق';
@@ -425,7 +419,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get personalInfoSubtitle =>
-      'قم بتحديث معلوماتك الشخصية للحفاظ على حسابك محدثاً.';
+      'حدّثي معلوماتك الشخصية للحفاظ على حسابك محدّثاً.';
 
   @override
   String get personalInfoFullName => 'الاسم الكامل';
@@ -619,6 +613,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تحكّم إعدادات هاتفك في وصول الإشعارات أصلاً. إن كانت موقوفة هناك، فلن يصلك شيء مهما اخترت هنا.';
 
   @override
+  String get notificationsNotLiveYet =>
+      'الإشعارات غير مفعّلة بعد. اختيارك محفوظ وسيُطبَّق فور تفعيلها.';
+
+  @override
   String get checkoutContactTitle => 'معلومات التواصل';
 
   @override
@@ -637,7 +635,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkoutFullName => 'الاسم الكامل';
 
   @override
-  String get checkoutFullNameHint => 'أدخل اسمك الكامل';
+  String get checkoutFullNameHint => 'أدخلي اسمك الكامل';
 
   @override
   String get checkoutPhoneHint => '59 123 4567';

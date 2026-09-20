@@ -18,13 +18,11 @@ class ProductCard extends StatelessWidget {
   const ProductCard({
     required this.product,
     this.onTap,
-    this.onFavouriteTap,
     super.key,
   });
 
   final Product product;
   final VoidCallback? onTap;
-  final VoidCallback? onFavouriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,17 +60,7 @@ class ProductCard extends StatelessWidget {
                 children: [
                   _Artwork(imageUrl: product.imageUrl),
                   if (product.isSoldOut)
-                    _SoldOutOverlay(label: l10n.productSoldOut)
-                  else
-                    PositionedDirectional(
-                      top: AppSpacing.xs,
-                      start: AppSpacing.xs,
-                      child: _FavouriteButton(
-                        selected: product.isFavourite,
-                        label: l10n.homeFavourite,
-                        onTap: onFavouriteTap,
-                      ),
-                    ),
+                    _SoldOutOverlay(label: l10n.productSoldOut),
                 ],
               ),
             ),
@@ -136,53 +124,6 @@ class _ArtworkPlaceholder extends StatelessWidget {
           size: _Artwork._placeholderIcon,
           color: AppColors.subtle,
           semanticLabel: '',
-        ),
-      ),
-    );
-  }
-}
-
-/// The heart control in the artwork's corner.
-class _FavouriteButton extends StatelessWidget {
-  const _FavouriteButton({
-    required this.selected,
-    required this.label,
-    required this.onTap,
-  });
-
-  final bool selected;
-  final String label;
-  final VoidCallback? onTap;
-
-  /// The design's 36x41 pill, kept as a local constant: one element on one
-  /// widget (`12-flutter-design-system-guard.md` §5).
-  static const double _size = 36;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      // container: the heart is a control in its own right. Without this its
-      // label merges into the card's node and a screen reader announces one
-      // blurred string instead of a product and a button.
-      container: true,
-      button: true,
-      selected: selected,
-      label: label,
-      child: Material(
-        color: AppColors.background,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox.square(
-            dimension: _size,
-            child: Icon(
-              selected ? Icons.favorite : Icons.favorite_border,
-              size: AppFontSize.xl,
-              color: selected ? AppColors.accent : AppColors.primaryText,
-              semanticLabel: '',
-            ),
-          ),
         ),
       ),
     );

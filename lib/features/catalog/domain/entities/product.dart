@@ -39,7 +39,6 @@ abstract class Product with _$Product {
     required num price,
     @JsonKey(name: 'category_id') required String categoryId,
     @JsonKey(name: 'image_url') String? imageUrl,
-    @JsonKey(name: 'is_favourite') @Default(false) bool isFavourite,
     @JsonKey(name: 'is_sold_out') @Default(false) bool isSoldOut,
     @Default(<ProductTag>[]) List<ProductTag> tags,
     String? description,

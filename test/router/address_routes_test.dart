@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -128,6 +129,29 @@ void main() {
 
     expect(find.byType(AddressListScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the addresses list has a way back out', (tester) async {
+    // It did not, and the screen trapped the shopper. The address routes sit
+    // under a ShellRoute — added so the list and the form share one bloc — and
+    // a ShellRoute hosts its children in a Navigator of its own. The list is
+    // the only page in that navigator, so the AppBar asked it "can I pop?",
+    // heard no, and drew nothing, while the form pushed above it did get an
+    // arrow. Only a test that goes through the real router can see this: the
+    // screen's own widget test has no navigator to be wrong about.
+    final router = await boot(tester);
+
+    router.go(Routes.profilePath);
+    await tester.pumpAndSettle();
+    unawaited(router.push(Routes.addresses));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddressListScreen), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(AppBar), matching: find.byType(BackButton)),
+      findsOneWidget,
+      reason: 'the shopper must be able to leave the addresses screen',
+    );
   });
 
   testWidgets('the add route renders the form', (tester) async {

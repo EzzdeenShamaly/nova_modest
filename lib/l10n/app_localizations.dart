@@ -308,12 +308,6 @@ abstract class AppLocalizations {
   /// **'لا توجد منتجات في هذه الفئة'**
   String get homeFilterEmpty;
 
-  /// Screen-reader label for the heart button on a product card.
-  ///
-  /// In ar, this message translates to:
-  /// **'إضافة للمفضلة'**
-  String get homeFavourite;
-
   /// Screen-reader label for the search action in the Home app bar.
   ///
   /// In ar, this message translates to:
@@ -377,7 +371,7 @@ abstract class AppLocalizations {
   /// Primary action on a product page.
   ///
   /// In ar, this message translates to:
-  /// **'أضف إلى السلة'**
+  /// **'أضيفي إلى السلة'**
   String get productAddToCart;
 
   /// Confirmation shown after adding a product. The cart screen itself is not built yet.
@@ -385,12 +379,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تمت الإضافة إلى السلة'**
   String get productAddedToCart;
-
-  /// Screen-reader label for the share action on a product page.
-  ///
-  /// In ar, this message translates to:
-  /// **'مشاركة'**
-  String get productShare;
 
   /// Screen-reader label for the minus button on the quantity stepper.
   ///
@@ -437,7 +425,7 @@ abstract class AppLocalizations {
   /// Validation message shown when the email field is not a valid address.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل بريدًا إلكترونيًا صحيحًا'**
+  /// **'أدخلي بريدًا إلكترونيًا صحيحًا'**
   String get emailInvalid;
 
   /// Label of the retry action on an error state.
@@ -557,7 +545,7 @@ abstract class AppLocalizations {
   /// Shown when the cart already holds 20 lines and a 21st is asked for. Says the move, not the rule: a shopper cannot act on "the maximum is 20", but can act on "remove one to add another".
   ///
   /// In ar, this message translates to:
-  /// **'سلتك ممتلئة. احذف منتجاً لتضيف غيره.'**
+  /// **'سلتك ممتلئة. احذفي منتجاً لتضيفي غيره.'**
   String get cartFull;
 
   /// Heading of the cart screen. Also the bottom-navigation destination it belongs to.
@@ -839,7 +827,7 @@ abstract class AppLocalizations {
   /// Supporting line under the personal-information heading. Two lines at most at 16sp on a 375pt screen.
   ///
   /// In ar, this message translates to:
-  /// **'قم بتحديث معلوماتك الشخصية للحفاظ على حسابك محدثاً.'**
+  /// **'حدّثي معلوماتك الشخصية للحفاظ على حسابك محدّثاً.'**
   String get personalInfoSubtitle;
 
   /// Label of the editable name field.
@@ -1202,6 +1190,12 @@ abstract class AppLocalizations {
   /// **'تحكّم إعدادات هاتفك في وصول الإشعارات أصلاً. إن كانت موقوفة هناك، فلن يصلك شيء مهما اخترت هنا.'**
   String get notificationsDeviceNote;
 
+  /// Shown above the switches. Nothing sends notifications yet — no push package is in pubspec.yaml and nothing reads the saved preference — so the screen says so rather than implying the switches do something today.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشعارات غير مفعّلة بعد. اختيارك محفوظ وسيُطبَّق فور تفعيلها.'**
+  String get notificationsNotLiveYet;
+
   /// App-bar title for checkout step 1.
   ///
   /// In ar, this message translates to:
@@ -1241,7 +1235,7 @@ abstract class AppLocalizations {
   /// Placeholder inside the checkout name field.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل اسمك الكامل'**
+  /// **'أدخلي اسمك الكامل'**
   String get checkoutFullNameHint;
 
   /// Placeholder inside the checkout phone field, shown after the dialling code. Digits only - the code is its own control.

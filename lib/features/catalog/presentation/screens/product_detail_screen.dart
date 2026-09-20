@@ -57,15 +57,6 @@ class _ProductDetailView extends StatelessWidget {
           textDirection: TextDirection.ltr,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
-        actions: [
-          IconButton(
-            // Sharing needs a platform share sheet, which would mean a package
-            // that is not in pubspec.yaml. Disabled rather than pretending.
-            onPressed: null,
-            icon: const Icon(Icons.share_outlined),
-            tooltip: l10n.productShare,
-          ),
-        ],
       ),
       body: BlocBuilder<ProductDetailBloc, ProductDetailState>(
         builder: (context, state) => switch (state) {
@@ -115,7 +106,6 @@ class _Body extends StatelessWidget {
       children: [
         ProductImageCarousel(
           images: [if (product.imageUrl != null) product.imageUrl!],
-          isFavourite: product.isFavourite,
         ),
         Padding(
           padding: EdgeInsetsDirectional.all(AppSpacing.l),

@@ -45,6 +45,17 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   A debug-signed artifact cannot be published, and the upload key, once chosen,
   is equally permanent. Adjacent to the id, and found with it.
 
+- **The support email and the privacy policy are placeholders.** Google Play
+  requires a **real support email address** on the listing and a **privacy
+  policy at a public URL**; both are mandatory, and a listing cannot be
+  published without them. Today the app carries
+  `_supportEmail = 'support@novamodest.com'` and
+  `_supportPhone = '+966 50 000 0000'` as constants in
+  `help_screen.dart:66-67`, and the terms screen shows `termsPlaceholder` —
+  «سيتم إضافة الشروط والأحكام الكاملة هنا». Terms and conditions are *not*
+  mandatory; the email and the privacy policy are. The owner decides the real
+  values (2026-09-20) and this stays open until they land.
+
 - **The session token is stored in plain text, on both platforms.**
   `supabase_flutter` persists the session through `SharedPreferences`: on
   Android that is

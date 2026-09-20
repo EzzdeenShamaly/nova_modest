@@ -227,17 +227,8 @@ void main() {
       expect(english.trimLeft(), startsWith('SAR'));
     });
 
-    testWidgets('the favourite control is exposed to a screen reader', (
-      tester,
-    ) async {
-      // The semantics tree is not built unless a test asks for it, so without
-      // this handle the assertion below would pass vacuously on an empty tree.
-      final semantics = tester.ensureSemantics();
-      await pump(tester, loaded);
-
-      expect(find.bySemanticsLabel('إضافة للمفضلة'), findsNWidgets(2));
-      semantics.dispose();
-    });
+    // Removed 2026-09-20 with the favourite control itself: the heart was never
+    // wired to anything, and `Product.isFavourite` had no column behind it.
   });
 
   group('direction and locale', () {

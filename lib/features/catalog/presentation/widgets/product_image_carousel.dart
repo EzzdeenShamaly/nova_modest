@@ -11,14 +11,10 @@ import 'package:nova_modest/l10n/app_localizations.dart';
 class ProductImageCarousel extends StatefulWidget {
   const ProductImageCarousel({
     required this.images,
-    required this.isFavourite,
-    this.onFavouriteTap,
     super.key,
   });
 
   final List<String> images;
-  final bool isFavourite;
-  final VoidCallback? onFavouriteTap;
 
   /// The design's 390x530 band, as a ratio so it adapts to the screen.
   static const double _aspect = 390 / 530;
@@ -32,7 +28,6 @@ class _ProductImageCarouselState extends State<ProductImageCarousel> {
   int _page = 0;
 
   static const double _placeholderIcon = 72;
-  static const double _favouriteSize = 48;
   static const double _dotSize = 8;
 
   @override
@@ -66,19 +61,6 @@ class _ProductImageCarouselState extends State<ProductImageCarousel> {
                             const _ArtworkPlaceholder(size: _placeholderIcon),
                       ),
                     ),
-            ),
-            SafeArea(
-              child: Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Padding(
-                  padding: EdgeInsetsDirectional.all(AppSpacing.m),
-                  child: _FavouriteButton(
-                    size: _favouriteSize,
-                    selected: widget.isFavourite,
-                    onTap: widget.onFavouriteTap,
-                  ),
-                ),
-              ),
             ),
             if (pageCount > 1)
               Align(
@@ -137,41 +119,3 @@ class _ArtworkPlaceholder extends StatelessWidget {
   );
 }
 
-class _FavouriteButton extends StatelessWidget {
-  const _FavouriteButton({
-    required this.size,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final double size;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      button: true,
-      selected: selected,
-      label: AppLocalizations.of(context).homeFavourite,
-      child: Material(
-        color: AppColors.background,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: SizedBox.square(
-            dimension: size,
-            child: Icon(
-              selected ? Icons.favorite : Icons.favorite_border,
-              size: AppFontSize.xxl,
-              color: selected ? AppColors.accent : AppColors.primaryText,
-              semanticLabel: '',
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

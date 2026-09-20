@@ -76,6 +76,17 @@ class _Body extends StatelessWidget {
     return ListView(
       padding: EdgeInsetsDirectional.all(AppSpacing.l),
       children: [
+        // Above the switches, not below them: nothing sends notifications yet,
+        // and a shopper should read that before choosing rather than after.
+        // The preference itself is real and persisted, which is what the
+        // sentence promises.
+        Text(
+          l10n.notificationsNotLiveYet,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.muted),
+        ),
+        SizedBox(height: AppSpacing.m),
         SettingsCard(
           children: [
             _PreferenceRow(

@@ -29,7 +29,22 @@ class AddressListScreen extends StatelessWidget {
     return Scaffold(
       // The frame titles this one rather than showing the brandmark, so it
       // does; personal information shows the brand because its frame did.
-      appBar: AppBar(centerTitle: true, title: Text(l10n.addressListTitle)),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(l10n.addressListTitle),
+        // Explicit, because the implicit one never appears here: the address
+        // routes live under a ShellRoute, which hosts them in a Navigator of
+        // its own, and this screen is the only page in it. The AppBar asks
+        // that navigator whether it can pop, hears no, and draws nothing —
+        // while the form pushed above it does get an arrow. `context.pop`
+        // pops the router's stack rather than the nested navigator's.
+        // `maybeOf`, so the screen still builds where no router is above it —
+        // a widget test pumping it alone gets no arrow rather than an
+        // exception. The router test is what proves the arrow is really there.
+        leading: (GoRouter.maybeOf(context)?.canPop() ?? false)
+            ? BackButton(onPressed: context.pop)
+            : null,
+      ),
       body: BlocBuilder<AddressListBloc, AddressListState>(
         builder: (context, state) => switch (state) {
           AddressListInitial() || AddressListLoading() => const Center(

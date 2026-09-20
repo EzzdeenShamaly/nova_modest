@@ -139,15 +139,10 @@ void main() {
   });
 
   group('sold out', () {
-    testWidgets('is badged and loses its favourite control', (tester) async {
-      final semantics = tester.ensureSemantics();
-
+    testWidgets('is badged', (tester) async {
       await pump(tester, loaded);
 
       expect(find.text('نفد من المخزن'), findsOneWidget);
-      // Two products, but only the available one offers a favourite button.
-      expect(find.bySemanticsLabel('إضافة للمفضلة'), findsOneWidget);
-      semantics.dispose();
     });
 
     testWidgets('does not respond to a tap', (tester) async {

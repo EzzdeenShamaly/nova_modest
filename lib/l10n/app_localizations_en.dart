@@ -120,9 +120,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFilterEmpty => 'Nothing in this category';
 
   @override
-  String get homeFavourite => 'Add to favourites';
-
-  @override
   String get homeSearch => 'Search';
 
   @override
@@ -157,9 +154,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productAddedToCart => 'Added to your cart';
-
-  @override
-  String get productShare => 'Share';
 
   @override
   String get productDecreaseQuantity => 'Decrease quantity';
@@ -617,6 +611,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationsDeviceNote =>
       'Your phone\'s settings decide whether notifications arrive at all. If they are turned off there, nothing will reach you whatever you choose here.';
+
+  @override
+  String get notificationsNotLiveYet =>
+      'Notifications are not switched on yet. Your choice is saved and will apply as soon as they are.';
 
   @override
   String get checkoutContactTitle => 'Contact information';

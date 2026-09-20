@@ -270,7 +270,7 @@ void main() {
     testWidgets('sends the whole selection to the cart', (tester) async {
       await pump(tester, loaded);
 
-      await tester.tap(find.text('أضف إلى السلة'));
+      await tester.tap(find.text('أضيفي إلى السلة'));
       await tester.pump();
 
       // Colour, size and quantity all travel as values. The cart never reads
@@ -285,7 +285,7 @@ void main() {
     testWidgets('confirms, with a way straight to the cart', (tester) async {
       await pump(tester, loaded);
 
-      await tester.tap(find.text('أضف إلى السلة'));
+      await tester.tap(find.text('أضيفي إلى السلة'));
       await tester.pump();
 
       expect(find.text('تمت الإضافة إلى السلة'), findsOneWidget);
@@ -301,7 +301,7 @@ void main() {
     testWidgets('the confirmation leaves on its own', (tester) async {
       await pump(tester, loaded);
 
-      await tester.tap(find.text('أضف إلى السلة'));
+      await tester.tap(find.text('أضيفي إلى السلة'));
       // Settle first: the messenger starts the four-second timer only once the
       // entrance animation has *completed*. One big pump would finish the
       // entrance at the end of its jump, start the timer there, and then
@@ -322,7 +322,7 @@ void main() {
     ) async {
       await pump(tester, loaded);
 
-      await tester.tap(find.text('أضف إلى السلة'));
+      await tester.tap(find.text('أضيفي إلى السلة'));
       await tester.pump();
       expect(find.byType(SnackBar), findsOneWidget);
 
