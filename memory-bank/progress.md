@@ -15,6 +15,53 @@ Tracks what's Done, In Progress, and Blocked, per feature.
 > as current fact in an audit deliverable. The record was not wrong — reading
 > it as present tense was.
 
+## Release blockers — settle before the first upload, not after
+
+Not debts. A debt can wait; each of these either stops the upload or cannot be
+undone once it has happened. Found 2026-09-20 while preparing the Android run.
+
+- **The application id is still Flutter's placeholder: `com.example.nova_modest`.**
+  Google Play rejects any package beginning with `com.example` outright, and
+  **an application id can never be changed after the first publish** — it is the
+  app's identity on the store, in the signing chain and in every installed copy.
+  Getting it wrong is not a fix-it-later matter; getting it late means a new
+  listing.
+
+  What a change touches, all of it before the first upload:
+  - `android/app/build.gradle.kts` — `namespace` and `applicationId` (both
+    `com.example.nova_modest` today);
+  - the Kotlin package path on disk,
+    `android/app/src/main/kotlin/com/example/nova_modest/MainActivity.kt`, and
+    the `package` line inside it;
+  - the three `AndroidManifest.xml` files (main, debug, profile);
+  - the signing configuration, which is tied to the id;
+  - **iOS carries the same placeholder**: `PRODUCT_BUNDLE_IDENTIFIER =
+    com.example.novaModest` in `ios/Runner.xcodeproj/project.pbxproj`, with the
+    same permanence on the App Store.
+
+- **The release build is signed with the debug keystore.**
+  `android/app/build.gradle.kts` still carries Flutter's scaffold TODO —
+  `signingConfig = signingConfigs.getByName("debug")` in the `release` block.
+  A debug-signed artifact cannot be published, and the upload key, once chosen,
+  is equally permanent. Adjacent to the id, and found with it.
+
+- **The session token is stored in plain text, on both platforms.**
+  `supabase_flutter` persists the session through `SharedPreferences`: on
+  Android that is
+  `/data/data/<id>/shared_prefs/FlutterSharedPreferences.xml`, key
+  `flutter.sb-ydreyrxzilrmynapsgpi-auth-token`; on web, `localStorage`. Neither
+  is the Keystore or the Keychain, and the refresh token inside is long-lived.
+  `03-flutter-security-guard` requires tokens to go through
+  `flutter_secure_storage`.
+
+  **Half the solution is already built and pointing the wrong way:**
+  `flutter_secure_storage` is a dependency and is registered as
+  `SecureTokenStorage` (`core/storage/`) — for the REST path, which nothing
+  routes through. Closing this means giving `Supabase.initialize` a
+  `LocalStorage` backed by that same secure storage, not adding a package.
+  **Before release, not after:** every copy shipped before the change keeps a
+  plaintext token on the device until the user signs out.
+
 ## Done
 
 - **Stack lock** — `/platform-init`: Bloc · REST only · multi-locale
