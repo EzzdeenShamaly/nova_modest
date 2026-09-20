@@ -48,7 +48,7 @@ class OrderItemLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ProductThumbnail(
-          images: item.product.images,
+          imageUrl: item.product.imageUrl,
           width: imageWidth,
           height: imageHeight,
           iconSize: placeholderIcon,

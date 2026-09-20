@@ -114,7 +114,7 @@ class _Body extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(bottom: AppSpacing.xxl),
       children: [
         ProductImageCarousel(
-          images: product.images,
+          images: [if (product.imageUrl != null) product.imageUrl!],
           isFavourite: product.isFavourite,
         ),
         Padding(

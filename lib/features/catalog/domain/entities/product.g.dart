@@ -20,9 +20,6 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
           .toList() ??
       const <ProductTag>[],
   description: json['description'] as String?,
-  images:
-      (json['images'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      const <String>[],
   colours:
       (json['colours'] as List<dynamic>?)
           ?.map((e) => ProductColour.fromJson(e as Map<String, dynamic>))
@@ -48,7 +45,6 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'is_sold_out': instance.isSoldOut,
   'tags': instance.tags,
   'description': instance.description,
-  'images': instance.images,
   'colours': instance.colours,
   'sizes': instance.sizes,
   'features': instance.features,

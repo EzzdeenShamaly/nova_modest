@@ -194,6 +194,28 @@ void main() {
     });
   });
 
+  group('artwork', () {
+    testWidgets('a line shows the product photograph', (tester) async {
+      const photographed = Product(
+        id: 'p1',
+        name: 'فستان كتان رملي',
+        price: 450,
+        categoryId: 'sets',
+        imageUrl: 'https://example.test/p1.jpg',
+      );
+      const line = CartItem(product: photographed);
+
+      await pump(
+        tester,
+        CartLoaded(items: const [line], totals: CartTotals.of(const [line])),
+      );
+
+      expect(find.byType(Image), findsOneWidget);
+      final image = tester.widget<Image>(find.byType(Image));
+      expect((image.image as NetworkImage).url, 'https://example.test/p1.jpg');
+    });
+  });
+
   group('checkout', () {
     testWidgets('leads somewhere now that the flow exists', (tester) async {
       // Disabled from the day the cart was built until checkout had a route.

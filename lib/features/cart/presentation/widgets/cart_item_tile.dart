@@ -54,7 +54,7 @@ class CartItemTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ProductThumbnail(
-            images: item.product.images,
+            imageUrl: item.product.imageUrl,
             width: _imageWidth,
             height: _imageHeight,
             iconSize: _placeholderIcon,

@@ -19,7 +19,14 @@ part 'product.g.dart';
 /// dims the card and hides its favourite control; anything else showing the
 /// product makes its own decision from the same flag.
 ///
-/// The detail fields — [description], [images], [colours], [sizes], [features] —
+/// There is **one** artwork field, [imageUrl], and it is the one the database
+/// has: `products.image_url`. A second `images` list lived here until
+/// 2026-09-19 and had no column behind it, so it was empty on every product the
+/// server returned while the product page, the cart and the review all read it
+/// — a beautiful card opening onto a placeholder. A gallery is the widget's
+/// shape, not the entity's, until the schema grows one.
+///
+/// The detail fields — [description], [colours], [sizes], [features] —
 /// default to empty rather than living on a separate entity. The detail view is
 /// a *superset* of the listing view, not a different shape, and one class per
 /// entity is this project's rule. A listing endpoint that omits them yields a
@@ -36,9 +43,6 @@ abstract class Product with _$Product {
     @JsonKey(name: 'is_sold_out') @Default(false) bool isSoldOut,
     @Default(<ProductTag>[]) List<ProductTag> tags,
     String? description,
-
-    /// Carousel artwork. Empty until real photography exists.
-    @Default(<String>[]) List<String> images,
     @Default(<ProductColour>[]) List<ProductColour> colours,
     @Default(<String>[]) List<String> sizes,
     @Default(<ProductFeature>[]) List<ProductFeature> features,

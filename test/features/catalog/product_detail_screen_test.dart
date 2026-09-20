@@ -49,6 +49,16 @@ void main() {
     selectedSize: 'S',
   );
 
+  const photographed = ProductDetailLoaded(
+    product: Product(
+      id: 'p2',
+      name: 'عباءة سوداء بتفاصيل عصرية',
+      price: 520,
+      categoryId: 'abayas',
+      imageUrl: 'https://example.test/p2.jpg',
+    ),
+  );
+
   setUpAll(() {
     registerFallbackValue(const ProductDetailRequested('p2'));
     return loadAppFonts();
@@ -233,6 +243,26 @@ void main() {
           .widgetList<IconButton>(find.byType(IconButton))
           .firstWhere((b) => (b.icon as Icon).icon == Icons.add);
       expect(plus.onPressed, isNull);
+    });
+  });
+
+  group('artwork', () {
+    // The visible half of the defect: the catalogue card showed a photograph
+    // and the page it opened showed the palette placeholder, because the page
+    // read `Product.images` — a field with no column behind it.
+    testWidgets('the page shows the product photograph', (tester) async {
+      await pump(tester, photographed);
+
+      expect(find.byType(Image), findsOneWidget);
+      final image = tester.widget<Image>(find.byType(Image));
+      expect((image.image as NetworkImage).url, 'https://example.test/p2.jpg');
+    });
+
+    testWidgets('a product with no photograph still draws', (tester) async {
+      await pump(tester, loaded);
+
+      expect(find.byType(Image), findsNothing);
+      expect(tester.takeException(), isNull);
     });
   });
 

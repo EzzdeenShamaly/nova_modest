@@ -14,14 +14,18 @@ import 'package:nova_modest/core/theme/app_dimensions.dart';
 /// 80x96, both fixed by their own layout rather than by a shared scale.
 class ProductThumbnail extends StatelessWidget {
   const ProductThumbnail({
-    required this.images,
+    required this.imageUrl,
     required this.width,
     required this.height,
     required this.iconSize,
     super.key,
   });
 
-  final List<String> images;
+  /// The product's artwork, or null when it has none.
+  ///
+  /// One URL, not a list: this box has never shown more than the first of them,
+  /// and `Product` carries one image because the database does.
+  final String? imageUrl;
   final double width;
   final double height;
 
@@ -47,12 +51,12 @@ class ProductThumbnail extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.s),
         child: ColoredBox(
           color: AppColors.hairline,
-          // No photography exists yet, so the palette placeholder stands in.
-          // Supplying URLs later turns the image on with no other change.
-          child: images.isEmpty
+          // The palette placeholder stands in for a product with no
+          // artwork, and for a URL that fails to load.
+          child: imageUrl == null
               ? placeholder
               : Image.network(
-                  images.first,
+                  imageUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stack) => placeholder,
                 ),

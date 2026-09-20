@@ -616,7 +616,26 @@ Tracks what's Done, In Progress, and Blocked, per feature.
   رسمية بخطوط ساتان». Uploading, renaming and deleting the eight old `webp`
   objects are the dashboard's, under its recorded seeding exception.
 
-- **`Product.images` is a field with no source anywhere.** *(Reworded
+- **FIXED 2026-09-20 — `Product.images` was a field with no source anywhere.**
+  Closed by **removing it**: one artwork field, `imageUrl`, matching the one
+  column the database has. Deriving it in the mapper was the alternative and
+  was rejected — it would have kept two copies of one fact in step forever,
+  for a gallery the schema cannot supply. `ProductThumbnail` now takes a
+  single nullable URL (it only ever drew the first of the list);
+  `ProductImageCarousel` keeps its list API, because a gallery is a widget
+  shape, and the product page converts at the seam. The product page, the
+  cart line and the checkout review each have a test that the photograph
+  renders — all three failed against the old code with *Found 0 widgets with
+  type "Image"*, which is the shopper's placeholder.
+
+  **Still a debt, unchanged and by decision: the order screens.** Their
+  `Product` is rebuilt by `SupabaseOrderRepository._itemFromRow` from an
+  `order_items` snapshot, which has no image column and no foreign key to
+  `products`, so they draw the placeholder under any option. Closing them
+  needs either a lookup by `product_id` (today's photo, not the one at
+  purchase) or an `image_url` snapshotted into `order_items` — a schema
+  change, so the dashboard owner's. The record as found:
+ *(Reworded
   2026-09-19. The first version, of 2026-09-17, said the repository "fills
   `imageUrl` only" and left `images` empty, as if it had forgotten one. That
   framing was wrong, and so was its count of three screens.)*
