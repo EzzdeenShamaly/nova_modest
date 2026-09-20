@@ -20,24 +20,31 @@ Tracks what's Done, In Progress, and Blocked, per feature.
 Not debts. A debt can wait; each of these either stops the upload or cannot be
 undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
-- **The application id is still Flutter's placeholder: `com.example.nova_modest`.**
-  Google Play rejects any package beginning with `com.example` outright, and
-  **an application id can never be changed after the first publish** — it is the
-  app's identity on the store, in the signing chain and in every installed copy.
-  Getting it wrong is not a fix-it-later matter; getting it late means a new
-  listing.
+- **SETTLED 2026-09-20 — the application id is `com.novamodest.store`.**
+  It was `com.example.nova_modest`, which Play rejects outright, and an
+  application id **cannot be changed after the first publish**. The owner chose
+  a reversed product name rather than a domain — no domain is owned, and an id
+  does not require one. Checked before the change: Play answers 404 for that
+  id, so nothing is published under it. A 404 does not reserve it; the first
+  upload does.
 
-  What a change touches, all of it before the first upload:
-  - `android/app/build.gradle.kts` — `namespace` and `applicationId` (both
-    `com.example.nova_modest` today);
-  - the Kotlin package path on disk,
-    `android/app/src/main/kotlin/com/example/nova_modest/MainActivity.kt`, and
-    the `package` line inside it;
-  - the three `AndroidManifest.xml` files (main, debug, profile);
-  - the signing configuration, which is tied to the id;
-  - **iOS carries the same placeholder**: `PRODUCT_BUNDLE_IDENTIFIER =
-    com.example.novaModest` in `ios/Runner.xcodeproj/project.pbxproj`, with the
-    same permanence on the App Store.
+  Changed in one commit: `namespace` and `applicationId` in
+  `android/app/build.gradle.kts` (and the scaffold TODO that asked for it),
+  the Kotlin package **path on disk** plus the `package` line in
+  `MainActivity.kt`, and `PRODUCT_BUNDLE_IDENTIFIER` for both the iOS app and
+  its test bundle. The three `AndroidManifest.xml` files needed nothing: they
+  carry no `package` attribute, because the namespace comes from Gradle.
+  Verified by `flutter clean`, a debug build and a fresh install on the
+  emulator, which launched to `/onboarding` with no error. The old app was
+  uninstalled first — a new id is a different app, so it would otherwise have
+  sat there beside it, and its session and cart are gone with it.
+
+  **Still on `com.example`, deliberately untouched: the desktop targets.**
+  `linux/CMakeLists.txt` (`APPLICATION_ID`), `macos/Runner/Configs/AppInfo.xcconfig`
+  (bundle id and copyright) and `windows/runner/Runner.rc` (company and
+  copyright). They were outside what was asked, this is a mobile app, and none
+  of them blocks a Play or App Store upload. They carry the same placeholder
+  and should be settled if a desktop build is ever shipped.
 
 - **The release build is signed with the debug keystore.**
   `android/app/build.gradle.kts` still carries Flutter's scaffold TODO —

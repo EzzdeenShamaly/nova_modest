@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.nova_modest"
+    namespace = "com.novamodest.store"
     compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
@@ -15,8 +15,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.nova_modest"
+        // Chosen 2026-09-20 and **permanent**: an application id cannot be
+        // changed after the first publish. No domain is owned, and none is
+        // needed — a reversed product name is the accepted form.
+        applicationId = "com.novamodest.store"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

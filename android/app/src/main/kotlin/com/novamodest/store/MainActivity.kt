@@ -1,4 +1,4 @@
-package com.example.nova_modest
+package com.novamodest.store
 
 import io.flutter.embedding.android.FlutterActivity
 
