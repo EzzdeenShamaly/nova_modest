@@ -579,9 +579,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helpContactEmail => 'البريد الإلكتروني';
 
   @override
-  String get helpContactPhone => 'هاتف الدعم';
-
-  @override
   String get helpCopy => 'نسخ';
 
   @override

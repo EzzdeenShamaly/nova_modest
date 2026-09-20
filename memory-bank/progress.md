@@ -52,45 +52,19 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   A debug-signed artifact cannot be published, and the upload key, once chosen,
   is equally permanent. Adjacent to the id, and found with it.
 
-- **The support email and the privacy policy are placeholders.** Google Play
-  requires a **real support email address** on the listing and a **privacy
-  policy at a public URL**; both are mandatory, and a listing cannot be
-  published without them. Today the app carries
-  `_supportEmail = 'support@novamodest.com'` and
-  `_supportPhone = '+966 50 000 0000'` as constants in
-  `help_screen.dart:66-67`, and the terms screen shows `termsPlaceholder` —
-  «سيتم إضافة الشروط والأحكام الكاملة هنا». Terms and conditions are *not*
-  mandatory; the email and the privacy policy are. The owner decides the real
-  values (2026-09-20) and this stays open until they land.
+- **PARTLY SETTLED 2026-09-20 — the support address is real; the privacy policy
+  is not written.** Play requires **a real support email** on the listing and
+  **a privacy policy at a public URL**; both are mandatory. The email is now
+  `ezzdeenshamali@gmail.com` (owner, 2026-09-20), in `help_screen.dart`.
 
-- **SETTLED 2026-09-20 — the session is in the keystore, not a preference file.**
-  `supabase_flutter`'s default wrote it, refresh token and all, through
-  `SharedPreferences`: a plaintext XML file on Android, `localStorage` on web.
-  `SecureSessionStorage` (`core/supabase/`) implements the SDK's `LocalStorage`
-  over the `flutter_secure_storage` this project already depended on and
-  already registered for the REST path nothing uses — so the fix was wiring,
-  not a new package. It is passed to `Supabase.initialize` through
-  `FlutterAuthClientOptions.localStorage`.
+  **The support phone number was removed, not replaced** (owner): the
+  placeholder `+966 50 000 0000` is gone and no number is shown. An invented
+  number on a support screen is worse than none, because a shopper dials it.
 
-  **Migration:** on first launch it moves a session written by the old storage
-  — found under the SDK's own key, `sb-<project ref>-auth-token`, rebuilt from
-  the project URL rather than guessed — into the keystore and deletes the
-  plaintext copy. A newer keystore session is left alone.
-
-  **Every failure wipes and starts clean** (user's constraint): a keystore that
-  cannot be read or written ends with both stores cleared and the shopper
-  signing in again. Never an exception, never a dead screen, and never left on
-  the plaintext session. Nine tests cover the migration and each failure path.
-
-  `android:allowBackup="false"` in the same change, so the app's files are no
-  longer eligible for automatic cloud backup. Note for Android 12+: that stops
-  cloud backup; device-to-device transfer is governed by
-  `android:dataExtractionRules`, which this app does not define.
-
-  **A consequence for future live runs:** the token can no longer be read off
-  the emulator with `adb run-as`, which is how it was taken on 2026-09-20. That
-  was the point. A future run needs another route — a second one-time code
-  through the auth API, or the VM service.
+  **Still open:** the privacy policy, to be published on GitHub Pages, and the
+  terms and conditions text (`termsPlaceholder`), which are *not* mandatory for
+  Play. The policy must describe what the app actually collects — email, name,
+  phone, address — why, that it is stored in Supabase, and who can read it.
 
 ## Done
 

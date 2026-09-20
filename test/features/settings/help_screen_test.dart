@@ -93,33 +93,26 @@ void main() {
   });
 
   group('contact', () {
-    testWidgets('shows the support details', (tester) async {
+    testWidgets('shows the support address', (tester) async {
       await pump(tester);
 
-      expect(find.text('support@novamodest.com'), findsOneWidget);
-      expect(find.text('+966 50 000 0000'), findsOneWidget);
+      expect(find.text('ezzdeenshamali@gmail.com'), findsOneWidget);
+      // There is no support phone number, by decision (2026-09-20): the
+      // placeholder was removed rather than replaced, because a shopper dials
+      // an invented number.
+      expect(find.byIcon(Icons.phone_outlined), findsNothing);
     });
 
     testWidgets('tapping a row copies it and confirms', (tester) async {
       await pump(tester);
 
-      await tester.tap(find.text('support@novamodest.com'));
+      await tester.tap(find.text('ezzdeenshamali@gmail.com'));
       await tester.pumpAndSettle();
 
-      expect(copied, 'support@novamodest.com');
+      expect(copied, 'ezzdeenshamali@gmail.com');
       expect(find.text('تم النسخ'), findsOneWidget);
     });
 
-    testWidgets('the phone row copies the number, not the email', (
-      tester,
-    ) async {
-      await pump(tester);
-
-      await tester.tap(find.text('+966 50 000 0000'));
-      await tester.pumpAndSettle();
-
-      expect(copied, '+966 50 000 0000');
-    });
   });
 
   group('direction and locale', () {
@@ -139,7 +132,7 @@ void main() {
       expect(find.text('Frequently asked questions'), findsOneWidget);
       expect(find.text('How do I sign in?'), findsOneWidget);
       // An address and a number are content, identical in every language.
-      expect(find.text('support@novamodest.com'), findsOneWidget);
+      expect(find.text('ezzdeenshamali@gmail.com'), findsOneWidget);
     });
 
     testWidgets('lays out RTL under Arabic', (tester) async {

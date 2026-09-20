@@ -1130,12 +1130,6 @@ abstract class AppLocalizations {
   /// **'البريد الإلكتروني'**
   String get helpContactEmail;
 
-  /// Label of the support phone row.
-  ///
-  /// In ar, this message translates to:
-  /// **'هاتف الدعم'**
-  String get helpContactPhone;
-
   /// Screen-reader label and tooltip for the copy control on a contact row.
   ///
   /// In ar, this message translates to:

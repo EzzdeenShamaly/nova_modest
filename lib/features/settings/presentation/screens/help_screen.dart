@@ -45,11 +45,6 @@ class HelpScreen extends StatelessWidget {
                 label: l10n.helpContactEmail,
                 value: _supportEmail,
               ),
-              _ContactRow(
-                icon: Icons.phone_outlined,
-                label: l10n.helpContactPhone,
-                value: _supportPhone,
-              ),
             ],
           ),
         ],
@@ -57,14 +52,17 @@ class HelpScreen extends StatelessWidget {
     );
   }
 
-  /// **Demo values** (user, 2026-08-23) — not a real inbox or a real line.
-  /// Replace both before anything ships to a shopper.
+  /// The real inbox (user, 2026-09-20), and the one Play will be given as the
+  /// listing's support address.
   ///
-  /// Not ARB strings: an address and a number are the same kind of content as a
-  /// product's price, identical in every language, and a translator has no
-  /// business editing them.
-  static const String _supportEmail = 'support@novamodest.com';
-  static const String _supportPhone = '+966 50 000 0000';
+  /// Not an ARB string: an address is the same kind of content as a product's
+  /// price, identical in every language, and a translator has no business
+  /// editing it.
+  ///
+  /// **There is no support phone number, by decision.** The placeholder
+  /// `+966 50 000 0000` was removed rather than replaced: an invented number on
+  /// a support screen is worse than no number, because a shopper will dial it.
+  static const String _supportEmail = 'ezzdeenshamali@gmail.com';
 
   /// The questions this app can answer **truthfully today**.
   ///

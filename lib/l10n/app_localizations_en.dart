@@ -578,9 +578,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpContactEmail => 'Email';
 
   @override
-  String get helpContactPhone => 'Support phone';
-
-  @override
   String get helpCopy => 'Copy';
 
   @override

@@ -52,6 +52,7 @@ dependencies:
 
   # Responsive scaling — design baseline 375x812
   flutter_screenutil: ^5.9.3
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:
