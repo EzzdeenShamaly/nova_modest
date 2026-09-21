@@ -1,7 +1,7 @@
 # Active Context
 
-**Last Updated:** 2026-09-20 (release blockers settled, the six UI findings
-closed, and the profile picture built)
+**Last Updated:** 2026-09-21 (the avatar proven on a device, and the blank-disc
+defect it exposed fixed)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
@@ -28,10 +28,14 @@ passing**, `flutter analyze` clean. The bucket's policies and limits were read
 from the live project rather than assumed — INSERT/SELECT/UPDATE scoped to
 `auth.uid()`, **no DELETE**, which is what the design is shaped around.
 
-**Not yet exercised on a device.** The upload path is proven against a fake
-Supabase on loopback; nothing has yet put a real photograph through the real
-bucket, and the RLS path is exactly the kind that works in a unit test and
-fails on a policy.
+**Proven on a device, 2026-09-21.** A real photograph went from the emulator's
+gallery through the system photo picker into the live `avatars` bucket, and
+came back signed: in the form, in the account header, and again after a cold
+start, which is what proves the column holds a path and the signing works. No
+policy refused anything. Two things fell out of that run — the keystore session
+survived an app update (blocker 3, measured off a test for the first time), and
+the disc was blank while the picture downloaded, which is now fixed with
+`frameBuilder` and pinned by a slow-provider test.
 
 **How to run the app against production:** from a terminal —
 `flutter run -d <android-device> --dart-define-from-file=config/prod.json`.

@@ -167,8 +167,13 @@ class _Picture extends StatelessWidget {
       // A signed link that has expired, or no connection: the letter, not a
       // broken-image glyph.
       errorBuilder: (_, _, _) => fallback,
-      loadingBuilder: (context, child, progress) =>
-          progress == null ? child : fallback,
+      // **frameBuilder, not loadingBuilder.** `Image` hands `loadingBuilder` a
+      // null `loadingProgress` until the first chunk arrives, and reading that
+      // null as "loaded" returns a `RawImage` holding no image — a blank disc
+      // for as long as the download takes. `frame == null` is the honest
+      // "nothing to paint yet", so the letter holds the place until there is
+      // something to replace it (measured on the emulator, 2026-09-21).
+      frameBuilder: (_, child, frame, _) => frame == null ? fallback : child,
     );
   }
 }

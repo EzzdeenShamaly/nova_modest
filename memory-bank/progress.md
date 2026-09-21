@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-09-20
+**Last Updated:** 2026-09-21
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -52,6 +52,14 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   A debug-signed artifact cannot be published, and the upload key, once chosen,
   is equally permanent. Adjacent to the id, and found with it.
 
+- **Blocker 3's keystore session, measured on a device 2026-09-21.** Until
+  that day the secure session had only ever been proven by unit tests. On the
+  emulator, a **new build installed over the old app** (same application id, so
+  app data survives) launched straight into the signed-in account: the profile
+  loaded, `/profile` was reachable, and no sign-in code was needed. That is the
+  migration and the keystore read working on a real Android keystore rather
+  than a mock — the first time either has been measured off a test.
+
 - **PARTLY SETTLED 2026-09-20 — the support address is real; the privacy policy
   is not written.** Play requires **a real support email** on the listing and
   **a privacy policy at a public URL**; both are mandatory. The email is now
@@ -67,6 +75,34 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   phone, address — why, that it is stored in Supabase, and who can read it.
 
 ## Done
+
+- **SETTLED 2026-09-21 — the disc is no longer blank while a picture loads.**
+  Found on the emulator, not by a test: between `avatarUrl` becoming non-null
+  and the first decoded frame, `AvatarCircle` showed neither the letter nor the
+  picture. `Image` hands `loadingBuilder` a null `loadingProgress` until the
+  first chunk arrives, and reading that null as "loaded" returns a `RawImage`
+  holding no image. Fixed by moving the decision to `frameBuilder`, whose
+  `frame == null` is the honest "nothing to paint yet"; `errorBuilder` stays as
+  it was.
+
+- **Two kinds of "no picture" — failure and loading — and a broken provider
+  only shows the first.** This is why the blank disc above shipped with
+  33 tests around it. In `flutter_test` every network image fails immediately,
+  so a test that supplies a bad URL lands in `errorBuilder`, finds the
+  fallback, and proves nothing about the window before the bytes arrive.
+  Reproducing that window needs a provider that is **slow**, not broken:
+  `debugNetworkImageHttpClientProvider` returning a client whose response body
+  is a stream held open (`test/core/widgets/avatar_circle_loading_test.dart`).
+  **Every network image added to this app from here on is tested both ways.**
+
+  Two mechanics worth keeping, both learned the hard way on 2026-09-21:
+  `debugNetworkImageHttpClientProvider` must be cleared **inside** the test
+  body, because the framework checks painting's debug variables the moment the
+  body returns and before any `tearDown`; and a real decode cannot be driven to
+  completion under the fake clock at all — the codec is an engine call whose
+  continuation is posted to a zone that never runs — so the "picture replaces
+  the letter" half is pinned at the builder, with the emulator run as its
+  end-to-end evidence.
 
 - **Profile picture (task أ, 2026-09-20)** — a shopper can set her own photo.
   `AvatarCircle` (`core/widgets/`) draws it in the account header and on the
