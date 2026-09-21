@@ -46,6 +46,60 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   of them blocks a Play or App Store upload. They carry the same placeholder
   and should be settled if a desktop build is ever shipped.
 
+- **BLOCKER 5, found 2026-09-21 — there is no way to delete an account.**
+  Google Play requires that any app which creates accounts offers deletion
+  **inside the app** *and* a **web URL** where deletion can be requested without
+  installing it. "Email us" does not satisfy either half, so the current terms
+  draft cannot ship as written. The web URL pairs with the privacy policy page
+  (blocker 4) — same GitHub Pages site, second page.
+
+  **This is a feature, not a clause.** The storefront cannot delete an account
+  by itself: `auth.users` is not writable from a client session, so the row that
+  everything else hangs off can only go through a `security definer` function in
+  the database. Migrations are the dashboard repository's to write; what this
+  repo needs from it is recorded below, and the app side (a confirm dialog that
+  names what goes and what survives, the RPC call, then a local sign-out and
+  cart clear) is ours.
+
+  **What the function must do** — the shape to hand the dashboard agent:
+  - `public.delete_my_account()`, `security definer`, `set search_path = public`,
+    **no arguments**. It acts on `auth.uid()` and nothing else; an id taken from
+    the caller would let one shopper delete another.
+  - Raise if `auth.uid()` is null rather than deleting nothing silently.
+  - **Delete the avatar object first**: `storage.objects` where
+    `bucket_id = 'avatars'` and `(storage.foldername(name))[1] = auth.uid()::text`.
+    The bucket grants INSERT, SELECT and UPDATE to `authenticated` and **no
+    DELETE** (measured 2026-09-20), so a deleted account otherwise leaves its
+    photograph behind with nothing able to remove it.
+  - Then `delete from auth.users where id = auth.uid()`, which cascades to
+    `profiles` and `user_addresses`. **`orders.user_id` is ON DELETE SET NULL**,
+    so the orders survive with their snapshot of name, phone and address — the
+    shop keeps its records, and that is worth saying plainly in the terms.
+  - `grant execute on function public.delete_my_account() to authenticated`
+    only — never `anon`.
+  - Confirm on the way back: whether any table other than `profiles`,
+    `user_addresses` and `orders` references `auth.users`, and that
+    `order_items` is untouched because it hangs off `orders`.
+
+- **BLOCKER 6, found 2026-09-21 — the Google sign-in button cannot work in any
+  build this repo produces.** It is the first control on the first screen, it
+  looks live, and a tap ends in a generic server-error message. Three layers are
+  missing, and the first fires before the other two matter:
+  1. `GOOGLE_WEB_CLIENT_ID` is read by `SupabaseAuthRepository` and **defined
+     nowhere** — not in `config/prod.json`, not in `config/dev.json`, not in the
+     committed example. `String.fromEnvironment` yields `''`, and the method
+     returns `ServerFailure` before the plugin is touched.
+  2. No `google-services.json` and no Google Services Gradle plugin on Android,
+     and no scheme registered in the manifest.
+  3. The Google provider in Supabase Auth, and the signing certificate's SHA-1
+     in Google Cloud — neither verifiable from here, and the SHA-1 **cannot be
+     settled before blocker 2**, because it is the upload key's.
+
+  By the standing rule that a control either works or goes, this is a decision
+  for the owner: remove the button for the first release, or finish all three
+  layers after the keystore exists. **The terms draft says nothing about Google
+  sign-in** until it is settled.
+
 - **The release build is signed with the debug keystore.**
   `android/app/build.gradle.kts` still carries Flutter's scaffold TODO —
   `signingConfig = signingConfigs.getByName("debug")` in the `release` block.
@@ -373,6 +427,15 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 ## In Progress
 
 - _(none)_
+
+- **The country field is free text while the terms say Saudi Arabia only**
+  (2026-09-21). `Address.country` is a plain `TextFormField`, so a shopper can
+  type anything and the order is accepted; the terms about to ship restrict
+  delivery to the Kingdom. One of the two has to move: either the field becomes
+  a fixed value or a short list in the form, or `place_order` refuses an address
+  outside the allowed set — the second is the real boundary, the first is only
+  the courtesy (`08-flutter-baas-security-guard` §1). Until then the app and its
+  own terms disagree.
 
 ## Not Started
 
