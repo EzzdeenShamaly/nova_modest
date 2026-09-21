@@ -48,3 +48,15 @@ final class AuthProfileUpdated extends AuthEvent {
 final class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+/// The shopper's account was deleted, and the device's session already
+/// cleared by the repository that deleted it.
+///
+/// Not [AuthLogoutRequested]: that one calls the repository to end a session,
+/// and there is nothing left to end — the account is gone on the server and
+/// the local session with it. This only moves the app's own state to signed
+/// out, which is what sends the router to sign-in. Reported by
+/// `AccountDeletionBloc`, the same way `ProfileEditBloc` reports an edit.
+final class AuthAccountDeleted extends AuthEvent {
+  const AuthAccountDeleted();
+}

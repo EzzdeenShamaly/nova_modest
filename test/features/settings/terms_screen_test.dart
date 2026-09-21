@@ -71,6 +71,22 @@ void main() {
     expect(text, contains('لا يرسل إشعاراتٍ بعد'));
   });
 
+  testWidgets('says what deletion takes and what it leaves, as the app does', (
+    tester,
+  ) async {
+    await pump(tester);
+    final text = body(tester);
+
+    // The in-app deletion exists (blocker 5), and the clause states both
+    // halves the confirmation dialog states — orders survive because
+    // orders.user_id is ON DELETE SET NULL.
+    expect(text, contains('يمكنكِ حذف حسابكِ من صفحة «حسابي»'));
+    expect(text, contains('أما طلباتكِ السابقة فتبقى لدى المتجر'));
+    // The sentence it replaced became false the day the feature shipped.
+    expect(text, isNot(contains('لا يمكن حذفها من التطبيق حالياً')));
+    expect(text, contains('وتُحذف عند حذف حسابكِ'));
+  });
+
   testWidgets('it does not offer Google sign-in, which does not work', (
     tester,
   ) async {

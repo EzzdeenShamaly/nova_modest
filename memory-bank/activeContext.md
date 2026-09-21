@@ -41,9 +41,15 @@ the disc was blank while the picture downloaded, which is now fixed with
 `flutter run -d <android-device> --dart-define-from-file=config/prod.json`.
 F5 in VS Code has no `launch.json` and starts the app without its key.
 
-**Next logical step:** task ب — the terms and conditions draft, Arabic and
-English, describing only what the code actually does, sent for review before it
-is placed anywhere.
+**Since then (2026-09-21):** the terms are in the app, approved clause by
+clause; the dead Google button is gone (blocker 6); and **account deletion is
+built** against the dashboard's `delete-account` Edge Function — the in-app half
+of blocker 5. 855 tests passing.
+
+**Next logical step:** the web half of blocker 5 and the privacy policy
+(blocker 4) are one GitHub Pages site with two pages, waiting on the owner's
+go. Signing (blocker 2) waits on his keystore. Deletion has not yet run on a
+device: that needs a throwaway account, because the demo shopper is kept.
 
 ## Where things stood — 2026-09-19
 

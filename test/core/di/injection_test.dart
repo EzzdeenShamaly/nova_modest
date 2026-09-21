@@ -16,6 +16,7 @@ import 'package:nova_modest/features/address/presentation/bloc/address_form_bloc
 import 'package:nova_modest/features/address/presentation/bloc/address_list_bloc.dart';
 import 'package:nova_modest/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart';
+import 'package:nova_modest/features/auth/presentation/bloc/account_deletion_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/profile_edit_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/sign_in_bloc.dart';
@@ -122,6 +123,7 @@ void main() {
       // The two that shipped broken on the device were AddressListBloc and,
       // before it, the account routes' localisation tear-offs.
       resolves<AddressListBloc>();
+      resolves<AccountDeletionBloc>();
       resolves<AddressFormBloc>();
       resolves<HomeBloc>();
       resolves<ProductListBloc>();

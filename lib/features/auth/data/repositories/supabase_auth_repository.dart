@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/error/result.dart';
 import 'package:nova_modest/core/media/image_bytes.dart';
+import 'package:nova_modest/core/supabase/secure_session_storage.dart';
 import 'package:nova_modest/core/supabase/supabase_error_mapper.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart';
@@ -203,6 +204,47 @@ class SupabaseAuthRepository implements AuthRepository {
     } catch (error) {
       return Err(mapSupabaseError(error));
     }
+  }
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    try {
+      // The dashboard's `delete-account` Edge Function. Identity is the
+      // session's own token, which the client attaches; the body is empty on
+      // purpose, because the function never reads identity from it.
+      await _client.functions.invoke('delete-account', body: const {});
+    } catch (error) {
+      // 401 → UnauthorizedFailure, anything else keeps its code
+      // (`_functionFailure` in the mapper).
+      return Err(mapSupabaseError(error));
+    }
+
+    // Deleted. What is left is this device's copy of a session for an account
+    // that no longer exists.
+    await clearLocalSession();
+    return const Ok(null);
+  }
+
+  /// Ends the session **on this device only**, without depending on the
+  /// server.
+  ///
+  /// `signOut` drops the in-memory session and announces `signedOut` *before*
+  /// it calls the server (`gotrue_client.dart`, `_signOut`), and it swallows a
+  /// 401, 403 or 404 from that call — but it rethrows anything else, and with
+  /// the account gone that call has nothing left to do anyway. So it runs
+  /// inside a catch, for its local half. The keystore is then cleared
+  /// explicitly rather than trusting the `signedOut` listener to do it: the
+  /// account no longer exists, and a refresh token for it must not survive on
+  /// the device by any path.
+  @visibleForTesting
+  Future<void> clearLocalSession() async {
+    try {
+      await _client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // Expected: the server no longer knows this account. The local half has
+      // already run.
+    }
+    await SecureSessionStorage().removePersistedSession();
   }
 
   @override

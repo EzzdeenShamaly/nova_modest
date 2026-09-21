@@ -124,6 +124,20 @@ class FakeAuthRepository implements AuthRepository {
     return Ok(_current);
   }
 
+  @override
+  Future<Result<void>> deleteAccount() async {
+    await Future<void>.delayed(_latency);
+    // Succeeds, and ends the session the way the real one does: the stored
+    // token goes, so the next `currentUser()` answers "signed out".
+    try {
+      await _tokenStorage.clear();
+      _current = _user;
+      return const Ok(null);
+    } on Failure catch (failure) {
+      return Err(failure);
+    }
+  }
+
   /// Every picture this fake was handed, for a test to assert on.
   final List<Uint8List> uploadedAvatarBytes = [];
 

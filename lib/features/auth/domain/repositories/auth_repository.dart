@@ -54,6 +54,17 @@ abstract class AuthRepository {
   /// contract would promise something the backend refuses.
   Future<Result<User>> uploadAvatar(Uint8List imageBytes);
 
+  /// Deletes the signed-in shopper's account, and on success ends the session
+  /// on this device.
+  ///
+  /// Irreversible. The profile, the saved addresses and the photograph go;
+  /// past orders stay with the shop, no longer linked to any account. The
+  /// caller must have said so to the shopper before calling this.
+  ///
+  /// Identity is the session alone — there is no parameter to name an account,
+  /// so no caller can express deleting someone else's.
+  Future<Result<void>> deleteAccount();
+
   /// Clears the stored session. Succeeds locally even if the server call fails,
   /// because a user who taps "sign out" must end up signed out.
   Future<Result<void>> logout();

@@ -46,7 +46,27 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   of them blocks a Play or App Store upload. They carry the same placeholder
   and should be settled if a desktop build is ever shipped.
 
-- **BLOCKER 5, found 2026-09-21 — there is no way to delete an account.**
+- **BLOCKER 5 — HALF SETTLED 2026-09-21: in-app deletion is built; the web
+  URL is not.** The dashboard shipped `delete-account` as an **Edge Function**
+  rather than the SQL function sketched below (same order and rules: avatar
+  first, then the user over the Admin API; admins refused; identity from the
+  JWT alone). The storefront calls it from the last row of the account menu,
+  behind a dialog that states what goes and what stays **before** the press,
+  and on success clears the device's session without relying on the server —
+  `signOut(local)` inside a catch for the in-memory half, then the keystore
+  cleared explicitly. A 401 is an expired session and signs her out, as every
+  lost session does; the other six codes keep their code and reach her in
+  Arabic. Eleven mutations, eleven caught. **Still open: the web page where
+  deletion can be requested without the app** — it pairs with the privacy
+  policy page (blocker 4).
+
+  *Not yet exercised on a device.* The only signed-in account on the emulator
+  is the owner's demo shopper, which is to be kept (2026-09-21), so a live run
+  needs a throwaway account.
+
+  Original record follows.
+
+  **BLOCKER 5, found 2026-09-21 — there is no way to delete an account.**
   Google Play requires that any app which creates accounts offers deletion
   **inside the app** *and* a **web URL** where deletion can be requested without
   installing it. "Email us" does not satisfy either half, so the current terms
@@ -430,6 +450,20 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 
 ## Not Started
+
+- **`orderErrorTechnical` speaks in the masculine** (found 2026-09-21): «وإذا
+  تكرر **تواصل** معنا» — the imperative the shopper voice forbids.
+  `test/l10n/arabic_voice_test.dart` does not list «تواصل», so it passed. Out of
+  scope for the deletion work and left untouched; it is also why deletion's
+  unknown codes do not fall back to it — that sentence tells her an *order*
+  failed.
+
+- **There is no central handler for an expired session in the presentation
+  layer** (observed 2026-09-21). The automatic sign-out happens in
+  `SupabaseAuthRepository.currentUser()` at the session check; a screen that
+  receives `UnauthorizedFailure` from anything else shows it or handles it
+  itself. Account deletion handles it explicitly (`AuthLogoutRequested`). Worth
+  a single listener if a third place needs the same.
 
 - **The country field is free text while the terms say Saudi Arabia only**
   (2026-09-21). `Address.country` is a plain `TextFormField`, so a shopper can

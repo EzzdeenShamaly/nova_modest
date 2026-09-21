@@ -79,6 +79,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Result<void>> deleteAccount() async {
+    // Unregistered, like the rest of this class. The live path is the
+    // dashboard's `delete-account` Edge Function, in `SupabaseAuthRepository`.
+    throw UnimplementedError(
+      'deleteAccount needs a confirmed backend endpoint.',
+    );
+  }
+
+  @override
   Future<Result<User>> uploadAvatar(Uint8List imageBytes) async {
     // Same reason as the two above: unregistered, and there is no confirmed
     // upload endpoint. The live path is Supabase Storage, in

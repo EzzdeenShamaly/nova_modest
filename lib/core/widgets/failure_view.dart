@@ -101,12 +101,27 @@ String failureMessage(Failure failure, AppLocalizations l10n) =>
 /// defaults differ — an unknown order code means the database gained one after
 /// this build shipped, while an unknown avatar code cannot happen without a
 /// mistake in this file.
-String _coded(String code, String? subject, AppLocalizations l10n) =>
-    switch (code) {
-      'avatar_unsupported_format' => l10n.avatarErrorFormat,
-      'avatar_too_large' => l10n.avatarErrorTooLarge,
-      _ => _orderRefusal(code, subject, l10n),
-    };
+String _coded(
+  String code,
+  String? subject,
+  AppLocalizations l10n,
+) => switch (code) {
+  'avatar_unsupported_format' => l10n.avatarErrorFormat,
+  'avatar_too_large' => l10n.avatarErrorTooLarge,
+  // The dashboard's `delete-account` function (its `index.ts`). All seven of
+  // its codes are listed, not just the three with their own sentence: an
+  // unlisted one would fall to `_orderRefusal`'s default, which tells the
+  // shopper her *order* failed. Its 401 never arrives here — the mapper
+  // makes that an UnauthorizedFailure, and it ends the session instead.
+  'admin_account' => l10n.accountDeleteErrorAdmin,
+  'avatar_delete_failed' => l10n.accountDeleteErrorAvatar,
+  'account_delete_failed' => l10n.accountDeleteErrorAccount,
+  'not_configured' ||
+  'admin_check_failed' ||
+  'unexpected' ||
+  'method_not_allowed' => l10n.accountDeleteErrorTechnical,
+  _ => _orderRefusal(code, subject, l10n),
+};
 
 /// The message for one `place_order` refusal code.
 ///

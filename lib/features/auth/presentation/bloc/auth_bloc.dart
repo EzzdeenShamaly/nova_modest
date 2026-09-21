@@ -39,6 +39,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // sequential: sign-out must not interleave with anything else touching the
     // stored token.
     on<AuthLogoutRequested>(_onLogoutRequested, transformer: sequential());
+
+    // sequential for the same reason. No repository call: the deletion already
+    // ended the session on the server and on the device.
+    on<AuthAccountDeleted>(
+      (_, emit) => emit(const AuthUnauthenticated()),
+      transformer: sequential(),
+    );
   }
 
   final AuthRepository _repository;

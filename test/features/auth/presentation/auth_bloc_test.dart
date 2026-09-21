@@ -178,6 +178,22 @@ void main() {
     );
   });
 
+  group('AuthAccountDeleted', () {
+    blocTest<AuthBloc, AuthState>(
+      'goes straight to Unauthenticated, calling nothing',
+      build: () => AuthBloc(repository),
+      act: (bloc) => bloc.add(const AuthAccountDeleted()),
+      // No Loading, and above all no logout(): the account is gone on the
+      // server and the device's session with it. A sign-out call here would
+      // ask the server to end a session for a user that no longer exists.
+      expect: () => const [AuthUnauthenticated()],
+      verify: (_) {
+        verifyNever(() => repository.logout());
+        verifyNever(() => repository.deleteAccount());
+      },
+    );
+  });
+
   group('state equality', () {
     // Guards the props contract directly: a field missing from props makes two
     // different states compare equal, emit becomes a no-op, and the UI silently

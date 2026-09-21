@@ -89,5 +89,30 @@ Failure mapSupabaseError(Object error) {
     }
     return ServerFailure(error.message);
   }
+  if (error is FunctionException) {
+    return _functionFailure(error);
+  }
   return UnknownFailure(error.toString());
+}
+
+/// An Edge Function's refusal. The dashboard's functions answer in one format —
+/// `{"code": "...", "detail": "..."}` with a meaningful status — and the SDK
+/// hands back that body, parsed, as `details`.
+///
+/// **A 401 is a lost session, not a refusal**, whatever code rides with it:
+/// it becomes [UnauthorizedFailure] so the caller treats it as every other
+/// expired session is treated, by signing out and returning to sign-in
+/// (owner, 2026-09-21). Everything else keeps its code, so the UI can say which
+/// refusal it was; a response with no readable code keeps none, and falls to
+/// the generic message rather than inventing one.
+Failure _functionFailure(FunctionException error) {
+  final details = error.details;
+  final code = details is Map ? details['code'] : null;
+  if (error.status == 401) {
+    return UnauthorizedFailure(code is String ? code : 'Session expired.');
+  }
+  if (code is String && code.isNotEmpty) {
+    return ValidationFailure(code, code: code);
+  }
+  return ServerFailure('Function failed with ${error.status}.');
 }

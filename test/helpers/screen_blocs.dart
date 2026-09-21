@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nova_modest/core/di/injection.dart';
+import 'package:nova_modest/features/auth/presentation/bloc/account_deletion_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/sign_in_bloc.dart';
 import 'package:nova_modest/features/address/presentation/bloc/address_form_bloc.dart';
 import 'package:nova_modest/features/address/presentation/bloc/address_list_bloc.dart';
@@ -13,6 +14,10 @@ import 'package:nova_modest/features/catalog/presentation/bloc/search_bloc.dart'
 
 class _MockSignInBloc extends MockBloc<SignInEvent, SignInState>
     implements SignInBloc {}
+
+class _MockAccountDeletionBloc
+    extends MockBloc<AccountDeletionEvent, AccountDeletionState>
+    implements AccountDeletionBloc {}
 
 class _MockHomeBloc extends MockBloc<HomeEvent, HomeState>
     implements HomeBloc {}
@@ -95,6 +100,21 @@ void registerScreenBlocs() {
       Stream<SignInState>.value(const SignInIdle()),
       initialState: const SignInIdle(),
     );
+    return bloc;
+  });
+
+  // The account screen resolves its own deletion bloc, and it is the root of a
+  // shell branch, so every navigation suite that reaches the account tab
+  // reaches this.
+  put<AccountDeletionBloc>(() {
+    final bloc = _MockAccountDeletionBloc();
+    whenListen(
+      bloc,
+      Stream<AccountDeletionState>.value(const AccountDeletionIdle()),
+      initialState: const AccountDeletionIdle(),
+    );
+    // Provided with `create:`, so the provider closes it on dispose.
+    when(bloc.close).thenAnswer((_) async {});
     return bloc;
   });
 

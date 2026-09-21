@@ -40,6 +40,8 @@ import 'package:nova_modest/features/auth/data/repositories/supabase_auth_reposi
     as _i346;
 import 'package:nova_modest/features/auth/domain/repositories/auth_repository.dart'
     as _i643;
+import 'package:nova_modest/features/auth/presentation/bloc/account_deletion_bloc.dart'
+    as _i538;
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart'
     as _i795;
 import 'package:nova_modest/features/auth/presentation/bloc/profile_edit_bloc.dart'
@@ -212,6 +214,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i795.AuthBloc>(
       () => _i795.AuthBloc(gh<_i643.AuthRepository>()),
+    );
+    gh.factory<_i538.AccountDeletionBloc>(
+      () => _i538.AccountDeletionBloc(gh<_i643.AuthRepository>()),
     );
     gh.factory<_i129.SignInBloc>(
       () => _i129.SignInBloc(gh<_i643.AuthRepository>()),

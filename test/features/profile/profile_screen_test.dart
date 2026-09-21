@@ -2,9 +2,11 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:nova_modest/core/di/injection.dart';
 import 'package:nova_modest/core/error/failure.dart';
 import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/features/auth/domain/entities/user.dart';
+import 'package:nova_modest/features/auth/presentation/bloc/account_deletion_bloc.dart';
 import 'package:nova_modest/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:nova_modest/features/profile/presentation/screens/profile_screen.dart';
 import 'package:nova_modest/features/profile/presentation/widgets/profile_menu_tile.dart';
@@ -14,8 +16,13 @@ import '../../helpers/pump_app.dart';
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
+class _MockAccountDeletionBloc
+    extends MockBloc<AccountDeletionEvent, AccountDeletionState>
+    implements AccountDeletionBloc {}
+
 void main() {
   late _MockAuthBloc authBloc;
+  late _MockAccountDeletionBloc deletionBloc;
 
   const user = User(
     id: 'u1',
@@ -24,9 +31,29 @@ void main() {
     phone: '+966 50 123 4567',
   );
 
-  setUpAll(loadAppFonts);
+  setUpAll(() {
+    registerFallbackValue(const AuthLogoutRequested());
+    registerFallbackValue(const AccountDeletionConfirmed());
+    return loadAppFonts();
+  });
 
-  setUp(() => authBloc = _MockAuthBloc());
+  setUp(() {
+    authBloc = _MockAuthBloc();
+    deletionBloc = _MockAccountDeletionBloc();
+    whenListen(
+      deletionBloc,
+      const Stream<AccountDeletionState>.empty(),
+      initialState: const AccountDeletionIdle(),
+    );
+    // The screen asks the container for its own deletion bloc, as
+    // PersonalInfoScreen does for ProfileEditBloc.
+    if (sl.isRegistered<AccountDeletionBloc>()) {
+      sl.unregister<AccountDeletionBloc>();
+    }
+    sl.registerFactory<AccountDeletionBloc>(() => deletionBloc);
+  });
+
+  tearDown(() => sl.unregister<AccountDeletionBloc>());
 
   /// [settle] is off for the loading state: a spinner animates forever. The
   /// state is re-stubbed per pump because `Stream.value` is single-subscription.
@@ -93,10 +120,12 @@ void main() {
         'المساعدة والدعم',
         'الشروط والأحكام',
         'تسجيل الخروج',
+        // Not in the frame: Play requires in-app deletion (blocker 5).
+        'حذف الحساب',
       ]) {
         expect(find.text(label), findsOneWidget, reason: 'missing $label');
       }
-      expect(find.byType(ProfileMenuTile), findsNWidgets(8));
+      expect(find.byType(ProfileMenuTile), findsNWidgets(9));
     });
 
     testWidgets('the language row reports the language in force', (
@@ -117,21 +146,24 @@ void main() {
       expect(withValues, hasLength(1));
     });
 
-    testWidgets('sign-out is the destructive row and has no chevron', (
-      tester,
-    ) async {
-      await pump(tester, const AuthAuthenticated(user));
+    testWidgets(
+      'the two rows that end things are destructive and lead nowhere',
+      (tester) async {
+        await pump(tester, const AuthAuthenticated(user));
 
-      final tiles = tester
-          .widgetList<ProfileMenuTile>(find.byType(ProfileMenuTile))
-          .toList();
-      final destructive = tiles.where((tile) => tile.destructive);
+        final tiles = tester
+            .widgetList<ProfileMenuTile>(find.byType(ProfileMenuTile))
+            .toList();
+        final destructive = tiles.where((tile) => tile.destructive);
 
-      expect(destructive, hasLength(1));
-      expect(destructive.single.label, 'تسجيل الخروج');
-      // Seven rows lead somewhere; the eighth acts here.
-      expect(find.byIcon(Icons.chevron_right), findsNWidgets(7));
-    });
+        expect(destructive.map((tile) => tile.label), [
+          'تسجيل الخروج',
+          'حذف الحساب',
+        ]);
+        // Seven rows lead somewhere; the last two act here.
+        expect(find.byIcon(Icons.chevron_right), findsNWidgets(7));
+      },
+    );
 
     testWidgets('the destructive row uses the palette error colour', (
       tester,
@@ -212,11 +244,150 @@ void main() {
     });
   });
 
+  group('deleting the account', () {
+    Future<void> openDialog(WidgetTester tester) async {
+      await pump(tester, const AuthAuthenticated(user));
+      await tester.scrollUntilVisible(find.text('حذف الحساب'), 200);
+      await tester.tap(find.text('حذف الحساب'));
+      await tester.pumpAndSettle();
+    }
+
+    /// Replays [states] from the deletion bloc, as its listener would see them.
+    Future<void> pumpWithDeletion(
+      WidgetTester tester,
+      List<AccountDeletionState> states,
+    ) async {
+      whenListen(
+        deletionBloc,
+        Stream<AccountDeletionState>.fromIterable(states),
+        initialState: const AccountDeletionIdle(),
+      );
+      await pump(tester, const AuthAuthenticated(user));
+    }
+
+    testWidgets('is the last row, in the error colour', (tester) async {
+      await pump(tester, const AuthAuthenticated(user));
+
+      // Play requires deletion to be discoverable in the app.
+      final tiles = tester
+          .widgetList<ProfileMenuTile>(find.byType(ProfileMenuTile))
+          .toList();
+      expect(tiles.last.label, 'حذف الحساب');
+      expect(tiles.last.destructive, isTrue);
+    });
+
+    testWidgets('the dialog says what goes and what stays, before any press', (
+      tester,
+    ) async {
+      await openDialog(tester);
+
+      final body = find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(Text),
+      );
+      final text = tester
+          .widgetList<Text>(body)
+          .map((t) => t.data ?? '')
+          .join(' ');
+
+      // What goes.
+      expect(text, contains('ملفكِ الشخصي'));
+      expect(text, contains('عناوينكِ المحفوظة'));
+      expect(text, contains('صورتكِ الشخصية'));
+      expect(text, contains('لا يمكن التراجع'));
+      // What stays — orders.user_id is ON DELETE SET NULL, and she must know
+      // that before pressing, not after (owner, 2026-09-21).
+      expect(text, contains('طلباتكِ السابقة فتبقى لدى المتجر'));
+      verifyNever(() => deletionBloc.add(any()));
+    });
+
+    testWidgets('cancelling deletes nothing', (tester) async {
+      await openDialog(tester);
+
+      await tester.tap(find.text('إلغاء'));
+      await tester.pumpAndSettle();
+
+      verifyNever(() => deletionBloc.add(any()));
+    });
+
+    testWidgets('confirming sends exactly one deletion', (tester) async {
+      await openDialog(tester);
+
+      // The title says it too; the button is the one to press.
+      await tester.tap(find.widgetWithText(TextButton, 'حذف الحساب'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => deletionBloc.add(const AccountDeletionConfirmed()),
+      ).called(1);
+    });
+
+    testWidgets('success ends the session through AuthBloc', (tester) async {
+      await pumpWithDeletion(tester, const [
+        AccountDeletionInProgress(),
+        AccountDeletionSucceeded(),
+      ]);
+
+      // Not AuthLogoutRequested: the account is gone, and there is no server
+      // session left to end.
+      verify(() => authBloc.add(const AuthAccountDeleted())).called(1);
+      verifyNever(() => authBloc.add(const AuthLogoutRequested()));
+    });
+
+    testWidgets('an expired session signs her out, as everywhere else', (
+      tester,
+    ) async {
+      await pumpWithDeletion(tester, const [
+        AccountDeletionFailed(UnauthorizedFailure('not_signed_in')),
+      ]);
+
+      verify(() => authBloc.add(const AuthLogoutRequested())).called(1);
+      verifyNever(() => authBloc.add(const AuthAccountDeleted()));
+    });
+
+    testWidgets('a refusal is reported and the account left as it was', (
+      tester,
+    ) async {
+      await pumpWithDeletion(tester, const [
+        AccountDeletionFailed(
+          ValidationFailure(
+            'account_delete_failed',
+            code: 'account_delete_failed',
+          ),
+        ),
+      ]);
+
+      // The honest sentence: the photo is removed before the account, so by
+      // this failure it is already gone.
+      expect(
+        find.text(
+          'تعذّر حذف الحساب، وقد حُذفت صورتكِ الشخصية. أعيدي المحاولة لاحقاً.',
+        ),
+        findsOneWidget,
+      );
+      verifyNever(() => authBloc.add(any()));
+    });
+
+    testWidgets('nothing on the screen can be touched while it runs', (
+      tester,
+    ) async {
+      whenListen(
+        deletionBloc,
+        const Stream<AccountDeletionState>.empty(),
+        initialState: const AccountDeletionInProgress(),
+      );
+      await pump(tester, const AuthAuthenticated(user), settle: false);
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ProfileMenuTile), findsNothing);
+    });
+  });
+
   group('direction and locale', () {
     testWidgets('renders without overflow in ar and en', (tester) async {
       for (final locale in const [Locale('ar'), Locale('en')]) {
         await pump(tester, const AuthAuthenticated(user), locale: locale);
-        expect(find.byType(ProfileMenuTile), findsNWidgets(8));
+        expect(find.byType(ProfileMenuTile), findsNWidgets(9));
         expect(tester.takeException(), isNull);
       }
     });
