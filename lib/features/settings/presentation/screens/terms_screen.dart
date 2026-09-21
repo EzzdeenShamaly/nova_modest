@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nova_modest/core/theme/app_colors.dart';
 import 'package:nova_modest/core/theme/app_dimensions.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
 
@@ -9,23 +8,24 @@ import 'package:nova_modest/l10n/app_localizations.dart';
 /// file, none of which is a terms, policy or privacy screen. The second such
 /// screen after help.
 ///
-/// The body is a **stand-in on purpose**. Real terms are a business decision,
-/// not a technical one, and drafting plausible clauses would put invented legal
-/// text in front of a customer as though it were the shop's — the same call made
-/// for the FAQ's shipping and returns answers
-/// (`10-evidence-and-dependency-guard.md`).
+/// The text arrived on 2026-09-21, reviewed and approved clause by clause by the
+/// owner. Until then this screen said the terms were not written rather than
+/// approximating them, and that was the right call: **nothing here is drafted
+/// legal wording**. Every operational clause states what the app and the
+/// database actually do — the cart's limits, the fees, what "confirmed" means,
+/// who can read an order — and the commercial ones (the seven-day return window,
+/// delivery inside the Kingdom, the governing law, the age) are the owner's
+/// decisions, given in his words.
 ///
-/// Laid out as flowing prose rather than inside a card: that is what this screen
-/// becomes once the real text arrives — paragraphs to read, not rows to scan —
-/// and it avoids a fourth copy of the card-of-rows already recorded for
-/// promotion.
+/// One key per locale rather than a key per section: it is one document, and a
+/// translator handed thirteen fragments cannot see how they read together.
+///
+/// Laid out as flowing prose rather than inside a card — paragraphs to read, not
+/// rows to scan.
 ///
 /// Static: no bloc, no repository, no request.
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
-
-  /// The illustration stands in for artwork that does not exist yet.
-  static const double _iconSize = 56;
 
   @override
   Widget build(BuildContext context) {
@@ -37,29 +37,16 @@ class TermsScreen extends StatelessWidget {
       body: ListView(
         padding: EdgeInsetsDirectional.all(AppSpacing.l),
         children: [
-          SizedBox(height: AppSpacing.xxl),
-          Icon(
-            Icons.description_outlined,
-            size: _iconSize,
-            color: AppColors.subtle,
-            // Decorative: the text below carries the meaning.
-            semanticLabel: '',
-          ),
-          SizedBox(height: AppSpacing.l),
           Text(
-            l10n.termsPlaceholder,
-            textAlign: TextAlign.center,
+            l10n.termsBody,
+            // start, not center: this is a document. Centred prose is unreadable
+            // past a couple of lines, and it mirrors with the locale.
+            textAlign: TextAlign.start,
             style: textTheme.bodyLarge?.copyWith(height: _lineHeight),
           ),
-          SizedBox(height: AppSpacing.s),
-          Text(
-            l10n.termsPlaceholderNote,
-            textAlign: TextAlign.center,
-            style: textTheme.bodyMedium?.copyWith(
-              color: AppColors.muted,
-              height: _lineHeight,
-            ),
-          ),
+          // Clear of the gesture bar, so the last clause is not the one line
+          // nobody can read comfortably.
+          SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );

@@ -10,10 +10,14 @@ import 'package:nova_modest/features/auth/presentation/bloc/sign_in_bloc.dart';
 import 'package:nova_modest/l10n/app_localizations.dart';
 import 'package:nova_modest/router/routes.dart';
 
-/// How to sign in: Google, or a one-time code emailed to you.
+/// How to sign in: a one-time code emailed to you.
 ///
 /// There is no password field and no "forgot password" — the product has no
 /// passwords, so neither exists anywhere in the flow.
+///
+/// The frame also draws a Google button. It was built, and removed on
+/// 2026-09-21 because it could not work in any build this repo produces; see
+/// the note at its former place in the column.
 ///
 /// Built from Figma frame `1:2247`.
 class AuthMethodScreen extends StatelessWidget {
@@ -79,9 +83,11 @@ class _AuthMethodViewState extends State<_AuthMethodView> {
             if (state is SignInFailureState) {
               return FailureView(
                 failure: state.failure,
-                onRetry: () => context.read<SignInBloc>().add(
-                  const SignInGoogleRequested(),
-                ),
+                // Back to the form. Re-dispatching the request that just
+                // failed would repeat it with the same inputs; what the shopper
+                // needs is her address field again.
+                onRetry: () =>
+                    context.read<SignInBloc>().add(const SignInDismissed()),
               );
             }
 
@@ -108,17 +114,17 @@ class _AuthMethodViewState extends State<_AuthMethodView> {
                     ),
                   ),
                   SizedBox(height: AppSpacing.xxl),
-                  _GoogleButton(
-                    label: l10n.authContinueWithGoogle,
-                    onPressed: busy
-                        ? null
-                        : () => context.read<SignInBloc>().add(
-                            const SignInGoogleRequested(),
-                          ),
-                  ),
-                  SizedBox(height: AppSpacing.l),
-                  _OrDivider(label: l10n.authOr),
-                  SizedBox(height: AppSpacing.l),
+                  // **The Google button was here, and was removed on
+                  // 2026-09-21.** It could not work in any build this repo
+                  // produces: `GOOGLE_WEB_CLIENT_ID` is defined in no config
+                  // file, so the call returned a server failure before the
+                  // plugin was reached, and the native setup and the provider
+                  // were missing behind that. A control that looks live and
+                  // ends in a technical error is worse than one that is not
+                  // there — the same call made for the dead heart and share
+                  // icons. The Dart path behind it is intact and reachable
+                  // again the day the three layers in `progress.md`
+                  // (blocker 6) are settled; only this control is gone.
                   Form(
                     key: _formKey,
                     child: TextFormField(
@@ -171,75 +177,5 @@ class _AuthMethodViewState extends State<_AuthMethodView> {
       return l10n.emailInvalid;
     }
     return null;
-  }
-}
-
-/// The Google button: bordered, with the official brand mark.
-class _GoogleButton extends StatelessWidget {
-  const _GoogleButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  /// The exported mark is square and sits beside the label at text height.
-  static const double _markSize = 20;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        backgroundColor: AppColors.background,
-        side: BorderSide(
-          // The design's #635E54 — the same derivation the splash tagline uses.
-          color: AppColors.muted,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/auth/google.png',
-            width: _markSize,
-            height: _markSize,
-            // The label names the provider, so the mark is decorative.
-            excludeFromSemantics: true,
-          ),
-          SizedBox(width: AppSpacing.xs),
-          // Flexible, not a bare Text: the label is translated, and a longer
-          // rendering than the Arabic one must shrink rather than overflow the
-          // button.
-          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
-    );
-  }
-}
-
-/// A rule either side of a single word.
-class _OrDivider extends StatelessWidget {
-  const _OrDivider({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final line = Expanded(child: Divider(color: AppColors.muted));
-
-    return Row(
-      children: [
-        line,
-        Padding(
-          padding: EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.m),
-          child: Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.mutedStrong),
-          ),
-        ),
-        line,
-      ],
-    );
   }
 }

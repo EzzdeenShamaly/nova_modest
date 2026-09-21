@@ -428,6 +428,9 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 - _(none)_
 
+
+## Not Started
+
 - **The country field is free text while the terms say Saudi Arabia only**
   (2026-09-21). `Address.country` is a plain `TextFormField`, so a shopper can
   type anything and the order is accepted; the terms about to ship restrict
@@ -436,8 +439,6 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   outside the allowed set — the second is the real boundary, the first is only
   the courtesy (`08-flutter-baas-security-guard` §1). Until then the app and its
   own terms disagree.
-
-## Not Started
 
 - **Artwork** — onboarding, hero banner and product cards all draw a palette
   stand-in. Blocked on real photography; the Figma sources are 286x512, below 1x

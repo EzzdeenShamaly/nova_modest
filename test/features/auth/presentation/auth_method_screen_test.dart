@@ -18,6 +18,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const SignInGoogleRequested());
+    registerFallbackValue(const SignInDismissed());
     return loadAppFonts();
   });
 
@@ -53,14 +54,11 @@ void main() {
     }
   }
 
-  testWidgets('offers exactly Google and email — no password anywhere', (
-    tester,
-  ) async {
+  testWidgets('offers the emailed code and nothing else', (tester) async {
     withState(const SignInIdle());
 
     await pump(tester);
 
-    expect(find.text('المتابعة عبر Google'), findsOneWidget);
     expect(find.text('متابعة بالبريد الإلكتروني'), findsOneWidget);
     // One field only: the address. A password field or a reset link reappearing
     // here would contradict the whole flow.
@@ -69,14 +67,32 @@ void main() {
     expect(find.text('نسيت كلمة المرور؟'), findsNothing);
   });
 
-  testWidgets('the Google button dispatches the Google flow', (tester) async {
+  testWidgets('the Google button is gone, not merely disabled', (tester) async {
     withState(const SignInIdle());
 
     await pump(tester);
-    await tester.tap(find.text('المتابعة عبر Google'));
+
+    // It could not work in any build this repo produces — no
+    // `GOOGLE_WEB_CLIENT_ID`, no native setup, no provider — and a control that
+    // looks live and ends in a technical error is worse than an absent one.
+    // Pinned as an absence so it cannot drift back in unnoticed, exactly as the
+    // support screen pins the missing phone row.
+    expect(find.textContaining('Google'), findsNothing);
+    expect(find.byType(OutlinedButton), findsNothing);
+    expect(find.text('أو'), findsNothing);
+  });
+
+  testWidgets('retrying after a failure returns the form, not a repeat', (
+    tester,
+  ) async {
+    withState(const SignInFailureState(NetworkFailure()));
+
+    await pump(tester);
+    await tester.tap(find.text('إعادة المحاولة'));
     await tester.pump();
 
-    verify(() => bloc.add(const SignInGoogleRequested())).called(1);
+    verify(() => bloc.add(const SignInDismissed())).called(1);
+    verifyNever(() => bloc.add(const SignInGoogleRequested()));
   });
 
   testWidgets('an empty address is rejected before anything is dispatched', (
@@ -117,8 +133,11 @@ void main() {
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNull,
     );
+    // The guest link too: it was the Google button that used to be asserted
+    // here, and "every action" has to keep meaning every action after a
+    // control is removed.
     expect(
-      tester.widget<OutlinedButton>(find.byType(OutlinedButton)).onPressed,
+      tester.widget<TextButton>(find.byType(TextButton)).onPressed,
       isNull,
     );
   });
@@ -147,7 +166,7 @@ void main() {
 
       await pump(tester, locale: const Locale('en'));
 
-      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Continue with email'), findsOneWidget);
       expect(find.text('Continue as a guest'), findsOneWidget);
     });
   });

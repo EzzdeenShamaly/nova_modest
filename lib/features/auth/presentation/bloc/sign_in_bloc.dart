@@ -28,6 +28,9 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     on<SignInEmailSubmitted>(_onEmailSubmitted, transformer: droppable());
     on<SignInCodeSubmitted>(_onCodeSubmitted, transformer: droppable());
     on<SignInCodeResendRequested>(_onResendRequested, transformer: droppable());
+    // No transformer: it starts nothing and awaits nothing, so there is no
+    // in-flight request for a second one to collide with.
+    on<SignInDismissed>((_, emit) => emit(const SignInIdle()));
   }
 
   final AuthRepository _repository;
