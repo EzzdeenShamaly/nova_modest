@@ -250,7 +250,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get orderErrorTechnical =>
-      'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.';
+      'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصلي معنا.';
 
   @override
   String get cartFull => 'سلتك ممتلئة. احذفي منتجاً لتضيفي غيره.';

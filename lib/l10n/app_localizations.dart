@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// The six refusal codes the app validates against before sending, plus any code this build does not know. Reaching one means a defect on our side, so the wording blames nothing the shopper did.
   ///
   /// In ar, this message translates to:
-  /// **'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصل معنا.'**
+  /// **'تعذّر إتمام الطلب بسبب خلل تقني لدينا. يرجى المحاولة مرة أخرى، وإذا تكرر تواصلي معنا.'**
   String get orderErrorTechnical;
 
   /// Shown when the cart already holds 20 lines and a 21st is asked for. Says the move, not the rule: a shopper cannot act on "the maximum is 20", but can act on "remove one to add another".

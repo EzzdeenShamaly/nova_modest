@@ -150,6 +150,27 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Done
 
+- **The voice test guarded twenty words and looked as though it guarded the
+  file** (found and closed 2026-09-21). `orderErrorTechnical` said «وإذا تكرر
+  **تواصل** معنا» — masculine — and passed, because «تواصل» was not on the
+  hand-kept list. The test now also **derives** its watch-list from the app's
+  own copy: every feminine imperative `app_ar.arb` speaks (a word ending in «ي»
+  that opens a clause and takes a complement, never one carrying «ال») becomes a
+  guarded masculine form, so a new «جرّبي» guards «جرّب» without anyone editing
+  the test. Proven on the unfixed file first — it failed naming exactly that
+  string, with no false alarms — then the word was made feminine.
+
+  The ambiguous uses («حدث» as past tense, «تسوق» as a noun) moved from a
+  **global** exclusion to an allow-list **keyed by string**: each covers one
+  sentence someone read. Checked both ways: removing an entry fails, and
+  «تسوّق الآن» as a command fails even though «تسوق» is allowed in
+  `onboardingBody3` — which the old global exclusion would have let through.
+
+  **The limit, stated:** telling an imperative from the same letters as a noun
+  or a past tense needs the sentence, which a pattern cannot parse; and a
+  masculine imperative whose feminine form the app never uses is invisible to
+  the derived check. The original list stays for that residue.
+
 - **SETTLED 2026-09-21 — the disc is no longer blank while a picture loads.**
   Found on the emulator, not by a test: between `avatarUrl` becoming non-null
   and the first decoded frame, `AvatarCircle` showed neither the letter nor the
@@ -451,19 +472,13 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Not Started
 
-- **`orderErrorTechnical` speaks in the masculine** (found 2026-09-21): «وإذا
-  تكرر **تواصل** معنا» — the imperative the shopper voice forbids.
-  `test/l10n/arabic_voice_test.dart` does not list «تواصل», so it passed. Out of
-  scope for the deletion work and left untouched; it is also why deletion's
-  unknown codes do not fall back to it — that sentence tells her an *order*
-  failed.
-
-- **There is no central handler for an expired session in the presentation
-  layer** (observed 2026-09-21). The automatic sign-out happens in
-  `SupabaseAuthRepository.currentUser()` at the session check; a screen that
-  receives `UnauthorizedFailure` from anything else shows it or handles it
-  itself. Account deletion handles it explicitly (`AuthLogoutRequested`). Worth
-  a single listener if a third place needs the same.
+- **DEBT — no central handler for an expired session in the presentation
+  layer** (observed 2026-09-21; recorded, not built, by the owner's decision).
+  The automatic sign-out lives in `SupabaseAuthRepository.currentUser()` at the
+  session check, and account deletion does it explicitly
+  (`AuthLogoutRequested`). **Two places are not a pattern yet. The third place
+  that needs it is the trigger to build one listener** — on `AuthBloc` or at the
+  app root — and move all three onto it, rather than a third hand-written copy.
 
 - **The country field is free text while the terms say Saudi Arabia only**
   (2026-09-21). `Address.country` is a plain `TextFormField`, so a shopper can
