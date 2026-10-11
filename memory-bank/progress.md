@@ -46,27 +46,46 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   of them blocks a Play or App Store upload. They carry the same placeholder
   and should be settled if a desktop build is ever shipped.
 
-- **BLOCKER 7, found 2026-10-11 — the app never starts when the backend host
-  cannot be resolved.** Measured, not inferred: with DNS failing for the
-  project host, `logcat` showed `supabase.auth` retrying
-  `/auth/v1/token?grant_type=refresh_token` every ~20 seconds for four minutes
-  and **not one GoRouter line** — unlike the run of 2026-09-21, where the
-  router logged within 20 seconds. So `runApp` was never reached: `main()`
-  does `await initializeSupabase()` before it (`lib/main.dart`), and session
-  recovery inside `Supabase.initialize` retries indefinitely. What the screen
-  shows meanwhile is the **native launch drawable**, which happens to look like
-  the brand splash — so the app appears to hang on its own splash while in fact
-  it never started.
+- **BLOCKER 7 — measured properly 2026-10-11: the app hangs offline because
+  `currentUser()` leaks its own error, not because of the SDK.**
 
-  A shopper in airplane mode, on hotel wifi behind a captive portal, or on a
-  dead connection gets an app that never opens and says nothing. Browsing is
-  public and the catalogue is remote, so there is little to show offline — but
-  "nothing, forever" is not one of the options.
+  **The first account of this, written the same day, was wrong** and is
+  corrected here. It said `runApp` was never reached and the screen was the
+  native launch drawable. That came from reading the *tail* of a log in which
+  frequent auth warnings had pushed the router lines out. Reading the **head**
+  shows `***** Supabase init completed *****` seven seconds in, and the router
+  immediately after: the app starts normally.
 
-  **Not fixed: it needs a decision and a plan.** The obvious shape is a bounded
-  wait around `initializeSupabase()` and starting the app anyway, but whether
-  the client is usable after a timed-out `initialize` has to be measured before
-  anything is written, and the offline screen is a product decision.
+  What actually happens, with airplane mode on:
+  `AuthBloc` → `currentUser()` → `_readCurrentUser()` → the `profiles` read
+  throws `SocketException` → **`Uncaught zone error`** → no state is emitted →
+  the router holds on the splash for ever, because it waits on `AuthInitial`
+  and `AuthCheckInProgress` (`app_router.dart`).
+
+  The leak is one word. `currentUser()` does `return _readCurrentUser();`
+  **inside** its own `try`, and in an `async` function a returned future is
+  awaited *outside* the try — so the `catch` never sees it. Five sites do this:
+  lines 96, 127, 149, 203 and 267 of `supabase_auth_repository.dart`
+  (`signInWithGoogle`, `verifyEmailCode`, `updateProfile`, `uploadAvatar`,
+  `currentUser`). Every one of them turns a network failure into an uncaught
+  error instead of a `Failure`.
+
+  **Measured with `await` added at all five** (experimental build, reverted,
+  not committed): no uncaught errors, and the app opens — `redirecting to
+  /home` **59 seconds** after the router came up. The minute is the SDK's own
+  retry chain: the `profiles` call waits on a token refresh that
+  `AuthRetryableFetchException` retries every 13–16 s, with postgrest's
+  `_executeWithRetry` on top. The retries continue in the background
+  afterwards, so a session should recover by itself when the network returns —
+  to be confirmed once the project is reachable.
+
+  So the fix has three parts, and only the first is a bug:
+  1. `await` at the five sites.
+  2. A bounded wait on the **session check** — not on `initializeSupabase()`,
+     which never blocks on the network (measured: it completes in ~7 s doing
+     only local work; `recoverSession()` is not even awaited by the SDK).
+  3. What she sees meanwhile, and whether a local session should be trusted
+     when the profile read fails — a product decision, see `activeContext.md`.
 
 - **BLOCKER 5 — HALF SETTLED 2026-09-21: in-app deletion is built; the web
   URL is not.** The dashboard shipped `delete-account` as an **Edge Function**
