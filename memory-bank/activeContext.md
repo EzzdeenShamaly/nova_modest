@@ -1,12 +1,30 @@
 # Active Context
 
-**Last Updated:** 2026-09-21 (the avatar proven on a device, and the blank-disc
-defect it exposed fixed)
+**Last Updated:** 2026-10-11 (the backend host stopped resolving, and the app's
+behaviour when it does was measured)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
 
-## Where things stand — 2026-09-20
+## Where things stand — 2026-10-11
+
+**The project's Supabase host no longer resolves** (NXDOMAIN, measured from two
+resolvers and `curl`, while `supabase.co` itself resolves). Most likely a
+free-tier pause after three idle weeks; only the dashboard can confirm. Until
+the owner restores it, **no live run of anything is possible** — including the
+account-deletion run that was the next step.
+
+Measured while finding that out, and worth more than the outage: **the app does
+not start at all when the host cannot be resolved.** `main()` awaits
+`initializeSupabase()` before `runApp`, session recovery retries forever, and
+the screen keeps showing the native launch drawable — which looks like the brand
+splash, so it reads as a hung app rather than one that never started. Recorded
+as blocker 7, not fixed: the fix needs a measurement and a product decision.
+
+Everything in the repository is green: 856 tests, `flutter analyze` clean, and
+the working tree matches `origin/master`.
+
+## Where things stood — 2026-09-20
 
 The Android run is closed (`ORD-260920-0001` from the emulator), the six
 screen-by-screen UI findings are fixed, and three of the four release blockers

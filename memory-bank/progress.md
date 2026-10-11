@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-09-21
+**Last Updated:** 2026-10-11
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -45,6 +45,28 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   copyright). They were outside what was asked, this is a mobile app, and none
   of them blocks a Play or App Store upload. They carry the same placeholder
   and should be settled if a desktop build is ever shipped.
+
+- **BLOCKER 7, found 2026-10-11 — the app never starts when the backend host
+  cannot be resolved.** Measured, not inferred: with DNS failing for the
+  project host, `logcat` showed `supabase.auth` retrying
+  `/auth/v1/token?grant_type=refresh_token` every ~20 seconds for four minutes
+  and **not one GoRouter line** — unlike the run of 2026-09-21, where the
+  router logged within 20 seconds. So `runApp` was never reached: `main()`
+  does `await initializeSupabase()` before it (`lib/main.dart`), and session
+  recovery inside `Supabase.initialize` retries indefinitely. What the screen
+  shows meanwhile is the **native launch drawable**, which happens to look like
+  the brand splash — so the app appears to hang on its own splash while in fact
+  it never started.
+
+  A shopper in airplane mode, on hotel wifi behind a captive portal, or on a
+  dead connection gets an app that never opens and says nothing. Browsing is
+  public and the catalogue is remote, so there is little to show offline — but
+  "nothing, forever" is not one of the options.
+
+  **Not fixed: it needs a decision and a plan.** The obvious shape is a bounded
+  wait around `initializeSupabase()` and starting the app anyway, but whether
+  the client is usable after a timed-out `initialize` has to be measured before
+  anything is written, and the offline screen is a product decision.
 
 - **BLOCKER 5 — HALF SETTLED 2026-09-21: in-app deletion is built; the web
   URL is not.** The dashboard shipped `delete-account` as an **Edge Function**
@@ -997,6 +1019,18 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   `refresh_token`, `display_name`, `avatar_url`) is assumed, not confirmed
   against a real backend. `API_BASE_URL` is still the placeholder. Confirm the
   contract before treating the auth feature as integration-ready.
+
+
+- **2026-10-11 — the Supabase project host does not resolve.**
+  `ydreyrxzilrmynapsgpi.supabase.co` answers NXDOMAIN from 8.8.8.8 and cannot
+  be resolved by `curl`, while `supabase.co` itself resolves (76.76.21.21), so
+  it is that project's subdomain and not local DNS. The project had been idle
+  since 2026-09-21; a free-tier project is **paused after inactivity**, and a
+  paused project's API subdomain stops resolving. Deletion or a changed ref
+  would look the same from here — **only the Supabase dashboard can say which**.
+  Until it is restored, the storefront and the dashboard are both offline, and
+  no live run is possible. Nothing in this repository is wrong, and nothing in
+  it can fix this.
 
 ## Toolchain notes
 
