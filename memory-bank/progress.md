@@ -1040,16 +1040,35 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   contract before treating the auth feature as integration-ready.
 
 
-- **2026-10-11 — the Supabase project host does not resolve.**
-  `ydreyrxzilrmynapsgpi.supabase.co` answers NXDOMAIN from 8.8.8.8 and cannot
-  be resolved by `curl`, while `supabase.co` itself resolves (76.76.21.21), so
-  it is that project's subdomain and not local DNS. The project had been idle
-  since 2026-09-21; a free-tier project is **paused after inactivity**, and a
-  paused project's API subdomain stops resolving. Deletion or a changed ref
-  would look the same from here — **only the Supabase dashboard can say which**.
-  Until it is restored, the storefront and the dashboard are both offline, and
-  no live run is possible. Nothing in this repository is wrong, and nothing in
-  it can fix this.
+- **2026-10-11 — a DNS scare, and the correction.** For one afternoon
+  `ydreyrxzilrmynapsgpi.supabase.co` would not resolve: 8.8.8.8 answered
+  NXDOMAIN and `curl` could not resolve it, while `supabase.co` itself
+  resolved. **That was written up as a likely free-tier pause, and it was
+  wrong on both counts.**
+
+  The owner checked the dashboard — the project reads the database, `main` is
+  PRODUCTION, and there is no restore button — and pointed out the weakness in
+  the measurement: 1.1.1.1 had not answered NXDOMAIN, it had **timed out**, so
+  exactly one resolver said "does not exist" and the conclusion was stronger
+  than the evidence.
+
+  Re-measured the next morning, each resolver separately:
+  - **8.8.8.8** — resolves at once: `172.64.149.246`, `104.18.38.10`.
+  - **1.1.1.1** (15 s, 2 retries) — one `DNS request timed out`, then the same
+    two addresses.
+  - **system resolver** — one `DNS request timed out`, then the same addresses.
+  - **A real HTTPS request** — `401` from `104.18.38.10`, which is the correct
+    answer for `/rest/v1/` with no `apikey` header. The project is alive.
+
+  And the URL the app uses was read rather than assumed:
+  `'https://ydreyrxzilrmynapsgpi.supabase.co'`, 40 characters, no stray
+  whitespace, and `SupabaseEnv` rewrites only `127.0.0.1`/`localhost`.
+
+  **What this leaves:** two of three resolvers needed a retry even on the good
+  morning, so **DNS on this machine is intermittent** — which explains the
+  emulator's `errno = 7` without any theory about the project. A lesson worth
+  more than the incident: one resolver's NXDOMAIN is one resolver's answer, and
+  a second resolver timing out is not corroboration.
 
 ## Toolchain notes
 
