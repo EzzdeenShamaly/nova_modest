@@ -1,6 +1,6 @@
 # Progress
 
-**Last Updated:** 2026-10-11
+**Last Updated:** 2026-10-12
 
 Tracks what's Done, In Progress, and Blocked, per feature.
 
@@ -78,6 +78,19 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   `_executeWithRetry` on top. The retries continue in the background
   afterwards, so a session should recover by itself when the network returns —
   to be confirmed once the project is reachable.
+
+  **Scanned for a sixth site 2026-10-12** (`lib/` in full, every `return …;`
+  with no `await` inside a `try`): nine candidates, six of them harmless —
+  `_requireData` in `dio_api_client.dart` is **synchronous** (`T _requireData<T>(
+  Response<T>)`) and `withSignedAvatar`'s `return user.copyWith(…)` carries no
+  future. **Five, exactly, and all in this one file.**
+
+  **The weight of this changed on 2026-10-12.** Re-measuring DNS after the
+  scare, two of three resolvers needed a retry on an ordinary machine with a
+  working connection. The condition that triggers the hang is therefore not
+  airplane mode or an exotic edge: **an ordinary wobbly network reaches it**, so
+  this is a release blocker rather than a debt (owner's reading, and the
+  measurement supports it).
 
   So the fix has three parts, and only the first is a bug:
   1. `await` at the five sites.
@@ -190,6 +203,15 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   phone, address — why, that it is stored in Supabase, and who can read it.
 
 ## Done
+
+- **The keystore session survived 21 days, unplanned** (2026-09-21 → 2026-10-12).
+  `SecureSessionStorage` was built and unit-tested on 2026-09-20 and proven on a
+  device the next day; nobody set out to test how long it lasts. Three weeks
+  later — across an app reinstall and an emulator shut down in between — the
+  same shopper was still signed in, with her photograph drawn from a freshly
+  signed link. Refresh-token rotation, keystore persistence and the migration
+  all held with nothing touching them. An accidental test, and the kind that
+  cannot be written.
 
 - **The voice test guarded twenty words and looked as though it guarded the
   file** (found and closed 2026-09-21). `orderErrorTechnical` said «وإذا تكرر
