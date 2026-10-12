@@ -199,6 +199,45 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Done
 
+- **A thin identity can no longer overwrite a real profile** (2026-10-12).
+  Raised as a debt and overruled by the owner the same day: *not* a debt but a
+  data-loss defect, because the flaky DNS proved a thin identity arrives without
+  anyone switching off a network, and its damage is the only part that survives
+  closing the app.
+
+  The form was pre-filled from the session-only user — derived name, empty phone
+  — and `String? phone` cannot carry "leave it alone" as well as "clear it", so
+  editing the name and saving wrote `phone: null` over a real number. Clearing
+  the number *is* a real edit (`personal_info_screen_test.dart:159`), so the
+  sentinel route would have cost the domain contract, the repository, the fake
+  and the bloc, and broken that edit.
+
+  What shipped is the smallest thing that prevents the write: `User.fromSession`
+  — set only by `_userFromSession`, excluded from JSON in both directions — and
+  one branch in `PersonalInfoScreen` that shows an explanation instead of the
+  form. No field to type in, no save bar, no avatar control. Measured: the only
+  write that could lose data is `profiles.update({display_name, phone})`
+  (`supabase_auth_repository.dart:151`); the avatar write touches `avatar_url`
+  alone and addresses never read from `User`.
+
+  The test failed first on the real defect, naming it:
+  `_MockProfileEditBloc.add(ProfileEditSubmitted(سارة أحمد, null))`. Three
+  mutations, three caught — the guard removed, the guard inverted so it locks a
+  *real* profile, and the flag not set by the fallback (which only the
+  session-check test can see, since the screen tests build the thin user
+  themselves).
+
+  **One string depends on an unbuilt decision:** `personalInfoUnavailable` tells
+  her to reopen the app, which is literally what is required today because
+  nothing re-reads the profile until relaunch. It needs rewording the day the
+  resume hook lands.
+
+- **Checkout's contact prefill reads the same thin identity, and that is fine**
+  (measured 2026-10-12). `checkout_bloc.dart:71` fills the contact phone from
+  `user?.phone ?? ''`, so while thin it opens empty — but the field is visible,
+  validated and hers to type, and `place_order` refuses an empty contact. Loss
+  needs a silent write over existing data, and there is none here.
+
 - **The keystore session survived 21 days, unplanned** (2026-09-21 → 2026-10-12).
   `SecureSessionStorage` was built and unit-tested on 2026-09-20 and proven on a
   device the next day; nobody set out to test how long it lasts. Three weeks
@@ -540,14 +579,6 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   `AuthChangeEvent.tokenRefreshed`, which fires exactly when the network returns
   and the token is good — at the cost of `AuthBloc` gaining a subscription it
   does not have today. **Not built: the owner decides.**
-
-- **The personal-information form can overwrite a real profile with a thin one**
-  (2026-10-12). While degraded, the form opens pre-filled with the derived name
-  and an empty phone. The save button stays disabled until something differs, so
-  it takes a deliberate edit — but editing the name and saving then writes
-  `phone: null` and wipes a real number. Guarding it means the entity carrying
-  "this came from the session alone", which is a change to `User` and to the
-  screen. **Not built: the owner decides.**
 
 - **DEBT — no central handler for an expired session in the presentation
   layer** (observed 2026-09-21; recorded, not built, by the owner's decision).

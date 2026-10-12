@@ -842,6 +842,12 @@ abstract class AppLocalizations {
   /// **'لا يمكن تغيير البريد الإلكتروني.'**
   String get personalInfoEmailLocked;
 
+  /// Shown in place of the whole personal-information form when the profile row could not be read and the user was built from the session token alone. Says why editing is off and what to do: a save from that state would write an empty phone over a real number. Reopening the app is literal today - nothing re-reads the profile until relaunch.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذّر تحميل بياناتك المحفوظة، فالتعديل موقوف الآن حتى لا تُمسح معلوماتك. تأكّدي من اتصالك ثم أعيدي تشغيل التطبيق.'**
+  String get personalInfoUnavailable;
+
   /// Label of the editable phone field. Optional - an account created with Google may have no number.
   ///
   /// In ar, this message translates to:

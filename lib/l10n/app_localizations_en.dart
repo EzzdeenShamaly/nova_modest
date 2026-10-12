@@ -426,6 +426,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalInfoEmailLocked => 'Your email address cannot be changed.';
 
   @override
+  String get personalInfoUnavailable =>
+      'We couldn\'t load your saved details, so editing is paused to avoid erasing them. Check your connection, then reopen the app.';
+
+  @override
   String get personalInfoPhone => 'Phone number';
 
   @override

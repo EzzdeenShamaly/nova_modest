@@ -23,7 +23,14 @@ The Supabase project is alive, and the emulator still holds the demo shopper's
 session — 21 days old, photograph and all. **The account-deletion live run is
 next**, waiting only on the owner's decision about that account's email.
 
-866 tests, `flutter analyze` clean.
+One of blocker 7's two leftovers was then promoted out of the debt list by the
+owner and fixed the same day: a form pre-filled from a thin identity could write
+its blanks over a real phone number. `User.fromSession` now marks the identity
+the session alone produced, and `PersonalInfoScreen` explains instead of
+offering a form. The other leftover — nothing re-reads the profile until
+relaunch — is next, as an `AppLifecycleState.resumed` hook.
+
+869 tests, `flutter analyze` clean.
 
 ## Where things stood — 2026-09-20
 

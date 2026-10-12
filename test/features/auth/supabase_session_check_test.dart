@@ -88,6 +88,9 @@ void main() {
       final user = (result as Ok<User?>).value!;
       expect(user.displayName, 'سارة');
       expect(user.phone, '+966500000000');
+      // A row that was read is never "from the session": the flag must not be
+      // set on the healthy path, or every form in the app locks itself.
+      expect(user.fromSession, isFalse);
     });
 
     test('no session at all is "signed out", not a failure', () async {
@@ -129,6 +132,9 @@ void main() {
       expect(user.displayName, 'sara');
       expect(user.phone, isNull);
       expect(user.avatarUrl, isNull);
+      // And she is marked as such, so a form pre-filled from her cannot write
+      // these blanks back over a real row.
+      expect(user.fromSession, isTrue);
     });
 
     test('a read that never answers is bounded, not endless', () async {

@@ -18,7 +18,19 @@ mixin _$User {
  String get id; String get email;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'avatar_url') String? get avatarUrl;/// Nullable on purpose: the sign-in flow is Google or an email code, so a
 /// shopper can have an account and no phone number at all. The account
 /// screen omits the line rather than showing an empty one.
- String? get phone;
+ String? get phone;/// True when this user was built from the **session token alone**, because
+/// the `profiles` row could not be read — see `_userFromSession` in
+/// `SupabaseAuthRepository`. Then [id] and [email] are real, [displayName]
+/// is derived from the address, and [phone] and [avatarUrl] are *unknown*
+/// rather than absent.
+///
+/// That distinction is the whole point of the flag. Without it a form
+/// pre-filled from this user cannot tell "she has no number" from "we never
+/// read it", and saving the form writes `phone: null` over a real number.
+///
+/// Never serialised in either direction: it describes how this object was
+/// obtained, not a column. A row that was read is never from the session.
+@JsonKey(includeFromJson: false, includeToJson: false) bool get fromSession;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +43,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.fromSession, fromSession) || other.fromSession == fromSession));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,avatarUrl,phone);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,avatarUrl,phone,fromSession);
 
 @override
 String toString() {
-  return 'User(id: $id, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone)';
+  return 'User(id: $id, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, fromSession: $fromSession)';
 }
 
 
@@ -51,7 +63,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'avatar_url') String? avatarUrl, String? phone
+ String id, String email,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'avatar_url') String? avatarUrl, String? phone,@JsonKey(includeFromJson: false, includeToJson: false) bool fromSession
 });
 
 
@@ -68,14 +80,15 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? phone = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? phone = freezed,Object? fromSession = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,fromSession: null == fromSession ? _self.fromSession : fromSession // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -160,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone, @JsonKey(includeFromJson: false, includeToJson: false)  bool fromSession)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone,_that.fromSession);case _:
   return orElse();
 
 }
@@ -181,10 +194,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.pho
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone, @JsonKey(includeFromJson: false, includeToJson: false)  bool fromSession)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone,_that.fromSession);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +214,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.pho
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'avatar_url')  String? avatarUrl,  String? phone, @JsonKey(includeFromJson: false, includeToJson: false)  bool fromSession)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.phone,_that.fromSession);case _:
   return null;
 
 }
@@ -216,7 +229,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.avatarUrl,_that.pho
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.id, required this.email, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'avatar_url') this.avatarUrl, this.phone});
+  const _User({required this.id, required this.email, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'avatar_url') this.avatarUrl, this.phone, @JsonKey(includeFromJson: false, includeToJson: false) this.fromSession = false});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -227,6 +240,19 @@ class _User implements User {
 /// shopper can have an account and no phone number at all. The account
 /// screen omits the line rather than showing an empty one.
 @override final  String? phone;
+/// True when this user was built from the **session token alone**, because
+/// the `profiles` row could not be read — see `_userFromSession` in
+/// `SupabaseAuthRepository`. Then [id] and [email] are real, [displayName]
+/// is derived from the address, and [phone] and [avatarUrl] are *unknown*
+/// rather than absent.
+///
+/// That distinction is the whole point of the flag. Without it a form
+/// pre-filled from this user cannot tell "she has no number" from "we never
+/// read it", and saving the form writes `phone: null` over a real number.
+///
+/// Never serialised in either direction: it describes how this object was
+/// obtained, not a column. A row that was read is never from the session.
+@override@JsonKey(includeFromJson: false, includeToJson: false) final  bool fromSession;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +267,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.fromSession, fromSession) || other.fromSession == fromSession));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,avatarUrl,phone);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,avatarUrl,phone,fromSession);
 
 @override
 String toString() {
-  return 'User(id: $id, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone)';
+  return 'User(id: $id, email: $email, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, fromSession: $fromSession)';
 }
 
 
@@ -261,7 +287,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'avatar_url') String? avatarUrl, String? phone
+ String id, String email,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'avatar_url') String? avatarUrl, String? phone,@JsonKey(includeFromJson: false, includeToJson: false) bool fromSession
 });
 
 
@@ -278,14 +304,15 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? phone = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? avatarUrl = freezed,Object? phone = freezed,Object? fromSession = null,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,fromSession: null == fromSession ? _self.fromSession : fromSession // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

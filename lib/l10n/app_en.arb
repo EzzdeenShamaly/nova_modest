@@ -124,6 +124,7 @@
   "personalInfoSubtitle": "Keep your details up to date so your account stays current.",
   "personalInfoFullName": "Full name",
   "personalInfoEmailLocked": "Your email address cannot be changed.",
+  "personalInfoUnavailable": "We couldn't load your saved details, so editing is paused to avoid erasing them. Check your connection, then reopen the app.",
   "personalInfoPhone": "Phone number",
   "personalInfoSave": "Save changes",
   "personalInfoSaved": "Your changes were saved",

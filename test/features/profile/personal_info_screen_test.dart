@@ -208,6 +208,85 @@ void main() {
     });
   });
 
+  /// What the screen does when the user it was handed came from the session
+  /// token alone — `User.fromSession`, set when the `profiles` row could not be
+  /// read (blocker 7, 2026-10-12).
+  ///
+  /// Her `phone` and `avatarUrl` are then **unknown, not absent**, and the form
+  /// cannot tell the two apart: it pre-fills an empty phone field, and saving
+  /// sends `phone: null` — which `updateProfile` writes straight over a real
+  /// number. Everything else about a thin identity is undone by closing the
+  /// app; this is permanent, so the form is not offered at all.
+  group('a profile that could not be read', () {
+    const thin = User(
+      id: 'u1',
+      email: 'sara@example.com',
+      displayName: 'sara',
+      fromSession: true,
+    );
+
+    Future<void> pumpThin(WidgetTester tester) async {
+      whenListen(
+        authBloc,
+        Stream<AuthState>.value(const AuthAuthenticated(thin)),
+        initialState: const AuthAuthenticated(thin),
+      );
+      await pump(tester);
+    }
+
+    testWidgets('is explained instead of being offered as a form', (
+      tester,
+    ) async {
+      await pumpThin(tester);
+
+      expect(
+        find.text(
+          'تعذّر تحميل بياناتك المحفوظة، فالتعديل موقوف الآن حتى لا تُمسح '
+          'معلوماتك. تأكّدي من اتصالك ثم أعيدي تشغيل التطبيق.',
+        ),
+        findsOneWidget,
+      );
+      // No field to type into, and no save bar: the guard is the absence of the
+      // control, not a disabled control she can be told about afterwards.
+      expect(find.byType(TextFormField), findsNothing);
+      expect(find.text('حفظ التغييرات'), findsNothing);
+    });
+
+    testWidgets('a save attempted anyway never writes her blanks back', (
+      tester,
+    ) async {
+      await pumpThin(tester);
+
+      // Tried through every affordance the screen offers — written to run
+      // against a version that still shows the form, which is how this test
+      // was proven to fail before the guard existed.
+      final fields = find.byType(TextFormField);
+      if (fields.evaluate().isNotEmpty) {
+        await tester.enterText(fields.first, 'سارة أحمد');
+        await tester.pumpAndSettle();
+      }
+      final save = find.text('حفظ التغييرات');
+      if (save.evaluate().isNotEmpty) {
+        await tester.tap(save);
+        await tester.pumpAndSettle();
+      }
+
+      // The write this prevents is `{display_name: 'سارة أحمد', phone: null}`
+      // on a row that holds a real number.
+      verifyNever(() => editBloc.add(any(that: isA<ProfileEditSubmitted>())));
+    });
+
+    testWidgets('the picture cannot be changed either', (tester) async {
+      await pumpThin(tester);
+
+      // Not because an upload would lose anything — it writes `avatar_url`
+      // alone — but because the screen has no form to hang it on, and she can
+      // choose one as soon as her profile reads again.
+      expect(find.byType(AvatarCircle), findsNothing);
+      verifyNever(() => editBloc.add(const ProfileAvatarRequested()));
+    });
+  });
+
   group('the picture', () {
     testWidgets('asks the bloc to open the gallery when tapped', (
       tester,

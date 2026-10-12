@@ -335,10 +335,13 @@ class SupabaseAuthRepository implements AuthRepository {
   /// `profiles` and are simply not known yet — the avatar falls back to her
   /// initial, and the account screen omits a phone line rather than showing an
   /// empty one.
+  /// `fromSession` is what stops a form pre-filled from this object writing its
+  /// own blanks back over a real row (`User.fromSession`).
   User _userFromSession(String userId, String? email) => User(
     id: userId,
     email: email ?? '',
     displayName: email?.split('@').first ?? 'Shopper',
+    fromSession: true,
   );
 
   /// Turns the stored avatar **path** into a link the app can draw.

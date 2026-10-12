@@ -23,6 +23,22 @@ abstract class User with _$User {
     /// shopper can have an account and no phone number at all. The account
     /// screen omits the line rather than showing an empty one.
     String? phone,
+
+    /// True when this user was built from the **session token alone**, because
+    /// the `profiles` row could not be read — see `_userFromSession` in
+    /// `SupabaseAuthRepository`. Then [id] and [email] are real, [displayName]
+    /// is derived from the address, and [phone] and [avatarUrl] are *unknown*
+    /// rather than absent.
+    ///
+    /// That distinction is the whole point of the flag. Without it a form
+    /// pre-filled from this user cannot tell "she has no number" from "we never
+    /// read it", and saving the form writes `phone: null` over a real number.
+    ///
+    /// Never serialised in either direction: it describes how this object was
+    /// obtained, not a column. A row that was read is never from the session.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    @Default(false)
+    bool fromSession,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

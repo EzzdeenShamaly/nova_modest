@@ -31,11 +31,85 @@ class PersonalInfoScreen extends StatelessWidget {
 
     return BlocProvider<ProfileEditBloc>(
       create: (_) => sl<ProfileEditBloc>(),
-      // Behind the sign-in gate there is always a user; the branch exists for
-      // the instant after a sign-out, before the router moves them on.
-      child: user == null
-          ? const Scaffold(body: SizedBox.shrink())
-          : _PersonalInfoView(user: user),
+      child: switch (user) {
+        // Behind the sign-in gate there is always a user; the branch exists for
+        // the instant after a sign-out, before the router moves them on.
+        null => const Scaffold(body: SizedBox.shrink()),
+        // **Her saved row was never read**, so this form would be pre-filled
+        // from the session token alone — a derived name and an empty phone
+        // field — and saving it writes `phone: null` over a real number.
+        // `String? phone` cannot carry "leave it alone" as well as "clear it",
+        // and clearing is a real edit the form already supports, so the guard
+        // is here: no form at all until the profile reads (blocker 7).
+        User(fromSession: true) => const _Unavailable(),
+        _ => _PersonalInfoView(user: user),
+      },
+    );
+  }
+}
+
+/// The screen's chrome, shared by the form and by [_Unavailable] so the two
+/// cannot drift apart.
+AppBar _brandAppBar(BuildContext context) => AppBar(
+  centerTitle: true,
+  title: Text(
+    AppLocalizations.of(context).brandName,
+    // direction-fixed: a brandmark's glyph order is fixed by the mark itself,
+    // not by the reader's language
+    textDirection: TextDirection.ltr,
+    style: Theme.of(context).textTheme.headlineLarge,
+  ),
+);
+
+/// What she sees when her saved profile could not be read.
+///
+/// Not a [FailureView]: those name the failure that just happened, and this
+/// state outlives it — the read failed at launch and nothing retries it, so by
+/// the time she opens this screen the network may well be back. The message
+/// says what is true regardless, and what to do about it.
+class _Unavailable extends StatelessWidget {
+  const _Unavailable();
+
+  /// Sized from the type scale, as the lock icon in the form below is.
+  static double get _iconSize => AppFontSize.display;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
+      appBar: _brandAppBar(context),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsetsDirectional.all(AppSpacing.l),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cloud_off_outlined,
+                size: _iconSize,
+                color: AppColors.muted,
+                // Decorative: the message carries the meaning, so an explicit
+                // empty label stops a screen reader announcing it twice.
+                semanticLabel: '',
+              ),
+              SizedBox(height: AppSpacing.m),
+              Text(
+                l10n.profilePersonalInfo,
+                textAlign: TextAlign.center,
+                style: textTheme.headlineLarge,
+              ),
+              SizedBox(height: AppSpacing.xs),
+              Text(
+                l10n.personalInfoUnavailable,
+                textAlign: TextAlign.center,
+                style: textTheme.bodyLarge?.copyWith(color: AppColors.muted),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -184,16 +258,7 @@ class _PersonalInfoViewState extends State<_PersonalInfoView> {
             }
           },
           child: Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              title: Text(
-                l10n.brandName,
-                // direction-fixed: a brandmark's glyph order is fixed by the
-                // mark itself, not by the reader's language
-                textDirection: TextDirection.ltr,
-                style: textTheme.headlineLarge,
-              ),
-            ),
+            appBar: _brandAppBar(context),
             body: Form(
               key: _formKey,
               child: ListView(

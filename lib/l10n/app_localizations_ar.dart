@@ -428,6 +428,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get personalInfoEmailLocked => 'لا يمكن تغيير البريد الإلكتروني.';
 
   @override
+  String get personalInfoUnavailable =>
+      'تعذّر تحميل بياناتك المحفوظة، فالتعديل موقوف الآن حتى لا تُمسح معلوماتك. تأكّدي من اتصالك ثم أعيدي تشغيل التطبيق.';
+
+  @override
   String get personalInfoPhone => 'رقم الجوال';
 
   @override
