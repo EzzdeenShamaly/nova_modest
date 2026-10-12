@@ -61,6 +61,11 @@ class SupabaseAuthRepository implements AuthRepository {
   @visibleForTesting
   String? get currentUserId => client.auth.currentUser?.id;
 
+  /// The address on the token, as the third seam. It is the one profile field
+  /// the session itself carries, so it is what a degraded read can still show.
+  @visibleForTesting
+  String? get currentEmail => client.auth.currentUser?.email;
+
   @override
   Future<Result<User>> signInWithGoogle() async {
     if (_googleWebClientId.isEmpty) {
@@ -93,7 +98,7 @@ class SupabaseAuthRepository implements AuthRepository {
         idToken: idToken,
         accessToken: googleAuth.accessToken,
       );
-      return _readCurrentUser();
+      return await _readCurrentUser();
     } on Failure catch (failure) {
       return Err(failure);
     } catch (error) {
@@ -124,7 +129,7 @@ class SupabaseAuthRepository implements AuthRepository {
         token: code,
         type: OtpType.email,
       );
-      return _readCurrentUser();
+      return await _readCurrentUser();
     } catch (error) {
       return Err(mapSupabaseError(error));
     }
@@ -146,7 +151,7 @@ class SupabaseAuthRepository implements AuthRepository {
           .update({'display_name': displayName, 'phone': phone})
           .eq('id', userId);
 
-      return _readCurrentUser();
+      return await _readCurrentUser();
     } catch (error) {
       return Err(mapSupabaseError(error));
     }
@@ -200,7 +205,7 @@ class SupabaseAuthRepository implements AuthRepository {
           .update({'avatar_url': _avatarPath(userId)})
           .eq('id', userId);
 
-      return _readCurrentUser();
+      return await _readCurrentUser();
     } catch (error) {
       return Err(mapSupabaseError(error));
     }
@@ -261,10 +266,10 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<Result<User?>> currentUser() async {
     try {
-      if (_client.auth.currentSession == null) {
+      if (currentUserId == null) {
         return const Ok(null);
       }
-      return _readCurrentUser();
+      return await _readCurrentUser();
     } on UnauthorizedFailure {
       await _client.auth.signOut();
       return const Ok(null);
@@ -278,31 +283,63 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 
+  /// How long the session check may wait on the profile read.
+  ///
+  /// Eight seconds. Measured 2026-10-11: the read takes under a second against
+  /// a healthy project, while an unreachable one sat for **59 seconds** behind
+  /// the SDK's own retry chain — the token refresh retries every 13–16 s and
+  /// postgrest retries on top of that. The app opens on what the session knows
+  /// rather than waiting that out. The request itself is not cancelled; its
+  /// answer is simply no longer waited for.
+  static const Duration _profileReadTimeout = Duration(seconds: 8);
+
   Future<Result<User>> _readCurrentUser() async {
     final userId = currentUserId;
     if (userId == null) {
       return const Err(UnauthorizedFailure());
     }
-    final email = _client.auth.currentUser?.email;
+    final email = currentEmail;
 
-    final row = await _client
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
+    final Map<String, dynamic>? row;
+    try {
+      row = await _client
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle()
+          .timeout(_profileReadTimeout);
+    } catch (error) {
+      // **A network failure only.** The session is valid and the token says who
+      // she is; what is missing is the row. Going "signed out" here would lie
+      // to a signed-in shopper silently, and the account tab would send her to
+      // the sign-in screen (owner, 2026-10-12).
+      //
+      // Anything else keeps its meaning and travels on: a policy refusal signs
+      // her out at the caller, a server error is reported. Falling back on
+      // those would keep her "signed in" on a token the server has rejected.
+      if (mapSupabaseError(error) is NetworkFailure) {
+        return Ok(_userFromSession(userId, email));
+      }
+      rethrow;
+    }
 
     if (row == null) {
-      return Ok(
-        User(
-          id: userId,
-          email: email ?? '',
-          displayName: email?.split('@').first ?? 'Shopper',
-        ),
-      );
+      return Ok(_userFromSession(userId, email));
     }
 
     return Ok(await withSignedAvatar(User.fromJson(row)));
   }
+
+  /// What the token alone can say: the id and the address, with a name derived
+  /// from the address. `display_name`, `phone` and `avatar_url` live in
+  /// `profiles` and are simply not known yet — the avatar falls back to her
+  /// initial, and the account screen omits a phone line rather than showing an
+  /// empty one.
+  User _userFromSession(String userId, String? email) => User(
+    id: userId,
+    email: email ?? '',
+    displayName: email?.split('@').first ?? 'Shopper',
+  );
 
   /// Turns the stored avatar **path** into a link the app can draw.
   ///
@@ -328,7 +365,10 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       final signed = await _client.storage
           .from(_avatarBucket)
-          .createSignedUrl(path, _signedUrlSeconds);
+          .createSignedUrl(path, _signedUrlSeconds)
+          // On the session-check path as well, so a stalled network cannot
+          // hold the app open here after the read itself was bounded.
+          .timeout(_profileReadTimeout);
       return user.copyWith(avatarUrl: signed);
     } catch (error) {
       debugPrint('avatar: could not sign $path ($error)');

@@ -191,4 +191,38 @@ void main() {
       expect(mapSupabaseError(StateError('odd')), isA<UnknownFailure>());
     });
   });
+
+  group('a refusal that arrives as a bare status', () {
+    test('401 is an authorisation failure, not a server error', () {
+      // What an RLS refusal looks like through `.maybeSingle()`: postgrest
+      // builds the exception with code 42501, `_handleMaybeSingleError`
+      // rethrows it, and the `catch (_)` around that block replaces it with a
+      // generic one carrying only the status (measured 2026-10-12). Read as a
+      // ServerFailure, a policy refusal on the session check never signed the
+      // shopper out.
+      final failure = mapSupabaseError(
+        const PostgrestException(message: 'permission denied', code: '401'),
+      );
+
+      expect(failure, isA<UnauthorizedFailure>());
+    });
+
+    test('403 likewise', () {
+      expect(
+        mapSupabaseError(
+          const PostgrestException(message: 'forbidden', code: '403'),
+        ),
+        isA<UnauthorizedFailure>(),
+      );
+    });
+
+    test('500 stays a server error', () {
+      expect(
+        mapSupabaseError(
+          const PostgrestException(message: 'boom', code: '500'),
+        ),
+        isA<ServerFailure>(),
+      );
+    });
+  });
 }

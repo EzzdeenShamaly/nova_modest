@@ -46,59 +46,54 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   of them blocks a Play or App Store upload. They carry the same placeholder
   and should be settled if a desktop build is ever shipped.
 
-- **BLOCKER 7 — measured properly 2026-10-11: the app hangs offline because
-  `currentUser()` leaks its own error, not because of the SDK.**
+- **BLOCKER 7 — SETTLED 2026-10-12. The session check always answers now, and
+  answers in bounded time.**
 
-  **The first account of this, written the same day, was wrong** and is
-  corrected here. It said `runApp` was never reached and the screen was the
-  native launch drawable. That came from reading the *tail* of a log in which
-  frequent auth warnings had pushed the router lines out. Reading the **head**
-  shows `***** Supabase init completed *****` seven seconds in, and the router
-  immediately after: the app starts normally.
+  Two earlier accounts of this were wrong; the history keeps them. What it
+  actually was: `currentUser()` did `return _readCurrentUser();` **inside** its
+  own `try`, and an `async` function awaits a returned future *outside* the try
+  — so the `catch` never saw it. With the host unreachable the `profiles` read
+  threw, the error escaped as an uncaught zone error, `AuthBloc` emitted
+  nothing, and the router held on the splash for ever. Five sites did this; a
+  scan of `lib/` found no sixth.
 
-  What actually happens, with airplane mode on:
-  `AuthBloc` → `currentUser()` → `_readCurrentUser()` → the `profiles` read
-  throws `SocketException` → **`Uncaught zone error`** → no state is emitted →
-  the router holds on the splash for ever, because it waits on `AuthInitial`
-  and `AuthCheckInProgress` (`app_router.dart`).
+  **The fix, in three parts:**
+  1. `await` at all five.
+  2. An **8-second** bound on the profile read, and on the avatar signing that
+     follows it on the same path. Not on `initializeSupabase()`, which was
+     measured and never blocks on the network.
+  3. On a **network failure only**, the shopper stays signed in with what the
+     token itself carries — id, email, and a name derived from the address —
+     and every screen shows its own error. A refusal does not fall back: a
+     policy refusal signs her out, a server error is reported.
 
-  The leak is one word. `currentUser()` does `return _readCurrentUser();`
-  **inside** its own `try`, and in an `async` function a returned future is
-  awaited *outside* the try — so the `catch` never sees it. Five sites do this:
-  lines 96, 127, 149, 203 and 267 of `supabase_auth_repository.dart`
-  (`signInWithGoogle`, `verifyEmailCode`, `updateProfile`, `uploadAvatar`,
-  `currentUser`). Every one of them turns a network failure into an uncaught
-  error instead of a `Failure`.
+  **A library quirk found on the way, which the fix depends on.** An RLS
+  refusal through `.maybeSingle()` does **not** arrive as `42501`. postgrest
+  builds that exception, hands it to `_handleMaybeSingleError`, which rethrows
+  it — into the `catch (_)` wrapped around that same block, which replaces it
+  with a generic exception carrying only the HTTP status
+  (`postgrest_builder.dart:553-571`). So every policy refusal on a single-row
+  read arrived as a `ServerFailure` and **no shopper was ever signed out by
+  one**. `mapSupabaseError` now reads a bare `401`/`403` as an authorisation
+  failure, with its own tests.
 
-  **Measured with `await` added at all five** (experimental build, reverted,
-  not committed): no uncaught errors, and the app opens — `redirecting to
-  /home` **59 seconds** after the router came up. The minute is the SDK's own
-  retry chain: the `profiles` call waits on a token refresh that
-  `AuthRetryableFetchException` retries every 13–16 s, with postgrest's
-  `_executeWithRetry` on top. The retries continue in the background
-  afterwards, so a session should recover by itself when the network returns —
-  to be confirmed once the project is reachable.
+  **Measured on a device, both ways:**
+  - Against a host that does not exist: opens in **10.6 s** (the 8-second bound
+    plus the DNS attempt), zero uncaught errors, and she is **signed in** — the
+    account screen shows the email-derived name, her initial instead of the
+    photograph, and no phone line.
+  - Against the live project: opens in **6.3 s** with her real name, phone and
+    photograph. Zero uncaught errors, zero retries. The fallback does not touch
+    the healthy path.
 
-  **Scanned for a sixth site 2026-10-12** (`lib/` in full, every `return …;`
-  with no `await` inside a `try`): nine candidates, six of them harmless —
-  `_requireData` in `dio_api_client.dart` is **synchronous** (`T _requireData<T>(
-  Response<T>)`) and `withSignedAvatar`'s `return user.copyWith(…)` carries no
-  future. **Five, exactly, and all in this one file.**
+  Seven mutations, seven caught — including the one the owner called the spine:
+  widening the fallback to any failure breaks the policy-refusal test. The
+  missing `await` is pinned by the **refusal** tests rather than the network
+  one, because once a network failure falls back, no error travels that path.
 
-  **The weight of this changed on 2026-10-12.** Re-measuring DNS after the
-  scare, two of three resolvers needed a retry on an ordinary machine with a
-  working connection. The condition that triggers the hang is therefore not
-  airplane mode or an exotic edge: **an ordinary wobbly network reaches it**, so
-  this is a release blocker rather than a debt (owner's reading, and the
-  measurement supports it).
-
-  So the fix has three parts, and only the first is a bug:
-  1. `await` at the five sites.
-  2. A bounded wait on the **session check** — not on `initializeSupabase()`,
-     which never blocks on the network (measured: it completes in ~7 s doing
-     only local work; `recoverSession()` is not even awaited by the SDK).
-  3. What she sees meanwhile, and whether a local session should be trusted
-     when the profile read fails — a product decision, see `activeContext.md`.
+  **Two things deliberately left, both under Not Started:** nothing re-reads the
+  profile after startup, and the personal-information form opened while thin is
+  pre-filled from the thin identity.
 
 - **BLOCKER 5 — HALF SETTLED 2026-09-21: in-app deletion is built; the web
   URL is not.** The dashboard shipped `delete-account` as an **Edge Function**
@@ -534,6 +529,25 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 
 ## Not Started
+
+- **A thin identity never fills itself in** (2026-10-12). `AuthCheckRequested`
+  is dispatched **once**, from `app.dart:46`, and nothing re-reads the profile
+  afterwards — not on resume, not when a later request succeeds. So a shopper
+  who launched on a dead network keeps the email-derived name and no photograph
+  until she closes and reopens the app. The smallest thing that would fix it is
+  a lifecycle hook: re-dispatch `AuthCheckRequested` on
+  `AppLifecycleState.resumed`. The most precise is to listen for the SDK's own
+  `AuthChangeEvent.tokenRefreshed`, which fires exactly when the network returns
+  and the token is good — at the cost of `AuthBloc` gaining a subscription it
+  does not have today. **Not built: the owner decides.**
+
+- **The personal-information form can overwrite a real profile with a thin one**
+  (2026-10-12). While degraded, the form opens pre-filled with the derived name
+  and an empty phone. The save button stays disabled until something differs, so
+  it takes a deliberate edit — but editing the name and saving then writes
+  `phone: null` and wipes a real number. Guarding it means the entity carrying
+  "this came from the session alone", which is a change to `User` and to the
+  screen. **Not built: the owner decides.**
 
 - **DEBT — no central handler for an expired session in the presentation
   layer** (observed 2026-09-21; recorded, not built, by the owner's decision).

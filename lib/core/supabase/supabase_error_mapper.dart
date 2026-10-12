@@ -65,6 +65,17 @@ Failure mapSupabaseError(Object error) {
     if (error.code == '42501' || error.code == 'PGRST301') {
       return UnauthorizedFailure(error.message);
     }
+    // **A bare HTTP status, which is what an RLS refusal looks like through
+    // `.maybeSingle()`.** Measured 2026-10-12: postgrest builds the detailed
+    // exception (code `42501`), hands it to `_handleMaybeSingleError`, which
+    // rethrows it — straight into the `catch (_)` wrapped around that very
+    // block, which replaces it with a generic one carrying the status instead
+    // (`postgrest_builder.dart:553-571`). So the branch above never fires for a
+    // single-row read, and without this one every policy refusal on the session
+    // check arrived as a `ServerFailure` and the shopper was never signed out.
+    if (error.code == '401' || error.code == '403') {
+      return UnauthorizedFailure(error.message);
+    }
     if (error.code == 'P0001') {
       // The order contract's format: a stable code in `message`, the prose
       // explanation in `details`. The code is carried through so the UI can say

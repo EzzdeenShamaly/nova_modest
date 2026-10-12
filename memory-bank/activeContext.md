@@ -1,28 +1,29 @@
 # Active Context
 
-**Last Updated:** 2026-10-11 (the backend host stopped resolving, and the app's
-behaviour when it does was measured)
+**Last Updated:** 2026-10-12 (blocker 7 settled: the session check answers, and
+answers in bounded time)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
 
-## Where things stand — 2026-10-11
+## Where things stand — 2026-10-12
 
-**The project's Supabase host no longer resolves** (NXDOMAIN, measured from two
-resolvers and `curl`, while `supabase.co` itself resolves). Most likely a
-free-tier pause after three idle weeks; only the dashboard can confirm. Until
-the owner restores it, **no live run of anything is possible** — including the
-account-deletion run that was the next step.
+**Blocker 7 is settled.** The session check leaked its own error past its try —
+five `return <future>;` inside a `try` — so an unreachable backend hung the app
+on the splash for ever. It answers now, within 8 seconds, and a network failure
+leaves the shopper signed in with what her token carries while each screen shows
+its own error. Measured on a device both ways: 10.6 s against a host that does
+not exist, 6.3 s against the live project with everything intact.
 
-Measured while finding that out, and worth more than the outage: **the app does
-not start at all when the host cannot be resolved.** `main()` awaits
-`initializeSupabase()` before `runApp`, session recovery retries forever, and
-the screen keeps showing the native launch drawable — which looks like the brand
-splash, so it reads as a hung app rather than one that never started. Recorded
-as blocker 7, not fixed: the fix needs a measurement and a product decision.
+A library quirk fell out of it and is worth remembering: an RLS refusal through
+`.maybeSingle()` arrives as a bare HTTP status, not as `42501`, so **no policy
+refusal had ever signed a shopper out**. The mapper reads `401`/`403` now.
 
-Everything in the repository is green: 856 tests, `flutter analyze` clean, and
-the working tree matches `origin/master`.
+The Supabase project is alive, and the emulator still holds the demo shopper's
+session — 21 days old, photograph and all. **The account-deletion live run is
+next**, waiting only on the owner's decision about that account's email.
+
+866 tests, `flutter analyze` clean.
 
 ## Where things stood — 2026-09-20
 
