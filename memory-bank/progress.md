@@ -95,8 +95,8 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   profile after startup, and the personal-information form opened while thin is
   pre-filled from the thin identity.
 
-- **BLOCKER 5 — HALF SETTLED 2026-09-21: in-app deletion is built; the web
-  URL is not.** The dashboard shipped `delete-account` as an **Edge Function**
+- **BLOCKER 5 — the in-app half is SETTLED, proven live 2026-10-12. Only the
+  web URL remains.** The dashboard shipped `delete-account` as an **Edge Function**
   rather than the SQL function sketched below (same order and rules: avatar
   first, then the user over the Admin API; admins refused; identity from the
   JWT alone). The storefront calls it from the last row of the account menu,
@@ -109,9 +109,35 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   deletion can be requested without the app** — it pairs with the privacy
   policy page (blocker 4).
 
-  *Not yet exercised on a device.* The only signed-in account on the emulator
-  is the owner's demo shopper, which is to be kept (2026-09-21), so a live run
-  needs a throwaway account.
+  **Run on the device, 2026-10-12, against the production project.** A throwaway
+  account signed in, a photograph uploaded first so the avatar branch was really
+  taken, then deletion from the account menu. The app wrote two log lines and
+  nothing else — `Signing out user with scope: local`, then the redirect to
+  `/login` — with no error, no exception and no refusal code, and showed the
+  sign-in screen with no message.
+
+  **The verdict came from the dashboard, not from the device, and it had to.**
+  Success and a 401 both end on the sign-in screen, and the log cannot separate
+  them either: the success path logs that line from `clearLocalSession()` inside
+  `deleteAccount`, the 401 path logs the identical line from `logout()`, because
+  gotrue's `signOut` defaults to `SignOutScope.local`
+  (`gotrue_client.dart:1075`) — not the global scope this repo's comments had
+  assumed. The owner then read the dashboard: **the user is absent from
+  Authentication** (five remain, none of them it), and **`avatars` holds exactly
+  one folder**, the demo shopper's, with her photograph from 21 September. So
+  the avatar and the user went together, the function's contract held, and the
+  one state its ordering makes impossible — user gone, avatar left — did not
+  appear. A refusal would have left both.
+
+  Three ways of measuring whether the request reached the server were tried
+  first and **all three failed**, so none was used: the kernel's per-uid byte
+  counters bucket at two hours (`bucketDuration=7200`) and read identically
+  before and after a whole photo upload; `supabase.functions` logs its request
+  at `finest`, below the `Level.INFO` floor supabase_flutter prints
+  (`supabase.dart:113`); and a host-side TCP connection to the project already
+  existed and is reused by keep-alive. What does separate cleanly, and was not
+  needed: a lost request shows «لا يوجد اتصال بالإنترنت.» and keeps her on the
+  account screen.
 
   Original record follows.
 
@@ -231,6 +257,15 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   her to reopen the app, which is literally what is required today because
   nothing re-reads the profile until relaunch. It needs rewording the day the
   resume hook lands.
+
+  **Seen live the same day, on the production project, with nothing switched
+  off** (2026-10-12, during the deletion run's setup): the first launch showed
+  the thin identity — `as92+shopper` and her initial, no phone — because the
+  `profiles` read exceeded the 8-second bound on a degraded link. A clean
+  restart read everything. So this guard was not precautionary: without it the
+  form that opens in that state was one edit away from erasing a real number,
+  and the state arrives on an ordinary flaky connection rather than an airplane
+  mode nobody switches on.
 
 - **Checkout's contact prefill reads the same thin identity, and that is fine**
   (measured 2026-10-12). `checkout_bloc.dart:71` fills the contact phone from
@@ -568,6 +603,46 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 
 ## Not Started
+
+- **Probe accounts are accumulating in production `auth.users`** (seen
+  2026-10-12 in the dashboard by the owner). `as92+deltest-1789983178@...`
+  survives from the dashboard side's `probe_delete_account.py`. The suffix is a
+  Unix timestamp and decodes to **2026-09-21 09:32:58 UTC** — the same day the
+  admin repo records that *"email OTP hit a daily send limit on 2026-09-21, so
+  probe sign-ins could not always get a code"*.
+
+  So this is not a forgetful script: `delete-account` takes its identity **from
+  the caller's JWT alone**, deliberately, so a probe run that cannot obtain a
+  code never gets a session and **cannot delete the account it just created by
+  any path the function offers**. Any run that fails before sign-in strands one,
+  however carefully the probe is written. The durable fix is a cleanup that does
+  not need a session — delete by user id over the Admin API in a `finally`,
+  where `service_role` already lives — and it belongs to the dashboard side:
+  the probe is not in either repository on this machine, and the admin repo is
+  read-only here.
+
+  Whether the stranded account is safe to delete could **not** be checked from
+  here: `claude_reader` returned 0 for `auth.users`, `profiles` *and* `orders`,
+  and a control proved that is blindness behind RLS, not emptiness. What the
+  schema guarantees regardless: `orders.user_id` is ON DELETE SET NULL, so
+  deleting it would unlink any order rather than destroy it — the same end state
+  as any shopper deleting her own account.
+
+- **CANDIDATE BLOCKER — the session check is bounded and nothing else is**
+  (2026-10-12, measured on the device during the deletion run's setup). The home
+  screen's product read spun for **more than four minutes** with no error, no
+  retry and no affordance, against a link whose 1500-byte packets were being
+  dropped entirely (MTU black hole on the emulator's path; Windows reached the
+  same host in 9 ms and a full HTTPS request answered in 2.05 s). This is
+  blocker 7's shape in a place it was never checked: `_profileReadTimeout`
+  guards the session check, and **no other network read in the app carries a
+  ceiling**. On a link like that the shop does not fail, it stalls — which reads
+  as "slow" rather than "broken", and the shopper is given nothing to press.
+
+  **Not built, by the owner's instruction.** What he asked for after the live
+  run: a sweep of *every* network read in the app — bounded or not, and what the
+  shopper sees while it hangs — and the decision then on whether this travels
+  with the two leftovers above or becomes a blocker of its own.
 
 - **A thin identity never fills itself in** (2026-10-12). `AuthCheckRequested`
   is dispatched **once**, from `app.dart:46`, and nothing re-reads the profile

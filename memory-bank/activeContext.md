@@ -20,8 +20,10 @@ A library quirk fell out of it and is worth remembering: an RLS refusal through
 refusal had ever signed a shopper out**. The mapper reads `401`/`403` now.
 
 The Supabase project is alive, and the emulator still holds the demo shopper's
-session — 21 days old, photograph and all. **The account-deletion live run is
-next**, waiting only on the owner's decision about that account's email.
+session — 21 days old, photograph and all. **The account-deletion live run is done** (2026-10-12): a throwaway account
+with a photograph was deleted from the device against production, and the
+dashboard confirmed both the user and the avatar folder gone. Blocker 5's
+in-app half is settled; only the web page remains.
 
 One of blocker 7's two leftovers was then promoted out of the debt list by the
 owner and fixed the same day: a form pre-filled from a thin identity could write
