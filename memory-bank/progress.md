@@ -628,6 +628,91 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   deleting it would unlink any order rather than destroy it — the same end state
   as any shopper deleting her own account.
 
+- **BLOCKER 8 — three places where a hung request has no way out but killing
+  the app** (found by sweep 2026-10-12, scoped by the owner the same day).
+
+  The sweep below found that **two timeouts exist in the whole app and both are
+  on the session check**. The owner's criterion for what that makes a blocker
+  rather than a debt is one question: *does she have a way out other than
+  closing the app?* Where back still works she is not trapped, so it is a debt.
+  Three places fail that test:
+
+  1. **`requestEmailCode` — a ceiling, and «المتابعة كزائر» must never be
+     disabled.** While the request is in flight `auth_method_screen.dart:159`
+     disables the guest button along with the form, so a hang here closes the
+     *exit* as well as the entrance: she can neither sign in nor browse.
+     Locking the only way out is worse than locking the way in.
+  2. **`deleteAccount` — a ceiling, and it must stop replacing the whole tab.**
+     `profile_screen.dart:56-59` swaps the entire account menu for a centred
+     spinner, so a hang takes her orders, her addresses and her sign-out with
+     it. A spinner on the row itself, or in the dialog, keeps the rest
+     reachable.
+  3. **Product images need `frameBuilder`, as `AvatarCircle` already has.** The
+     three `Image.network` call sites carry an `errorBuilder` only, so "nothing
+     has arrived yet" paints *nothing*. This one is not really about hanging:
+     the catalogue is images, and a storefront with white gaps is something a
+     Play reviewer rejects before ever thinking about the network. The pattern
+     exists in `core/widgets/avatar_circle.dart:176` — copy it.
+
+- **DEBT — every other network read is unbounded, but she can always leave**
+  (sweep 2026-10-12; recorded by the owner's instruction as the documentation of
+  record). Only the two session-check ceilings exist
+  (`supabase_auth_repository.dart:310`, `:374`).
+
+  | Screen | Read | Ceiling | While it hangs |
+  |---|---|---|---|
+  | Splash / router | `currentUser()` → `profiles` | **8 s** | falls back to the session identity, the app opens — the only guarded one |
+  | Splash / router | `withSignedAvatar()` → signing | **8 s** | returns without a picture, her initial instead |
+  | Home | `categories()` + `featuredProducts()` | none | a spinner for ever, no error and no retry. **Measured 2026-10-12: 4+ minutes, and it survived switching tabs and coming back** |
+  | Product list | `productsInCategory()` | none | spinner; back works |
+  | Search | `searchProducts()` / `trendingSearches()` | none | spinner; back works |
+  | Product detail | `productById()` | none | spinner; back works |
+  | Orders / order detail | `orders()` / `orderByNumber()` | none | spinner; back works |
+  | Addresses (and the checkout step) | `addresses()` | none | spinner; back works |
+  | Address form | `save()` | none | fields locked, button spinning; back offers the discard dialog |
+  | Personal information | `updateProfile()` | none | same; what she typed is kept and back works |
+  | Personal information | `uploadAvatar()` | none | the disc dims under a spinner and **the form stays usable** — the kindest of them |
+  | Checkout | `place()` → `place_order` | none | button spinning; `droppable` stops a second tap; back walks the steps |
+  | Sign in | `requestEmailCode()` | none | field and button locked — **and the guest button with them** → blocker 8 |
+  | Code entry | `verifyEmailCode()` | none | field, submit and resend all locked; back works |
+  | Delete account | `deleteAccount()` | none | **the whole account menu is replaced by a spinner** → blocker 8 |
+  | Sign out | `logout()` | none | **never visible** — gotrue clears locally and announces `signedOut` *before* the server call, so the router moves her at once |
+  | Product images | `Image.network` ×3 | none | **a white gap with no stand-in** — `errorBuilder` only → blocker 8 |
+  | Account picture | `AvatarCircle` | none | her initial — the only one already handled |
+
+- **RISK, not an observation — a second order is reachable while the first is in
+  flight** (2026-10-12, recorded at the owner's instruction without measuring
+  it). `CheckoutConfirmed` is `droppable()`, so tapping twice cannot place two
+  orders. But `place()` has no ceiling, and leaving checkout and re-entering
+  builds a **new** `CheckoutBloc`, whose `droppable` knows nothing about the
+  call still outstanding on the old one. `place_order` carries no idempotency
+  key. Nobody has seen this happen; it is written down so that it is not
+  rediscovered as a surprise.
+
+- **Probe accounts are accumulating in production `auth.users`** (seen
+  2026-10-12 in the dashboard by the owner). `as92+deltest-1789983178@...`
+  survives from the dashboard side's `probe_delete_account.py`. The suffix is a
+  Unix timestamp and decodes to **2026-09-21 09:32:58 UTC** — the same day the
+  admin repo records that *"email OTP hit a daily send limit on 2026-09-21, so
+  probe sign-ins could not always get a code"*.
+
+  So this is not a forgetful script: `delete-account` takes its identity **from
+  the caller's JWT alone**, deliberately, so a probe run that cannot obtain a
+  code never gets a session and **cannot delete the account it just created by
+  any path the function offers**. Any run that fails before sign-in strands one,
+  however carefully the probe is written. The durable fix is a cleanup that does
+  not need a session — delete by user id over the Admin API in a `finally`,
+  where `service_role` already lives — and it belongs to the dashboard side:
+  the probe is not in either repository on this machine, and the admin repo is
+  read-only here.
+
+  Whether the stranded account is safe to delete could **not** be checked from
+  here: `claude_reader` returned 0 for `auth.users`, `profiles` *and* `orders`,
+  and a control proved that is blindness behind RLS, not emptiness. What the
+  schema guarantees regardless: `orders.user_id` is ON DELETE SET NULL, so
+  deleting it would unlink any order rather than destroy it — the same end state
+  as any shopper deleting her own account.
+
 - **CANDIDATE BLOCKER — the session check is bounded and nothing else is**
   (2026-10-12, measured on the device during the deletion run's setup). The home
   screen's product read spun for **more than four minutes** with no error, no
