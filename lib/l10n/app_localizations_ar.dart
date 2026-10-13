@@ -63,6 +63,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authContinueWithEmail => 'متابعة بالبريد الإلكتروني';
 
   @override
+  String get authEmailCodeTimeout =>
+      'طال انتظار الرد، ولا نعرف إن كان الرمز قد أُرسل. إن وصلكِ رمز فاستعمليه، وإلا أعيدي المحاولة.';
+
+  @override
   String get authContinueAsGuest => 'المتابعة كزائر';
 
   @override

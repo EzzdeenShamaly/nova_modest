@@ -628,38 +628,52 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   deleting it would unlink any order rather than destroy it — the same end state
   as any shopper deleting her own account.
 
-- **BLOCKER 8 — 2026-10-13: two and a half of the three are built; one half
-  waits on a decision** (found by sweep 2026-10-12, scoped by the owner the same
-  day).
+- **BLOCKER 8 — SETTLED 2026-10-13. All three places where a hung request left
+  no way out but closing the app** (found by sweep 2026-10-12).
 
-  **Built:** the guest button is never disabled; account deletion has a
-  twenty-second ceiling, an abstaining message and a spinner on its own row
-  instead of over the tab; and all three product images carry a `frameBuilder`.
-  Every assertion failed first on the old code — the guest button came back
-  null, the menu came back empty, the deletion hung for the full 45-second test
-  timeout — and eight mutations were all caught (`857c4e2`).
+  1. **«المتابعة كزائر» is never disabled**, and the sign-in code request has a
+     twenty-second ceiling. The test that asserted the opposite — "every action
+     is disabled" — was a generalisation written when the Google button was
+     removed, not a decision about this control; it is reversed deliberately.
+  2. **Account deletion** has the same ceiling, and its wait moved off the tab
+     and onto the row that owns it. The second press is still prevented, where
+     it is made: `ProfileMenuTile(busy:)` drops the row's `onTap`, and the event
+     was already `droppable`.
+  3. **All three product `Image.network` sites carry a `frameBuilder`**, the fix
+     `AvatarCircle` got in September. Less for hanging than because a catalogue
+     of white rectangles is refused before the network is ever considered.
 
-  **Open: the ceiling on `requestEmailCode`.** Two things found while writing
-  its test changed the question the owner asked.
+  **Twenty seconds, not the session check's eight, and the reason is a
+  measurement:** a ceiling cuts the waiting, not the work. A live deletion took
+  over five seconds on a degraded link (2026-10-12), so a tight bound would
+  report failure on a request that succeeded. For the same reason both failures
+  **claim no outcome** — a `TimeoutException` maps to `NetworkFailure`, which
+  renders as "no internet connection", and that would be the app telling her her
+  account is still there when it may be gone.
 
-  1. `requestEmailCode` **always returns `Ok`**, deliberately — a distinct
-     answer for an unknown address would be an account-enumeration oracle
-     (`supabase_auth_repository.dart:132`). So a ceiling there has a third
-     option the plan did not consider: give up waiting and move her to the
-     code-entry screen, where *resend* already exists, rather than report
-     anything. That keeps one code path and the anti-enumeration intent; its
-     cost is that she is asked for a code that may never arrive.
-  2. The loopback test cannot reach the network at all: `signInWithOtp` calls
-     `_generatePKCECodeChallenge()` **before** the request, and a bare
-     `SupabaseClient` has no async storage, so it throws an `AssertionError` in
-     3 ms with zero requests sent. Testing this needs a client given a stub
-     `pkceAsyncStorage`.
+  **The two sign-in rules are orthogonal, not in tension** (owner, 2026-10-13,
+  correcting the framing). `requestEmailCode` returns `Ok` whatever happens so
+  that an attacker cannot tell a registered address from an unregistered one. A
+  *refusal* can carry that difference, so refusals are still swallowed — pinned
+  by a test that passes before and after, whose job is to stop the fix widening.
+  A timeout cannot carry it: it falls the same way for both. The reasoning is
+  written beside the branch so it is not read later as a hole in the rule.
 
-  The side effect the owner asked about is real: GoTrue sends the email before
-  it answers, so a lost reply means the code may well be in her inbox while the
-  app says the request failed.
+  **One sentence was refused for want of a measurement.** The draft message said
+  a new request invalidates the earlier code. Nothing here can show that:
+  `supabase/config.toml` and the contract say nothing, and proving it needs two
+  codes sent to a real inbox and the older one tried — a live run on production
+  auth, against a daily OTP limit that has already been hit once. So the message
+  says only «إن وصلكِ رمز فاستعمليه، وإلا أعيدي المحاولة».
 
-  The rest of the original scoping follows.
+  **Flagged, not swept:** `supabase_error_mapper.dart:31` already carries the
+  same unmeasured claim in a comment — *"or one superseded by a newer request"*.
+  It explains why `otp_expired` is mapped the way it is, so nothing depends on
+  it, but it is the same assertion and should either be measured or softened.
+
+  Eleven mutations across the three items, eleven caught — including the one
+  that widens the sign-in report to every failure, which brings the enumeration
+  oracle back and breaks the guard test.
 
   The sweep below found that **two timeouts exist in the whole app and both are
   on the session check**. The owner's criterion for what that makes a blocker

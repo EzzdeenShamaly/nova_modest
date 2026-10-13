@@ -35,15 +35,16 @@ relaunch — is next, as an `AppLifecycleState.resumed` hook.
 **Blocker 8** took the three places a hung request left no exit: the guest
 button that was disabled with the form, account deletion that blanked the whole
 tab, and the product images that painted nothing before their first frame. All
-three are built and mutation-checked; the one piece left is the ceiling on the
-sign-in code request, which turned out to need a decision rather than a fix —
-that call always returns `Ok` by design, so "what does its timeout show" has an
-answer nobody picked yet.
+three are built and mutation-checked, and so is the fourth piece that came out
+of writing the tests: the sign-in code request has its ceiling too, reporting a
+timeout without breaking the always-`Ok` contract that stops address
+enumeration — the two rules are orthogonal, and the reasoning is written beside
+the branch.
 
 **Next, in the owner's order:** that decision, then the 401/403 sweep (point 2),
 then the `AppLifecycleState.resumed` hook (point 3).
 
-870 tests, `flutter analyze` clean.
+873 tests, `flutter analyze` clean.
 
 ## Where things stood — 2026-09-20
 

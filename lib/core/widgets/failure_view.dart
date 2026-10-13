@@ -125,6 +125,9 @@ String _coded(
   // the same way, and it is worded as the only one of the group that claims no
   // outcome: the deletion may have completed after we stopped waiting.
   'account_delete_timeout' => l10n.accountDeleteErrorTimeout,
+  // The same shape, on the other request a shopper cannot walk away from: the
+  // email may have been sent before the reply was lost.
+  'email_code_timeout' => l10n.authEmailCodeTimeout,
   _ => _orderRefusal(code, subject, l10n),
 };
 

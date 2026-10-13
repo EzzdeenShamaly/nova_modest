@@ -128,8 +128,28 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       // Always succeeds from the caller's point of view: a distinct response
       // for an unknown address would be an account-enumeration oracle.
-      await _client.auth.signInWithOtp(email: email, shouldCreateUser: true);
+      await _client.auth
+          .signInWithOtp(email: email, shouldCreateUser: true)
+          .timeout(interactiveTimeout);
       return const Ok(null);
+    } on TimeoutException {
+      // **This is not a hole in the rule above, and the two are orthogonal
+      // rather than in tension** (owner, 2026-10-13). The always-`Ok` contract
+      // exists to stop an attacker telling a registered address from an
+      // unregistered one — a *refusal* can carry that difference, which is why
+      // the `catch` below still swallows every one of them. A timeout cannot:
+      // it falls the same way for both, so reporting it leaks nothing.
+      //
+      // And it must be reported, because GoTrue sends the email **before** it
+      // answers. A lost reply does not mean a lost code: she may have one in
+      // her inbox while a silent `Ok` walks her to a screen asking for it, or
+      // "no internet connection" sends her hunting a fault that is not there.
+      return const Err(
+        ValidationFailure(
+          'the code request did not answer in time',
+          code: 'email_code_timeout',
+        ),
+      );
     } catch (_) {
       return const Ok(null);
     }

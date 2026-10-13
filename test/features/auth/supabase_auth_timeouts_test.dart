@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -23,12 +24,30 @@ void main() {
   /// fails fast by itself and would prove nothing about a ceiling.
   final held = <HttpRequest>[];
 
+  /// What the fake endpoint does. Swapped per test rather than re-listening:
+  /// an `HttpServer` is a single-subscription stream, so a second `listen`
+  /// throws.
+  late void Function(HttpRequest) answer;
+
   setUp(() async {
     held.clear();
+    answer = held.add;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    server.listen(held.add);
+    server.listen((req) => answer(req));
     client = SupabaseClient('http://127.0.0.1:${server.port}', 'anon-key');
   });
+
+  /// Answers every request with [status] and [body], for the one case that
+  /// needs the server to refuse rather than to stall.
+  void answersWith(int status, Object body) {
+    answer = (req) async {
+      req.response
+        ..statusCode = status
+        ..headers.contentType = ContentType.json
+        ..write(jsonEncode(body));
+      await req.response.close();
+    };
+  }
 
   tearDown(() async {
     await client.dispose();
@@ -60,6 +79,63 @@ void main() {
     expect(repository.sessionCleared, isFalse);
   });
 
+  group('the sign-in code request', () {
+    /// `signInWithOtp` builds a PKCE challenge **before** it sends anything, and
+    /// a bare `SupabaseClient` has no async storage to build it with — it throws
+    /// an `AssertionError` in 3 ms with zero requests sent (measured
+    /// 2026-10-12). Without this stub the test never reaches the network and
+    /// proves nothing about a ceiling.
+    SupabaseClient withStorage() => SupabaseClient(
+      'http://127.0.0.1:${server.port}',
+      'anon-key',
+      authOptions: const AuthClientOptions(pkceAsyncStorage: _MemoryStorage()),
+    );
+
+    test('answers instead of hanging', () async {
+      final client = withStorage();
+      addTearDown(client.dispose);
+
+      final result = await _Repository(
+        client,
+      ).requestEmailCode('s@example.com');
+
+      expect(result, isA<Err<void>>());
+    });
+
+    test('says it does not know, rather than blaming the connection', () async {
+      final client = withStorage();
+      addTearDown(client.dispose);
+
+      final result = await _Repository(
+        client,
+      ).requestEmailCode('s@example.com');
+
+      // GoTrue sends the email before it answers, so a lost reply does not mean
+      // a lost code: it may be in her inbox already. "No internet connection"
+      // would send her looking for a fault that is not there.
+      final failure = (result as Err<void>).failure;
+      expect(failure, isA<ValidationFailure>());
+      expect((failure as ValidationFailure).code, 'email_code_timeout');
+    });
+
+    test('a refusal is still swallowed, because that oracle is real', () async {
+      // **The two rules are orthogonal, and this is what keeps them so.** The
+      // always-`Ok` contract exists to stop an attacker telling a registered
+      // address from an unregistered one; a *refusal* can carry that
+      // difference, so it is still swallowed. A timeout cannot — it falls the
+      // same way for both — which is why the branch above may report it.
+      answersWith(400, {'error_code': 'validation_failed'});
+      final client = withStorage();
+      addTearDown(client.dispose);
+
+      final result = await _Repository(
+        client,
+      ).requestEmailCode('s@example.com');
+
+      expect(result, isA<Ok<void>>());
+    });
+  });
+
   test('the ceiling is twenty seconds in a real build', () {
     // Pinned because the value is a judgement, not an implementation detail: a
     // live deletion measured at over five seconds on a degraded link
@@ -69,6 +145,23 @@ void main() {
       const Duration(seconds: 20),
     );
   });
+}
+
+/// Enough storage for the PKCE challenge, held in memory for one test.
+class _MemoryStorage extends GotrueAsyncStorage {
+  const _MemoryStorage();
+
+  static final Map<String, String> _items = {};
+
+  @override
+  Future<String?> getItem({required String key}) async => _items[key];
+
+  @override
+  Future<void> setItem({required String key, required String value}) async =>
+      _items[key] = value;
+
+  @override
+  Future<void> removeItem({required String key}) async => _items.remove(key);
 }
 
 /// The live repository with its client replaced and its ceiling shortened, so

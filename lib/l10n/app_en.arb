@@ -17,6 +17,7 @@
   "authContinueWithGoogle": "Continue with Google",
   "authOr": "or",
   "authContinueWithEmail": "Continue with email",
+  "authEmailCodeTimeout": "The reply took too long, so we do not know whether the code was sent. If one reaches you, use it; otherwise try again.",
   "authContinueAsGuest": "Continue as a guest",
   "verifyEmailTitle": "Check your email",
   "verifyEmailSubtitle": "We sent a 6-digit code to {email}",

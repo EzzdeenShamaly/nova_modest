@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'متابعة بالبريد الإلكتروني'**
   String get authContinueWithEmail;
 
+  /// Shown when the sign-in code request passed its ceiling. It claims no outcome: GoTrue sends the email before it answers, so the code may already be in her inbox. It deliberately does NOT say a new request invalidates an older code - that is a claim about GoTrue nobody has measured (owner, 2026-10-13).
+  ///
+  /// In ar, this message translates to:
+  /// **'طال انتظار الرد، ولا نعرف إن كان الرمز قد أُرسل. إن وصلكِ رمز فاستعمليه، وإلا أعيدي المحاولة.'**
+  String get authEmailCodeTimeout;
+
   /// Skips signing in. Browsing is public, so this simply returns to Home.
   ///
   /// In ar, this message translates to:

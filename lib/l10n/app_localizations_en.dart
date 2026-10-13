@@ -64,6 +64,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authContinueWithEmail => 'Continue with email';
 
   @override
+  String get authEmailCodeTimeout =>
+      'The reply took too long, so we do not know whether the code was sent. If one reaches you, use it; otherwise try again.';
+
+  @override
   String get authContinueAsGuest => 'Continue as a guest';
 
   @override
