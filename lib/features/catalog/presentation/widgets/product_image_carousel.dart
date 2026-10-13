@@ -9,10 +9,7 @@ import 'package:nova_modest/l10n/app_localizations.dart';
 /// placeholder is drawn — with no indicators, because one page has nothing to
 /// indicate. Supplying URLs later turns the carousel on with no other change.
 class ProductImageCarousel extends StatefulWidget {
-  const ProductImageCarousel({
-    required this.images,
-    super.key,
-  });
+  const ProductImageCarousel({required this.images, super.key});
 
   final List<String> images;
 
@@ -59,6 +56,13 @@ class _ProductImageCarouselState extends State<ProductImageCarousel> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stack) =>
                             const _ArtworkPlaceholder(size: _placeholderIcon),
+                        // The largest of the three, and the one she is looking
+                        // straight at: a blank page here is the product
+                        // (blocker 8).
+                        frameBuilder: (context, child, frame, _) =>
+                            frame == null
+                            ? const _ArtworkPlaceholder(size: _placeholderIcon)
+                            : child,
                       ),
                     ),
             ),
@@ -118,4 +122,3 @@ class _ArtworkPlaceholder extends StatelessWidget {
     ),
   );
 }
-

@@ -848,6 +848,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The account could not be deleted, though your photo has been removed. Please try again later.';
 
   @override
+  String get accountDeleteErrorTimeout =>
+      'The reply took too long, so we do not know whether the deletion went through. If it did, your next attempt will simply sign you out.';
+
+  @override
   String get accountDeleteErrorTechnical =>
       'The account could not be deleted because of a technical problem. Please try again later.';
 }

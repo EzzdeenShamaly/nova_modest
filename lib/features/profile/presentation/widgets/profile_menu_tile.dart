@@ -15,12 +15,15 @@ class ProfileMenuTile extends StatelessWidget {
     required this.onTap,
     this.value,
     this.destructive = false,
+    this.busy = false,
     super.key,
   });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+
+  /// Null while the row cannot be pressed — which is how [busy] disables it.
+  final VoidCallback? onTap;
 
   /// Shown before the chevron — the current language, on the one row that has
   /// something to report.
@@ -30,10 +33,23 @@ class ProfileMenuTile extends StatelessWidget {
   /// acts here rather than leading anywhere.
   final bool destructive;
 
+  /// This row's own request is in flight.
+  ///
+  /// The wait is drawn **here**, not over the menu: a request that hangs must
+  /// not take the rest of the account with it — her orders, her addresses and
+  /// her sign-out stay one tap away (blocker 8).
+  final bool busy;
+
   /// The design's 56pt row. Above the 48pt accessible minimum, and specific to
   /// this component rather than a value on the spacing scale
   /// (`12-flutter-design-system-guard.md` §5).
   static const double _rowHeight = 56;
+
+  /// Matches the spinner the sign-in and save buttons already draw, so a row
+  /// that is waiting looks the same as a button that is waiting. Component
+  /// measurements, not scale steps.
+  static const double _spinner = 20;
+  static const double _spinnerStroke = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +60,7 @@ class ProfileMenuTile extends StatelessWidget {
       button: true,
       label: label,
       child: InkWell(
-        onTap: onTap,
+        onTap: busy ? null : onTap,
         child: SizedBox(
           height: _rowHeight,
           child: Padding(
@@ -80,7 +96,15 @@ class ProfileMenuTile extends StatelessWidget {
                   ),
                   SizedBox(width: AppSpacing.xs),
                 ],
-                if (!destructive)
+                if (busy)
+                  SizedBox.square(
+                    dimension: _spinner,
+                    child: CircularProgressIndicator(
+                      strokeWidth: _spinnerStroke,
+                      color: foreground,
+                    ),
+                  )
+                else if (!destructive)
                   Icon(
                     // chevron_right is declared with matchTextDirection, so it
                     // mirrors to point at the end of the row in either

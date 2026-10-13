@@ -121,24 +121,29 @@ void main() {
     ).called(1);
   });
 
-  testWidgets('every action is disabled while a request is in flight', (
+  testWidgets('the request is locked while in flight — but not the way out', (
     tester,
   ) async {
     withState(const SignInSubmitting());
 
     await pump(tester, settle: false);
 
+    // Sending the same address twice is what the lock is for.
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNull,
     );
-    // The guest link too: it was the Google button that used to be asserted
-    // here, and "every action" has to keep meaning every action after a
-    // control is removed.
+
+    // **«المتابعة كزائر» stays live.** This assertion used to read the other
+    // way, under the heading "every action is disabled" — a generalisation
+    // written when the Google button was removed, not a decision about this
+    // control. It made the one exit depend on a reply that may never come: with
+    // the backend unreachable she could neither sign in nor browse, and only
+    // closing the app got her out (blocker 8).
     expect(
       tester.widget<TextButton>(find.byType(TextButton)).onPressed,
-      isNull,
+      isNotNull,
     );
   });
 

@@ -59,6 +59,11 @@ class ProductThumbnail extends StatelessWidget {
                   imageUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stack) => placeholder,
+                  // And for a picture that simply has not arrived yet — the
+                  // same stand-in, because an empty square reads as a defect
+                  // rather than as waiting (blocker 8).
+                  frameBuilder: (context, child, frame, _) =>
+                      frame == null ? placeholder : child,
                 ),
         ),
       ),

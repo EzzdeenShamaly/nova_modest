@@ -53,27 +53,29 @@ class ProfileScreen extends StatelessWidget {
         create: (_) => sl<AccountDeletionBloc>(),
         child: BlocConsumer<AccountDeletionBloc, AccountDeletionState>(
           listener: _onDeletion,
-          builder: (context, deletion) => deletion is AccountDeletionInProgress
-              // Nothing on this screen may be touched while an irreversible
-              // request is in flight.
-              ? const Center(child: CircularProgressIndicator())
-              : BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) => switch (state) {
-                    AuthAuthenticated(:final user) => _Body(user: user),
-                    // Signing out is in flight; the redirect follows in a
-                    // moment.
-                    AuthLoading() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    // Unreachable behind the gate, and listed rather than
-                    // caught by a wildcard so a new AuthState is a compile
-                    // error here.
-                    AuthInitial() ||
-                    AuthCheckInProgress() ||
-                    AuthUnauthenticated() ||
-                    AuthFailureState() => const SizedBox.shrink(),
-                  },
-                ),
+          // **The wait belongs on the row, not over the menu.** This used to
+          // replace the whole screen with one spinner, so that an irreversible
+          // request could not be pressed twice — but it took her orders, her
+          // addresses and her sign-out with it, and a request that hangs left
+          // closing the app as the only way back (blocker 8). The second press
+          // is prevented where it is made: `ProfileMenuTile(busy:)` drops the
+          // row's own `onTap`, and `AccountDeletionConfirmed` is `droppable`.
+          builder: (context, deletion) => BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) => switch (state) {
+              AuthAuthenticated(:final user) => _Body(
+                user: user,
+                deleting: deletion is AccountDeletionInProgress,
+              ),
+              // Signing out is in flight; the redirect follows in a moment.
+              AuthLoading() => const Center(child: CircularProgressIndicator()),
+              // Unreachable behind the gate, and listed rather than caught by a
+              // wildcard so a new AuthState is a compile error here.
+              AuthInitial() ||
+              AuthCheckInProgress() ||
+              AuthUnauthenticated() ||
+              AuthFailureState() => const SizedBox.shrink(),
+            },
+          ),
         ),
       ),
     );
@@ -105,9 +107,12 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.user});
+  const _Body({required this.user, this.deleting = false});
 
   final User user;
+
+  /// Her deletion is in flight. Only the row that asked for it shows the wait.
+  final bool deleting;
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +178,7 @@ class _Body extends StatelessWidget {
               icon: Icons.delete_forever_outlined,
               label: l10n.accountDelete,
               destructive: true,
+              busy: deleting,
               onTap: () => _confirmDeletion(context),
             ),
           ],

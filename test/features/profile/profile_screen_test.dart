@@ -255,14 +255,15 @@ void main() {
     /// Replays [states] from the deletion bloc, as its listener would see them.
     Future<void> pumpWithDeletion(
       WidgetTester tester,
-      List<AccountDeletionState> states,
-    ) async {
+      List<AccountDeletionState> states, {
+      bool settle = true,
+    }) async {
       whenListen(
         deletionBloc,
         Stream<AccountDeletionState>.fromIterable(states),
         initialState: const AccountDeletionIdle(),
       );
-      await pump(tester, const AuthAuthenticated(user));
+      await pump(tester, const AuthAuthenticated(user), settle: settle);
     }
 
     testWidgets('is the last row, in the error colour', (tester) async {
@@ -274,6 +275,48 @@ void main() {
           .toList();
       expect(tiles.last.label, 'حذف الحساب');
       expect(tiles.last.destructive, isTrue);
+    });
+
+    testWidgets('a deletion in flight leaves the rest of the menu reachable', (
+      tester,
+    ) async {
+      // Not settled: the row's spinner animates forever, so `pumpAndSettle`
+      // would time out instead of asserting.
+      await pumpWithDeletion(tester, [
+        const AccountDeletionInProgress(),
+      ], settle: false);
+      await tester.pump();
+
+      // **The whole tab used to be replaced by one centred spinner.** On a hung
+      // request that took her orders, her addresses and her sign-out with it,
+      // and closing the app was the only way back (blocker 8). The wait belongs
+      // on the row that is waiting.
+      expect(find.text('طلباتي'), findsOneWidget);
+      expect(find.text('العناوين'), findsOneWidget);
+      expect(find.text('تسجيل الخروج'), findsOneWidget);
+
+      final tiles = tester
+          .widgetList<ProfileMenuTile>(find.byType(ProfileMenuTile))
+          .toList();
+      expect(tiles.last.label, 'حذف الحساب');
+      expect(tiles.last.busy, isTrue, reason: 'the row carries the wait');
+      expect(tiles.first.busy, isFalse, reason: 'and only that row');
+
+      // Tappability is read off the ink well rather than the field: the rule
+      // "busy means it cannot be pressed" belongs to the row, so that is where
+      // it is asserted — and it is what she can actually do.
+      InkWell wellOf(int index) => tester.widget<InkWell>(
+        find.descendant(
+          of: find.byType(ProfileMenuTile).at(index),
+          matching: find.byType(InkWell),
+        ),
+      );
+      expect(wellOf(tiles.length - 1).onTap, isNull);
+      expect(
+        wellOf(0).onTap,
+        isNotNull,
+        reason: 'her orders stay one tap away',
+      );
     });
 
     testWidgets('the dialog says what goes and what stays, before any press', (
@@ -368,7 +411,7 @@ void main() {
       verifyNever(() => authBloc.add(any()));
     });
 
-    testWidgets('nothing on the screen can be touched while it runs', (
+    testWidgets('the deletion cannot be asked for twice while it runs', (
       tester,
     ) async {
       whenListen(
@@ -378,8 +421,21 @@ void main() {
       );
       await pump(tester, const AuthAuthenticated(user), settle: false);
 
+      // This test used to assert that **no** row survived — the screen replaced
+      // itself with one spinner so that an irreversible request could not be
+      // repeated. The protection was right and its blast radius was not: it
+      // also took her orders, her addresses and her sign-out, and a request
+      // that hung left closing the app as the only exit (blocker 8). The guard
+      // now sits on the row that owns the request.
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.byType(ProfileMenuTile), findsNothing);
+      final rows = find.byType(ProfileMenuTile);
+      final deleteWell = tester.widget<InkWell>(
+        find.descendant(
+          of: rows.at(tester.widgetList(rows).length - 1),
+          matching: find.byType(InkWell),
+        ),
+      );
+      expect(deleteWell.onTap, isNull);
     });
   });
 

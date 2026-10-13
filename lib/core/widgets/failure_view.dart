@@ -120,6 +120,11 @@ String _coded(
   'admin_check_failed' ||
   'unexpected' ||
   'method_not_allowed' => l10n.accountDeleteErrorTechnical,
+  // Not one of the function's codes — the app's own, for the case where the
+  // function never answered. It is listed beside them because it reaches her
+  // the same way, and it is worded as the only one of the group that claims no
+  // outcome: the deletion may have completed after we stopped waiting.
+  'account_delete_timeout' => l10n.accountDeleteErrorTimeout,
   _ => _orderRefusal(code, subject, l10n),
 };
 

@@ -1,11 +1,9 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nova_modest/core/widgets/avatar_circle.dart';
 
 import '../../helpers/pump_app.dart';
+import '../../helpers/slow_network_image.dart';
 
 /// **There are two ways a picture can be absent, and only one of them was
 /// tested.**
@@ -22,32 +20,10 @@ import '../../helpers/pump_app.dart';
 ///
 /// Every network image added to this app from here on gets both.
 void main() {
-  late StreamController<List<int>> body;
-
-  /// Installs the slow provider for one test and takes it back down **inside
-  /// the test body**: the framework checks that painting's debug variables are
-  /// unset the moment the body returns, which is before any `tearDown` runs.
-  ///
-  /// `debugNetworkImageHttpClientProvider`, not `HttpOverrides`: `NetworkImage`
-  /// builds one `HttpClient` per process and keeps it in a static, so whichever
-  /// override was current when the *first* image in the suite loaded is the one
-  /// that sticks — injection would depend on test order. This hook is read on
-  /// every load, and exists for exactly this.
-  Future<void> withSlowNetwork(Future<void> Function() run) async {
-    body = StreamController<List<int>>();
-    debugNetworkImageHttpClientProvider = () => _FakeHttpClient(body.stream);
-    try {
-      await run();
-    } finally {
-      debugNetworkImageHttpClientProvider = null;
-      if (!body.isClosed) await body.close();
-    }
-  }
-
   testWidgets('the letter stands in while the picture is still downloading', (
     tester,
   ) async {
-    await withSlowNetwork(() async {
+    await withSlowNetworkImages(() async {
       await tester.pumpApp(
         const AvatarCircle(
           imageUrl: 'https://example.invalid/avatars/u1/avatar',
@@ -68,7 +44,7 @@ void main() {
   testWidgets('and steps aside the moment there is a frame to paint', (
     tester,
   ) async {
-    await withSlowNetwork(() async {
+    await withSlowNetworkImages(() async {
       await tester.pumpApp(
         const AvatarCircle(
           imageUrl: 'https://example.invalid/avatars/u1/avatar',
@@ -100,66 +76,4 @@ void main() {
       );
     });
   });
-}
-
-/// Enough of `HttpClient` for `NetworkImage`, and no more: it asks for a URL,
-/// closes the request, and reads the response as a stream.
-class _FakeHttpClient extends Fake implements HttpClient {
-  _FakeHttpClient(this._body);
-
-  final Stream<List<int>> _body;
-
-  @override
-  bool autoUncompress = false;
-
-  @override
-  Future<HttpClientRequest> getUrl(Uri url) async => _FakeRequest(_body);
-}
-
-class _FakeRequest extends Fake implements HttpClientRequest {
-  _FakeRequest(this._body);
-
-  final Stream<List<int>> _body;
-
-  @override
-  final HttpHeaders headers = _FakeHeaders();
-
-  @override
-  Future<HttpClientResponse> close() async => _FakeResponse(_body);
-}
-
-class _FakeResponse extends Fake implements HttpClientResponse {
-  _FakeResponse(this._body);
-
-  final Stream<List<int>> _body;
-
-  @override
-  int get statusCode => HttpStatus.ok;
-
-  /// Unknown length, which is also what Supabase's storage answers with — and
-  /// it is what leaves `loadingProgress` null until bytes actually arrive.
-  @override
-  int get contentLength => -1;
-
-  @override
-  HttpClientResponseCompressionState get compressionState =>
-      HttpClientResponseCompressionState.notCompressed;
-
-  @override
-  StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) => _body.listen(
-    onData,
-    onError: onError,
-    onDone: onDone,
-    cancelOnError: cancelOnError,
-  );
-}
-
-class _FakeHeaders extends Fake implements HttpHeaders {
-  @override
-  void add(String name, Object value, {bool preserveHeaderCase = false}) {}
 }

@@ -850,6 +850,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر حذف الحساب، وقد حُذفت صورتكِ الشخصية. أعيدي المحاولة لاحقاً.';
 
   @override
+  String get accountDeleteErrorTimeout =>
+      'طال انتظار الرد، ولا نعرف إن تمّ الحذف أم لا. إن كان قد تمّ، فسيُسجَّل خروجكِ تلقائياً عند المحاولة التالية.';
+
+  @override
   String get accountDeleteErrorTechnical =>
       'تعذّر إتمام حذف الحساب لخلل تقني. أعيدي المحاولة لاحقاً.';
 }

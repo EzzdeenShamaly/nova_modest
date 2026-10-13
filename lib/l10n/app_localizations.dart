@@ -1592,6 +1592,12 @@ abstract class AppLocalizations {
   /// **'تعذّر حذف الحساب، وقد حُذفت صورتكِ الشخصية. أعيدي المحاولة لاحقاً.'**
   String get accountDeleteErrorAccount;
 
+  /// Shown when the delete-account request passed its ceiling. It deliberately claims no outcome: giving up on the reply does not stop the function, so the account may already be gone. The other deletion messages say what happened; this one says only that we stopped waiting.
+  ///
+  /// In ar, this message translates to:
+  /// **'طال انتظار الرد، ولا نعرف إن تمّ الحذف أم لا. إن كان قد تمّ، فسيُسجَّل خروجكِ تلقائياً عند المحاولة التالية.'**
+  String get accountDeleteErrorTimeout;
+
   /// Any other delete-account code: not_configured, admin_check_failed, unexpected, method_not_allowed.
   ///
   /// In ar, this message translates to:

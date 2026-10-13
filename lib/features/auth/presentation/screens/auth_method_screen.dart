@@ -156,7 +156,13 @@ class _AuthMethodViewState extends State<_AuthMethodView> {
                   SizedBox(height: AppSpacing.l),
                   TextButton(
                     // Browsing is public, so "continue as guest" is simply Home.
-                    onPressed: busy ? null : () => context.go(Routes.homePath),
+                    //
+                    // **Never disabled, not even mid-request.** The code request
+                    // has no ceiling worth trusting on a bad network, and while
+                    // it is outstanding this is the only way off the screen:
+                    // locking it made closing the app the sole exit, which is
+                    // worse than locking the entrance (blocker 8).
+                    onPressed: () => context.go(Routes.homePath),
                     child: Text(l10n.authContinueAsGuest),
                   ),
                 ],

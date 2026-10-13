@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
@@ -65,6 +66,22 @@ class SupabaseAuthRepository implements AuthRepository {
   /// the session itself carries, so it is what a degraded read can still show.
   @visibleForTesting
   String? get currentEmail => client.auth.currentUser?.email;
+
+  /// How long the two requests a shopper cannot walk away from are allowed to
+  /// wait — the sign-in code and account deletion (blocker 8).
+  ///
+  /// Twenty seconds, not the eight the session check uses, and the difference is
+  /// deliberate. The session check runs before she has asked for anything, and
+  /// giving up early there costs her nothing but a thinner screen. These two she
+  /// asked for by pressing, and **a ceiling cuts the waiting, not the work**: a
+  /// live deletion was measured at over five seconds on a degraded link
+  /// (2026-10-12), so a tight bound here would report failure on a request that
+  /// succeeded.
+  ///
+  /// A seam, so the suite can prove the behaviour without spending twenty
+  /// seconds; the value itself is pinned by its own test.
+  @visibleForTesting
+  Duration get interactiveTimeout => const Duration(seconds: 20);
 
   @override
   Future<Result<User>> signInWithGoogle() async {
@@ -217,7 +234,23 @@ class SupabaseAuthRepository implements AuthRepository {
       // The dashboard's `delete-account` Edge Function. Identity is the
       // session's own token, which the client attaches; the body is empty on
       // purpose, because the function never reads identity from it.
-      await _client.functions.invoke('delete-account', body: const {});
+      await _client.functions
+          .invoke('delete-account', body: const {})
+          .timeout(interactiveTimeout);
+    } on TimeoutException {
+      // **The one failure that must not claim an outcome.** Giving up on the
+      // reply does not stop the function: by the time this returns her account
+      // may already be gone. Every other failure here says what happened;
+      // this one says only that we stopped waiting, and it must not fall
+      // through to the `NetworkFailure` a `TimeoutException` maps to, which
+      // renders as "no internet connection" — the app telling her the account
+      // is still there when it may not be.
+      return const Err(
+        ValidationFailure(
+          'delete-account did not answer in time',
+          code: 'account_delete_timeout',
+        ),
+      );
     } catch (error) {
       // 401 → UnauthorizedFailure, anything else keeps its code
       // (`_functionFailure` in the mapper).

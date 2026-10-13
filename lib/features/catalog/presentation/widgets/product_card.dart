@@ -15,11 +15,7 @@ import 'package:nova_modest/l10n/app_localizations.dart';
 /// driven by `Product.isSoldOut`, so both screens agree without either knowing
 /// about the other.
 class ProductCard extends StatelessWidget {
-  const ProductCard({
-    required this.product,
-    this.onTap,
-    super.key,
-  });
+  const ProductCard({required this.product, this.onTap, super.key});
 
   final Product product;
   final VoidCallback? onTap;
@@ -104,6 +100,14 @@ class _Artwork extends StatelessWidget {
         imageUrl!,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stack) => const _ArtworkPlaceholder(),
+        // **A picture that has not arrived yet is not a picture.** Without this
+        // the card drew nothing at all until the first frame decoded, so a grid
+        // on a slow connection was a page of white rectangles — the same defect
+        // `AvatarCircle` was given a `frameBuilder` for (blocker 8). `frame`,
+        // not `loadingBuilder`: the progress callback is handed null until the
+        // first chunk, which reads as "loaded" and paints an empty image.
+        frameBuilder: (context, child, frame, _) =>
+            frame == null ? const _ArtworkPlaceholder() : child,
       );
     }
     return const _ArtworkPlaceholder();

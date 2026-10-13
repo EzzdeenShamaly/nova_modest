@@ -324,5 +324,6 @@
   "accountDeleteErrorAdmin": "Admin accounts cannot be deleted from the app.",
   "accountDeleteErrorAvatar": "Your photo could not be removed, so nothing was deleted. Please try again later.",
   "accountDeleteErrorAccount": "The account could not be deleted, though your photo has been removed. Please try again later.",
+  "accountDeleteErrorTimeout": "The reply took too long, so we do not know whether the deletion went through. If it did, your next attempt will simply sign you out.",
   "accountDeleteErrorTechnical": "The account could not be deleted because of a technical problem. Please try again later."
 }
