@@ -628,8 +628,38 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   deleting it would unlink any order rather than destroy it — the same end state
   as any shopper deleting her own account.
 
-- **BLOCKER 8 — three places where a hung request has no way out but killing
-  the app** (found by sweep 2026-10-12, scoped by the owner the same day).
+- **BLOCKER 8 — 2026-10-13: two and a half of the three are built; one half
+  waits on a decision** (found by sweep 2026-10-12, scoped by the owner the same
+  day).
+
+  **Built:** the guest button is never disabled; account deletion has a
+  twenty-second ceiling, an abstaining message and a spinner on its own row
+  instead of over the tab; and all three product images carry a `frameBuilder`.
+  Every assertion failed first on the old code — the guest button came back
+  null, the menu came back empty, the deletion hung for the full 45-second test
+  timeout — and eight mutations were all caught (`857c4e2`).
+
+  **Open: the ceiling on `requestEmailCode`.** Two things found while writing
+  its test changed the question the owner asked.
+
+  1. `requestEmailCode` **always returns `Ok`**, deliberately — a distinct
+     answer for an unknown address would be an account-enumeration oracle
+     (`supabase_auth_repository.dart:132`). So a ceiling there has a third
+     option the plan did not consider: give up waiting and move her to the
+     code-entry screen, where *resend* already exists, rather than report
+     anything. That keeps one code path and the anti-enumeration intent; its
+     cost is that she is asked for a code that may never arrive.
+  2. The loopback test cannot reach the network at all: `signInWithOtp` calls
+     `_generatePKCECodeChallenge()` **before** the request, and a bare
+     `SupabaseClient` has no async storage, so it throws an `AssertionError` in
+     3 ms with zero requests sent. Testing this needs a client given a stub
+     `pkceAsyncStorage`.
+
+  The side effect the owner asked about is real: GoTrue sends the email before
+  it answers, so a lost reply means the code may well be in her inbox while the
+  app says the request failed.
+
+  The rest of the original scoping follows.
 
   The sweep below found that **two timeouts exist in the whole app and both are
   on the session check**. The owner's criterion for what that makes a blocker
