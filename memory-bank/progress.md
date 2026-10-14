@@ -225,6 +225,41 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Done
 
+- **BLOCKERS 4 and 5's web half — DONE 2026-10-14.** The two pages Play requires
+  are live, as a separate public repository (`nova-modest-pages`) so the app's
+  own stays private:
+
+  - `https://ezzdeenshamaly.github.io/nova-modest-pages/privacy/`
+  - `https://ezzdeenshamaly.github.io/nova-modest-pages/delete-account/`
+
+  Written from measured facts rather than a template: one Android permission
+  (`INTERNET`), no analytics, tracking or crash-reporting package anywhere in
+  `pubspec.yaml`, no card data because payment is cash on delivery, Android's own
+  photo picker so only the chosen image is handed over, the avatar's one-hour
+  signed link, the session in the device's encrypted keystore, and Supabase as
+  the only third party. The deletion page states plainly what does **not** go:
+  past orders stay with the shop, unlinked, with the contact copy saved against
+  each one. Email requests are answered **within 30 days** — the owner's number,
+  chosen because it can be met by hand; a drafted promise to reply to every
+  request was struck before it became a commitment published on a public site.
+
+  **No external resource of any kind**, verified against the served bytes: zero
+  absolute URLs, zero `<script>`, zero `@import`, zero `url()`. A privacy page
+  that pulls a font from a third party hands that party the reader's IP, which
+  the page would then have to disclose. The pages say this about themselves, and
+  the claim was checked rather than assumed.
+
+  **A defect was shipped here and caught by that check.** Both pages went
+  through a PowerShell substitution step to insert the contact address, and
+  `Get-Content -Raw` in Windows PowerShell decodes with the machine's ANSI code
+  page — 1256 here — so the BOM-less UTF-8 Arabic was read as cp1256 and written
+  back as UTF-8 over itself. Every Arabic character was destroyed, and published.
+  Only `index.html`, which never went through that step, was unaffected — and it
+  was the page the owner had opened, so the breakage was invisible from the
+  outside. The repair was the exact inverse (`text.encode('cp1256')` recovers the
+  original bytes) with assertions before writing, not a rewrite. **Rule from it:
+  never edit Arabic text on this machine with `Get-Content`/`Set-Content`.**
+
 - **A thin identity can no longer overwrite a real profile** (2026-10-12).
   Raised as a debt and overruled by the owner the same day: *not* a debt but a
   data-loss defect, because the flaky DNS proved a thin identity arrives without
@@ -604,6 +639,16 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Not Started
 
+- **Waiting on the dashboard: add `identity_check_unavailable` to the codes
+  table** (2026-10-14). The owner is passing on the fix for `delete-account`'s
+  401: separate a failed `caller.auth.getUser()` call from an absent user, so a
+  transient failure in the function's own identity check answers **503
+  `identity_check_unavailable`** instead of `401 not_signed_in` and stops
+  signing out shoppers whose session is fine. Nothing here has to change for it
+  to be safe — an unlisted code already falls through to the technical message
+  rather than a sign-out — but the message is better with its own line in
+  `failure_view.dart`'s `_coded`. One line, once that lands.
+
 - **Probe accounts are accumulating in production `auth.users`** (seen
   2026-10-12 in the dashboard by the owner). `as92+deltest-1789983178@...`
   survives from the dashboard side's `probe_delete_account.py`. The suffix is a
@@ -773,7 +818,12 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   shopper sees while it hangs — and the decision then on whether this travels
   with the two leftovers above or becomes a blocker of its own.
 
-- **A thin identity never fills itself in** (2026-10-12). `AuthCheckRequested`
+- **A thin identity never fills itself in — STOPPED, not pending** (2026-10-12,
+  stopped by the owner 2026-10-14). He had already approved building the resume
+  hook and then withdrew it, applying his own rule to his own decision: from
+  here to release nothing is built unless it blocks a release, and this one is
+  cosmetic — a name and a picture — and clears itself when the app is closed and
+  reopened. Not an oversight and not a queue item: a decision, with a date. `AuthCheckRequested`
   is dispatched **once**, from `app.dart:46`, and nothing re-reads the profile
   afterwards — not on resume, not when a later request succeeds. So a shopper
   who launched on a dead network keeps the email-derived name and no photograph
