@@ -377,7 +377,23 @@ void main() {
       verifyNever(() => authBloc.add(const AuthLogoutRequested()));
     });
 
-    testWidgets('an expired session signs her out, as everywhere else', (
+    testWidgets('success says so, and the word survives the redirect', (
+      tester,
+    ) async {
+      await pumpWithDeletion(tester, const [
+        AccountDeletionInProgress(),
+        AccountDeletionSucceeded(),
+      ]);
+
+      // **Both outcomes used to end on the sign-in screen in silence** — they
+      // are indistinguishable there, measured on a device 2026-10-12 — so she
+      // could only guess which had happened to an account she cannot get back.
+      // A `ScaffoldMessenger` above the router outlives the redirect, so the
+      // sentence is still on screen when she lands.
+      expect(find.text('تم حذف حسابكِ.'), findsOneWidget);
+    });
+
+    testWidgets('a 401 signs her out and refuses to guess the outcome', (
       tester,
     ) async {
       await pumpWithDeletion(tester, const [
@@ -386,6 +402,21 @@ void main() {
 
       verify(() => authBloc.add(const AuthLogoutRequested())).called(1);
       verifyNever(() => authBloc.add(const AuthAccountDeleted()));
+
+      // It claims neither "your session expired" nor "the deletion failed".
+      // The function answers 401 before it touches anything, so nothing was
+      // deleted — but a transient failure inside its own identity check
+      // produces the same 401 (`delete-account/index.ts:70-72`), so the app
+      // says what it knows and names the one check she can actually make.
+      // Signing in again proves nothing by itself: `shouldCreateUser` is true,
+      // so a deleted account is silently replaced by a new empty one.
+      expect(
+        find.text(
+          'سجّلنا خروجكِ، ولا نعرف إن تمّ حذف حسابكِ. سجّلي الدخول من '
+          'جديد: إن وجدتِ طلباتكِ وعناوينكِ فالحساب لم يُحذف.',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a refusal is reported and the account left as it was', (

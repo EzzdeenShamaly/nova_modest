@@ -85,18 +85,39 @@ class ProfileScreen extends StatelessWidget {
   /// both session-ending cases: the session state goes unauthenticated,
   /// `/profile` is protected, and the guard moves her to sign-in.
   void _onDeletion(BuildContext context, AccountDeletionState state) {
+    final l10n = AppLocalizations.of(context);
+
+    /// Says it on the way out.
+    ///
+    /// `ScaffoldMessenger` lives above the router, so the bar outlives the
+    /// redirect and is still on screen when she lands on sign-in. **Both of
+    /// these outcomes used to arrive there in silence** — measured on a device
+    /// 2026-10-12, success and a 401 are indistinguishable once the redirect
+    /// has happened — which left her guessing about an account she cannot get
+    /// back.
+    void sayOnTheWayOut(String message) => ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(message), duration: _noticeDuration),
+      );
+
     switch (state) {
       case AccountDeletionSucceeded():
+        // This one may state the outcome: the function answered 200.
+        sayOnTheWayOut(l10n.accountDeletedNotice);
         // The repository already cleared the device's session; this only moves
         // the app's own state.
         context.read<AuthBloc>().add(const AuthAccountDeleted());
       case AccountDeletionFailed(failure: UnauthorizedFailure()):
-        // An expired session, handled as every expired session is: signed out
-        // and back to sign-in, rather than a message asking her to do that by
-        // hand (owner, 2026-09-21). Nothing was deleted.
+        // Signed out, as every lost session is (owner, 2026-09-21) — but the
+        // notice claims neither that the session expired nor that the deletion
+        // failed. The function answers 401 before it touches anything
+        // (`delete-account/index.ts:70-72`), so on that reading nothing was
+        // deleted; a transient failure inside its own identity check produces
+        // the very same 401, and the app cannot tell the two apart from here.
+        sayOnTheWayOut(l10n.accountDeleteSignedOutNotice);
         context.read<AuthBloc>().add(const AuthLogoutRequested());
       case AccountDeletionFailed(:final failure):
-        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(failureMessage(failure, l10n))));
@@ -104,6 +125,14 @@ class ProfileScreen extends StatelessWidget {
         break;
     }
   }
+
+  /// Longer than the four seconds a snack bar defaults to.
+  ///
+  /// These two sentences are the only account she has of something
+  /// irreversible, and they are read on a screen she has just been moved to
+  /// without asking — not beside the control she pressed. Specific to this one
+  /// use, so it lives here (`12-flutter-design-system-guard` §5).
+  static const Duration _noticeDuration = Duration(seconds: 8);
 }
 
 class _Body extends StatelessWidget {

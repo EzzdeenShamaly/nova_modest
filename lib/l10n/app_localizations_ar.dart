@@ -843,6 +843,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'سيُحذف حسابكِ نهائياً، ومعه ملفكِ الشخصي وعناوينكِ المحفوظة وصورتكِ الشخصية، ولا يمكن التراجع عن ذلك.\n\nأما طلباتكِ السابقة فتبقى لدى المتجر دون ربطٍ بحسابكِ، بما فيها الاسم والهاتف والعنوان المسجّلة مع كل طلب.';
 
   @override
+  String get accountDeletedNotice => 'تم حذف حسابكِ.';
+
+  @override
+  String get accountDeleteSignedOutNotice =>
+      'سجّلنا خروجكِ، ولا نعرف إن تمّ حذف حسابكِ. سجّلي الدخول من جديد: إن وجدتِ طلباتكِ وعناوينكِ فالحساب لم يُحذف.';
+
+  @override
   String get accountDeleteErrorAdmin => 'حسابات الإدارة لا تُحذف من التطبيق.';
 
   @override

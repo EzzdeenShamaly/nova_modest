@@ -322,6 +322,8 @@
   },
   "accountDelete": "Delete account",
   "accountDeleteBody": "Your account will be permanently deleted, together with your profile, your saved addresses and your photo. This cannot be undone.\n\nYour past orders stay with the shop, no longer linked to your account, including the name, phone and address recorded with each order.",
+  "accountDeletedNotice": "Your account has been deleted.",
+  "accountDeleteSignedOutNotice": "We signed you out, and we do not know whether your account was deleted. Sign in again: if your orders and addresses are there, it was not.",
   "accountDeleteErrorAdmin": "Admin accounts cannot be deleted from the app.",
   "accountDeleteErrorAvatar": "Your photo could not be removed, so nothing was deleted. Please try again later.",
   "accountDeleteErrorAccount": "The account could not be deleted, though your photo has been removed. Please try again later.",

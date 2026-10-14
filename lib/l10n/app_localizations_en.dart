@@ -840,6 +840,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account will be permanently deleted, together with your profile, your saved addresses and your photo. This cannot be undone.\n\nYour past orders stay with the shop, no longer linked to your account, including the name, phone and address recorded with each order.';
 
   @override
+  String get accountDeletedNotice => 'Your account has been deleted.';
+
+  @override
+  String get accountDeleteSignedOutNotice =>
+      'We signed you out, and we do not know whether your account was deleted. Sign in again: if your orders and addresses are there, it was not.';
+
+  @override
   String get accountDeleteErrorAdmin =>
       'Admin accounts cannot be deleted from the app.';
 

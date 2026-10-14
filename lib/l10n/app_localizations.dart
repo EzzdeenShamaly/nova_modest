@@ -1580,6 +1580,18 @@ abstract class AppLocalizations {
   /// **'سيُحذف حسابكِ نهائياً، ومعه ملفكِ الشخصي وعناوينكِ المحفوظة وصورتكِ الشخصية، ولا يمكن التراجع عن ذلك.\n\nأما طلباتكِ السابقة فتبقى لدى المتجر دون ربطٍ بحسابكِ، بما فيها الاسم والهاتف والعنوان المسجّلة مع كل طلب.'**
   String get accountDeleteBody;
 
+  /// Shown on the sign-in screen after a deletion the function confirmed with 200. This one may state the outcome, because it is known.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم حذف حسابكِ.'**
+  String get accountDeletedNotice;
+
+  /// Shown on the sign-in screen when the deletion answered 401. It claims neither a lost session nor a failed deletion: the function answers 401 before it touches anything, but a transient failure in its own identity check produces the same 401. It names the only check she can make, because signing in proves nothing by itself - shouldCreateUser is true, so a deleted account is silently replaced by a new empty one.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّلنا خروجكِ، ولا نعرف إن تمّ حذف حسابكِ. سجّلي الدخول من جديد: إن وجدتِ طلباتكِ وعناوينكِ فالحساب لم يُحذف.'**
+  String get accountDeleteSignedOutNotice;
+
   /// delete-account refused with admin_account (403).
   ///
   /// In ar, this message translates to:
