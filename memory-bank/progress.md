@@ -683,6 +683,30 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Not Started
 
+- **No order screen can show a product picture** (measured 2026-10-17 on a
+  device, then traced to the query). `_orderColumns` in
+  `supabase_order_repository.dart:45` asks `order_items` for
+  `product_id, product_name, unit_price, colour_id, colour_name, size,
+  quantity` — and nothing else. There is no image column on the snapshot and no
+  join to `products`, so `item.product.imageUrl` is always null and
+  `ProductThumbnail` draws its hanger in every row, on both «طلباتي» and the
+  order detail.
+
+  **Not a bug: a consequence of the snapshot.** `order_items` deliberately
+  freezes the name, price and quantity so a later catalogue edit cannot change a
+  past order, which is what the published terms promise. An image was never part
+  of that snapshot.
+
+  **The decision it needs, when someone wants pictures there:** join `products`
+  by `product_id` and show the *current* photograph — cheap, and what every shop
+  does — accepting that the picture may no longer be the one she bought; or add
+  an image column to the snapshot, which is the dashboard's migration to write
+  and only helps orders placed after it. **Not built: nobody has asked for it,
+  and the screen is honest without it.**
+
+  Noticed because the Play screenshot of «طلباتي» is three grey hangers. The
+  listing can use a different fourth screen without touching the app.
+
 - **Onboarding artwork — conditional, not open-ended** (2026-10-14). The three
   onboarding slides draw a warm band and nothing else. `OnboardingSlide.image`
   exists, is optional, and `onboarding_screen.dart` has never passed it: the
