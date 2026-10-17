@@ -9,7 +9,7 @@
          governed by android:dataExtractionRules, which this app does not
          define. -->
     <application
-        android:label="nova_modest"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

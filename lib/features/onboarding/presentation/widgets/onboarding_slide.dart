@@ -162,23 +162,19 @@ class _ImageArea extends StatelessWidget {
 class _ArtworkPlaceholder extends StatelessWidget {
   const _ArtworkPlaceholder();
 
-  /// Sized to read at a glance across a band ~530pt tall. Specific to this one
-  /// element on this one screen and used nowhere else, so it stays local rather
-  /// than joining a shared scale (`12-flutter-design-system-guard.md` §5).
-  static const double _iconSize = 64;
-
+  /// **A warm band, and deliberately nothing in it.**
+  ///
+  /// It used to centre `Icons.photo_size_select_actual_outlined` here — which
+  /// is the glyph Android itself shows for an image that failed to load. The
+  /// intent was "artwork is not ready yet"; what every new shopper actually
+  /// read, on the first three screens she ever sees, was "this app is broken"
+  /// (seen on a device 2026-10-14, and it is why this changed).
+  ///
+  /// An empty band under the gradient reads as a design decision. A broken
+  /// picture does not. When real photographs arrive, [OnboardingSlide.image]
+  /// is the one parameter to pass and nothing here relayouts.
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.secondary,
-      child: Center(
-        child: Icon(
-          Icons.photo_size_select_actual_outlined,
-          size: _iconSize,
-          color: AppColors.subtle,
-          semanticLabel: '',
-        ),
-      ),
-    );
+    return const ColoredBox(color: AppColors.secondary);
   }
 }

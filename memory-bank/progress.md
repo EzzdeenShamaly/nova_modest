@@ -225,6 +225,50 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 ## Done
 
+- **BLOCKER 2 — SETTLED 2026-10-14: the app is signed, named and marked.**
+
+  **The upload key** is at `%USERPROFILE%\FlutterKeys\novamodest-upload.jks`,
+  alias `upload`, RSA 2048, valid to 1 March 2054, outside the project tree and
+  ignored by git in both repositories it could have touched. `key.properties`
+  carries it into the build and is invisible to git
+  (`android/.gitignore:12`, checked with `git check-ignore`, not by eye). The
+  Gradle read is **conditional on purpose**: a clone or CI without the file
+  still builds, signed with the debug key, rather than failing to configure —
+  Play refuses such a build at upload, which is where that failure belongs.
+  Proven with two tools: `apksigner` on the APK and `jarsigner` on the bundle
+  both report `CN=Ezzdeen Shamali, O=Nova Modest, L=Gaza, ST=Gaza, C=PS`, and
+  jarsigner's verdict is `jar verified`.
+
+  **The launcher icon was still the Flutter logo**, found by looking at the PNG
+  rather than at its file size. It is now the Arabic letter **ن** in
+  `AppColors.accent` on `AppColors.primaryText` — both straight from the closed
+  palette, and the glyph is the app's own bundled IBM Plex Sans Arabic.
+
+  The owner's correction decided the letter: a Latin **N** on an Arabic shop
+  says nothing to the shopper reading it. Both were rendered at a true 48 px and
+  compared by eye; the dot of **ن** survives cleanly at that size, so the
+  Arabic letter won on legibility rather than on sentiment. Three fits were
+  compared and 0.74 chosen — 0.66 reads light, 0.82 crowds the dot against the
+  bowl. Each density is rendered from the glyph at its own resolution, never
+  upscaled, and the mark sits inside the central 74% so any launcher mask keeps
+  it whole.
+
+  A detail worth keeping: the glyph is centred by its **ink** box, not its
+  layout box. An Arabic letter's layout box carries ascender space its ink never
+  uses, so metric centring would have set it visibly low.
+
+  **The name under the icon was `nova_modest`** — the Gradle module's own name,
+  in every one of the eighty-odd locales the build carries. It is now
+  `@string/app_name`: `Nova Modest`, with `نوفا مودست` in `values-ar`. Read back
+  out of the built artefact, not the source.
+
+  **A constraint, recorded so it is not later read as a defect:** that label is
+  a *system* resource and follows the **phone's** language, not the language
+  chosen inside the app. A phone set to English shows `Nova Modest` even while
+  the app is running in Arabic. There is no way to make the launcher follow an
+  in-app setting, and it is the right behaviour: the home screen belongs to the
+  phone, not to the app.
+
 - **BLOCKERS 4 and 5's web half — DONE 2026-10-14.** The two pages Play requires
   are live, as a separate public repository (`nova-modest-pages`) so the app's
   own stays private:
@@ -638,6 +682,24 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 
 ## Not Started
+
+- **Onboarding artwork — conditional, not open-ended** (2026-10-14). The three
+  onboarding slides draw a warm band and nothing else. `OnboardingSlide.image`
+  exists, is optional, and `onboarding_screen.dart` has never passed it: the
+  original decision was that the design's source photographs are **286x512**,
+  below 1x for a 390pt-wide slot, so shipping them would look upscaled on any
+  modern phone. That decision stands.
+
+  **The condition for closing this:** photographs at a resolution that actually
+  covers the slot — roughly **1170x1600 or larger**, three of them. Passing
+  `image:` is then the only change; nothing relayouts.
+
+  **What was fixed in the meantime, and why it was urgent:** the band used to
+  centre `Icons.photo_size_select_actual_outlined`, which is the glyph Android
+  shows for an image that failed to load. On a clean install the first three
+  screens a shopper ever sees each carried what reads as a broken picture (seen
+  on a device 2026-10-14). The intent was "not ready yet"; the appearance said
+  "this app is broken". An empty band reads as a decision.
 
 - **Waiting on the dashboard: add `identity_check_unavailable` to the codes
   table** (2026-10-14). The owner is passing on the fix for `delete-account`'s

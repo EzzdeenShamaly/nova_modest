@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The name under the launcher icon. It was the Gradle module's own name,
+        `nova_modest`, in all eighty-odd locales the build carries - lowercase,
+        with an underscore, which is what a shopper would have read on her
+        phone.
+
+        This is a *system* resource, so it follows the phone's language, not the
+        language chosen inside the app: a phone set to English shows this one
+        even while the app itself is in Arabic. There is no way to make the
+        launcher follow an in-app setting, and it is the right behaviour anyway -
+        the home screen belongs to the phone.
+    -->
+    <string name="app_name">Nova Modest</string>
+</resources>
