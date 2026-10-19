@@ -154,53 +154,132 @@ Google).
 
 ---
 
-## ٦. بيانات القائمة (Store listing)
+## ٦. دخول المراجع (App access)
 
-**اللغة الأساسية:** العربية. التطبيق يدعم العربية والإنجليزية
-(`lib/l10n/app_ar.arb`, `app_en.arb`)، وواجهته العربية هي الأصل.
+التطبيق يتطلّب تسجيل دخول لإتمام الطلب ولصفحات الحساب، **فلا بدّ من إعطاء Play
+حساباً يعمل** وإلا رُفض بحجّة أن المراجع لم يستطع رؤية التطبيق.
 
-**اسم التطبيق (٣٠ حرفاً كحدّ أقصى):**
+**انسخ هذا كما هو في خانة App access → "All or some functionality is restricted"
+→ Instructions:**
+
+```
+The app is in Arabic by default. It can be switched to English inside the
+app: Account tab (bottom right) -> Language -> English.
+
+Sign-in uses a one-time code sent by email. There is no password screen in
+the app, so the credentials below are for the email inbox, not for the app.
+
+How to sign in:
+1. Open the app and tap the Account tab (bottom right).
+2. Enter this address:  novamodest.review@gmail.com
+3. Tap "Continue with email".
+4. Open Gmail with the credentials below, find the message from Nova Modest,
+   and copy the 6-digit code.
+5. Type the code in the app.
+
+Gmail account that receives the code:
+   Email:    novamodest.review@gmail.com
+   Password: <PUT THE GMAIL PASSWORD HERE>
+
+The account already has a saved address and a past order, so the Orders and
+Addresses screens are not empty.
+
+Browsing the catalogue, opening a product and using the cart do NOT require
+signing in. Only placing an order and the account screens do.
+
+Payment is cash on delivery only. The app collects no payment details and no
+real charge is ever made.
+```
+
+**لا تنسَ وضع كلمة مرور Gmail مكان `<PUT THE GMAIL PASSWORD HERE>` قبل الحفظ.**
+
+---
+
+## ٧. بيانات القائمة — جاهزة للنسخ
+
+### بالعربية (اللغة الأساسية)
+
+**اسم التطبيق** (٣٠ حرفاً كحدّ أقصى):
 
 ```
 نوفا مودست
 ```
 
-**الوصف القصير (٨٠ حرفاً كحدّ أقصى):**
+**الوصف القصير** (٨٠ حرفاً كحدّ أقصى):
 
 ```
-متجر أزياء محتشمة: تسوّقي عباءات وأطقم وحجابات، والدفع عند الاستلام.
+متجر أزياء محتشمة: عباءات وأطقم وحجابات، والدفع عند الاستلام.
 ```
 
-**الوصف الطويل:**
+**الوصف الطويل** (٤٠٠٠ حرف كحدّ أقصى):
 
 ```
 نوفا مودست متجر إلكتروني للأزياء المحتشمة.
 
-تصفّحي الفئات — عباءات، أطقم، حجابات وشالات، وإكسسوارات — وابحثي عمّا تريدينه،
-واطّلعي على تفاصيل كل قطعة بألوانها ومقاساتها قبل أن تضيفيها إلى السلة.
+تصفّحي الفئات — عباءات، أطقم، حجاب وشيلات، وإكسسوارات — وابحثي عمّا تريدينه،
+وصفّي النتائج بالنمط أو السعر أو المقاس أو اللون. وفي صفحة كل قطعة تجدين
+صورها وألوانها ومقاساتها وتفاصيل قماشها قبل أن تضيفيها إلى السلة.
 
-• التسوّق متاح من دون حساب؛ وتسجيل الدخول مطلوب عند الطلب فقط.
+• التصفّح والسلة متاحان من دون حساب؛ وتسجيل الدخول مطلوب عند إرسال الطلب فقط.
 • تسجيل الدخول برمز يصل إلى بريدك الإلكتروني — بلا كلمة مرور.
 • الدفع عند الاستلام، والمبلغ كاملاً واضح أمامك قبل الإرسال: المنتجات،
   والتوصيل، ورسوم الدفع عند الاستلام.
-• احفظي عناوينك لتختاري بينها عند كل طلب.
-• تابعي حالة طلبك: قيد الانتظار، مؤكّد، قيد التحضير، تم الشحن، تم التوصيل.
+• احفظي عناوينك واختاري بينها عند كل طلب.
+• تابعي حالة طلبك عبر خمس مراحل: قيد الانتظار، مؤكّد، قيد التحضير، تم الشحن،
+  تم التوصيل.
 • التوصيل داخل المملكة العربية السعودية.
-• واجهة عربية بالكامل، وإنجليزية متى شئتِ.
+• واجهة عربية بالكامل، وإنجليزية متى شئتِ، بتبديل من شاشة الحساب.
 
-ويمكنك حذف حسابك نهائياً من داخل التطبيق في أي وقت.
+ويمكنك حذف حسابك نهائياً من داخل التطبيق في أي وقت، من شاشة «حسابي».
 ```
 
-**الفئة:** Shopping.
-**نوع التطبيق:** Apps (لا Games).
-**بريد التواصل للقائمة:** `ezzdeenshamali@gmail.com`
+### بالإنجليزية (لو طلب الكونسول لغة ثانية)
 
-> **غير مؤكَّد:** حدود الأحرف (٣٠ / ٨٠ / ٤٠٠٠) هي ما أعرفه، والكونسول يعدّ أمامك
-> ويمنعك من التجاوز. إن رفض نصاً لطوله فاختصره من آخره.
+**App name:**
 
----
+```
+Nova Modest
+```
 
-## ٧. الصور
+**Short description** (80 characters max):
+
+```
+Modest fashion store: abayas, sets and hijabs, with cash on delivery.
+```
+
+**Full description** (4000 characters max):
+
+```
+Nova Modest is an online store for modest fashion.
+
+Browse the categories - abayas, sets, hijabs and scarves, accessories - search
+for what you want, and narrow the results by style, price, size or colour.
+Every product page shows its photographs, colours, sizes and fabric details
+before you add it to the basket.
+
+• Browsing and the basket need no account; signing in is required only when you
+  place an order.
+• Sign in with a one-time code sent to your email - no password.
+• Cash on delivery, with the full amount shown before you send the order:
+  products, delivery, and the cash-on-delivery fee.
+• Save your addresses and choose between them on each order.
+• Follow your order through five stages: pending, confirmed, preparing,
+  shipped, delivered.
+• Delivery within Saudi Arabia.
+• Fully Arabic, and English whenever you want it, switchable from the account
+  screen.
+
+You can delete your account permanently from inside the app at any time, from
+the Account screen.
+```
+
+**الفئة:** Shopping · **النوع:** Apps (لا Games) · **بريد التواصل:**
+`ezzdeenshamali@gmail.com`
+
+> **غير مؤكَّد:** حدود الأحرف (٣٠ / ٨٠ / ٤٠٠٠) هي ما أعرفه، والكونسول يعدّ
+> أمامك ويمنعك من التجاوز.
+
+## ٨. الصور
 
 **جاهزة في مجلّد `play-assets/` داخل المشروع** — ابعثها كما هي.
 
@@ -231,7 +310,7 @@ Google).
 الكثافات (`mipmap-mdpi` حتى `xxxhdpi`)، ومُتحقَّق منها **بالنظر إليها بعد
 استخراجها من داخل ملف الـAPK المبني**، لا من المصدر.
 
-## ٨. ما ينقص فعلاً
+## ٩. ما ينقص فعلاً
 
 مرتّباً بالأهمّ:
 
