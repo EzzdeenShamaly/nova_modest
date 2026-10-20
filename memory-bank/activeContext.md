@@ -1,10 +1,44 @@
 # Active Context
 
-**Last Updated:** 2026-10-12 (blocker 7 settled: the session check answers, and
-answers in bounded time)
+**Last Updated:** 2026-10-20 (the two things a shopper meets before she meets
+the app: the icon, and the back button)
 
 What's being worked on right now, updated after every significant task per
 `00-memory-think.md`.
+
+## Where things stand — 2026-10-20
+
+**Upload-ready.** The owner's standing rule since the keystore —
+*"من هون لحدّ الرفع ما بنبني إلا اللي بيوقف رفعاً"* — held: of the three things
+the final constrained check found, he took two and is handling the third
+himself.
+
+- **SMTP** (the OTP email rate limit, the highest-stakes risk to Play review)
+  is the owner's, from the Supabase dashboard, before upload. Nothing in this
+  repo changes for it.
+- **The adaptive icon** — the launcher was wrapping the arch in a white plate
+  of its own on every API 26+ device. Two layers now
+  (`mipmap-anydpi-v26/ic_launcher.xml` + `values/colors.xml`), legacy PNGs
+  kept for API 24–25. Measured, not eyeballed: the mark's furthest pixel sits
+  at 64.9 dp of the 66 dp safe circle, and on the emulator the icon's edge
+  pixel is `#1A1A1A` where a still-legacy app in the same screenshot reads
+  `#FFFFFF` under the same 159 px mask.
+- **Back from a tab** closed the app instead of returning Home. `AppShell` has
+  a `PopScope` now; back from Home still exits. Three tests failed first, four
+  mutations caught.
+
+**The «الفئات» tab is a recorded debt, deliberately not built** (owner's
+instruction). It reaches `abayas` and nothing else: the branch root hardcodes
+`entryCategoryId`, the listing's filter sheet never draws a category section
+because `ProductFilterOptions.from(products)` is called without `categories:`,
+and Home's chips filter Home's own grid rather than opening a listing. Not a
+blocker — the catalogue is reachable from Home — and `progress.md` has the four
+file-and-line readings plus the two ways to close it.
+
+877 tests, `flutter analyze` clean.
+
+**Next:** rebuild the `.aab`, refresh `C:\Users\pc\Desktop\NovaModest-Play` with
+it, push. Then the upload is the friend's to do, from `PLAY_UPLOAD.md`.
 
 ## Where things stand — 2026-10-12
 

@@ -15,7 +15,7 @@
 | | |
 |---|---|
 | **المسار** | `build\app\outputs\bundle\release\app-release.aab` |
-| **الحجم** | ٥٥٫٨٣ ميغابايت (58,542,096 بايت) |
+| **الحجم** | ٥٥٫٨٤ ميغابايت (58,549,137 بايت) |
 | **applicationId** | `com.novamodest.store` |
 | **versionName** | `1.0.0` |
 | **versionCode** | `1` |

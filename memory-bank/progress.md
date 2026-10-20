@@ -269,6 +269,77 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
   in-app setting, and it is the right behaviour: the home screen belongs to the
   phone, not to the app.
 
+  > **Superseded 2026-10-17 — the mark is no longer the letter.** The two
+  > paragraphs above describe **ن**, which shipped for three days and was then
+  > replaced (commit `035711a`) by a **pointed arch**, gold `#C6A75E` on
+  > near-black `#1A1A1A`, both still straight from the closed palette. The
+  > reasoning that rejected a Latin N applies one step further: the Arabic
+  > letter is legible at 48 px but is still a letter on a square, where an arch
+  > is a doorway and reads as a mark. Three other directions were drawn and
+  > discarded. Everything else in those paragraphs — per-density rendering from
+  > the geometry rather than upscaling, and the mark sitting inside the central
+  > safe area — still holds.
+
+  **The icon was still being wrapped in a white circle — FIXED 2026-10-20.**
+  Shipping only `mipmap-*/ic_launcher.png` makes it a *legacy* icon, and from
+  API 26 the launcher does not draw a legacy icon as given: it shrinks it and
+  centres it on a white plate of its own. So the arch arrived on the home
+  screen inside a white disc nobody designed, and that disc is the first thing
+  a shopper sees — before the app has ever been opened.
+
+  Fixed with the two layers the platform actually asks for:
+  `mipmap-anydpi-v26/ic_launcher.xml`, `@color/ic_launcher_background`
+  (`#1A1A1A`, new `values/colors.xml`), and `ic_launcher_foreground.png` at
+  108/162/216/324/432 px. **The legacy PNGs stay** — API 24 and 25 still read
+  them.
+
+  The geometry was re-laid-out rather than copied. On the adaptive canvas only
+  the central 72 dp of 108 is guaranteed visible and the safe zone is a 66 dp
+  circle, and the arch's extreme points are its two square bottom corners — so
+  the bounding box, not the width, is what has to fit. 50 dp tall by 41.67 wide,
+  centred, puts the furthest opaque pixel at a **measured 64.9 dp** diameter
+  (counted off the 432 px foreground, not estimated). Inside 66. No launcher
+  mask can clip it.
+
+  **Proven on the emulator, in one screenshot, against two references.** The
+  launcher's mask is 159 px across the centre line (read off Settings, a known
+  full-mask icon). In the same app-drawer frame:
+
+  | icon | span | edge pixel |
+  |---|---|---|
+  | Settings — known full mask | 159 px | `#4285F4` |
+  | **`wasiati`** — another Flutter app, still legacy | 159 px | **`#FFFFFF`** |
+  | **Nova Modest** — ours | 159 px | **`#1A1A1A`** |
+
+  `wasiati` is the control and it is not a simulation: it is a real app on the
+  same emulator in the same screenshot, rendered by the same launcher, and it
+  is exactly what Nova Modest looked like an hour earlier. The plate fills the
+  mask and its own artwork covers about half of it. Ours reaches the edge in
+  our own ink.
+
+  The inner arch is a **hole**, not a dark shape painted over the gold: one
+  `GraphicsPath`, two figures, even-odd fill. A painted inner would have been
+  correct against exactly one background colour.
+
+- **The system back button closed the app from every tab — FIXED 2026-10-20.**
+  Two taps into the catalogue, back did not return anywhere; it fell through to
+  Android and closed the store. That is the one gesture a shopper uses without
+  thinking, and the first one a Play reviewer presses.
+
+  `AppShell` now wraps its `Scaffold` in `PopScope<Object?>` with
+  `canPop: currentIndex == 0`, routing an unhandled press to the Home branch.
+  **Back from Home still leaves the app**, which is what Android expects and
+  what a trap here would have broken.
+
+  `canPop` is read rather than guessed: while a tab's own navigator still has a
+  page to pop, this widget is not what handles the press — the inner navigator
+  is. The shell only sees the press once the branch is at its root.
+
+  Three tests in `test/router/shell_navigation_test.dart`, **all confirmed
+  failing first** (there was no `PopScope` under `AppShell` at all), and four
+  mutations, **4/4 caught**: the guard removed, the guard trapping Home too, the
+  press swallowed instead of routed, and the press routed to the wrong branch.
+
 - **BLOCKERS 4 and 5's web half — DONE 2026-10-14.** The two pages Play requires
   are live, as a separate public repository (`nova-modest-pages`) so the app's
   own stays private:
@@ -682,6 +753,40 @@ undone once it has happened. Found 2026-09-20 while preparing the Android run.
 
 
 ## Not Started
+
+- **The «الفئات» tab reaches exactly one category, and no route out of it**
+  (traced 2026-10-20; recorded at the owner's instruction, deliberately not
+  built). Four readings, each from the file:
+
+  | | |
+  |---|---|
+  | `app_router.dart:184` | the branch root builds `ProductListScreen(categoryId: Routes.entryCategoryId)` |
+  | `routes.dart:43` | `entryCategoryId` is the literal `'abayas'` |
+  | `product_list_state.dart:82` | `ProductFilterOptions.from(products)` — **no `categories:` argument**, so `hasCategories` (`length > 1`) is false and `product_filter_sheet.dart:95` never draws the category section |
+  | `home_screen.dart:152,179` | the hero and "see all" both go to `productList(entryCategoryId)` — abayas again |
+
+  Home's chips are not the way out either: `home_screen.dart:165` dispatches
+  `HomeCategorySelected(id)`, which filters Home's **own featured grid** in
+  place. It never opens a listing.
+
+  So `/categories/abayas` is the only product listing the app can reach.
+  `/categories/:categoryId` resolves correctly for every other category — there
+  is simply nothing in the interface that ever produces the URL. The tab is not
+  broken; it is a one-category shortcut wearing a plural name.
+
+  **Why it is not a blocker** (owner, 2026-10-20): the catalogue is reachable.
+  A shopper browses from Home, filters there by category, and opens any product
+  from the grid. Nothing is unreachable and nothing hangs — she just cannot see
+  one category's full listing. The 2026-08-23 decision that created this was
+  sound at the time: the design genuinely has no "pick a category" frame, and
+  inventing one was correctly refused.
+
+  **What closing it would take, when someone asks:** either pass `categories:`
+  into `ProductFilterOptions.from` on the listing so the existing sheet can
+  switch category — small, and reuses a sheet that already handles the facet —
+  or make the branch root a real category index, which is a screen with no
+  design behind it. The first is a change to one line and its tests; the second
+  needs a frame first.
 
 - **No order screen can show a product picture** (measured 2026-10-17 on a
   device, then traced to the query). `_orderColumns` in
