@@ -320,4 +320,62 @@ void main() {
     await tester.pumpAndSettle();
     verify(() => authBloc.add(const AuthLogoutRequested())).called(1);
   });
+
+  group('the system back button', () {
+    /// The shell's own guard, not a screen's.
+    PopScope<Object?> shellGuard(WidgetTester tester) => tester.widget<PopScope<Object?>>(
+      find.descendant(
+        of: find.byType(AppShell),
+        matching: find.byType(PopScope<Object?>),
+      ),
+    );
+
+    testWidgets('from another tab it returns to Home, it does not close the app', (
+      tester,
+    ) async {
+      final router = await boot(tester, signedIn: true);
+      await tapTab(tester, 'الفئات');
+      expect(locationOf(router), Routes.categoriesPath);
+
+      // Measured on a device 2026-10-19: back from any tab but Home handed the
+      // press to Android, which closed the app. A shopper two taps into the
+      // catalogue was dropped on her home screen.
+      expect(
+        shellGuard(tester).canPop,
+        isFalse,
+        reason: 'the shell must take the press rather than let Android close it',
+      );
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(locationOf(router), Routes.homePath);
+      expect(find.byType(HomeScreen), findsOneWidget);
+    });
+
+    testWidgets('from Home it still closes the app, as Android expects', (
+      tester,
+    ) async {
+      final router = await boot(tester, signedIn: true);
+      expect(locationOf(router), Routes.homePath);
+
+      // The other half of the convention: Home is the end of the back stack.
+      // Trapping the press here would make the app impossible to leave.
+      expect(shellGuard(tester).canPop, isTrue);
+    });
+
+    testWidgets('it goes to Home from the cart and from the account too', (
+      tester,
+    ) async {
+      final router = await boot(tester, signedIn: true);
+
+      for (final tab in ['السلة', 'حسابي']) {
+        await tapTab(tester, tab);
+        expect(shellGuard(tester).canPop, isFalse, reason: 'on $tab');
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(locationOf(router), Routes.homePath, reason: 'back from $tab');
+      }
+    });
+  });
 }
