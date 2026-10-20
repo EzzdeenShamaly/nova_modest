@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The adaptive icon's background layer. Same ink as the legacy
+         ic_launcher.png and as AppColors.primaryText, so the icon reads as one
+         mark whichever of the two Android picks. -->
+    <color name="ic_launcher_background">#1A1A1A</color>
+</resources>

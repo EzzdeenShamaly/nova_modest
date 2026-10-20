@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 26+ reads this instead of mipmap-*/ic_launcher.png.
+
+     Without it the launcher treats the square PNG as a legacy icon: it shrinks
+     it and drops it inside a white circle of its own making, which is what a
+     shopper sees on her home screen before the app has ever been opened. The
+     two layers below let the launcher apply its own mask to our own artwork
+     instead.
+
+     The PNGs stay where they are — API 24 and 25 still use them. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
